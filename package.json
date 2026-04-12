@@ -9,10 +9,8 @@
     "preview": "vite preview",
     "start": "node server.js"
   },
-  "devDependencies": {
-    "vite": "^6.0.0"
-  },
   "dependencies": {
+    "vite": "^6.0.0",
     "ws": "^8.20.0"
   },
   "engines": {
