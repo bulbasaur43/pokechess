@@ -153,6 +153,10 @@ export function renderTitleScreen(onStart) {
           <li>⏱️ <strong>Chess clock</strong> — run out of time and you lose!</li>
         </ul>
       </div>
+
+      <!-- Admin Panel -->
+      <button class="btn btn--admin" id="btn-admin">🔒 Admin</button>
+      <div class="admin-overlay" id="admin-overlay"></div>
     </div>
   `;
 
@@ -537,6 +541,218 @@ export function renderTitleScreen(onStart) {
       overlay.classList.remove('pokedex-overlay--open');
       overlay.innerHTML = '';
     });
+  }
+
+  // ── Admin Panel ──
+  document.getElementById('btn-admin')?.addEventListener('click', showAdminPanel);
+
+  let adminPassword = null;
+
+  function adminFetch(endpoint, body) {
+    const isDev = window.location.port === '5173' || window.location.port === '5174';
+    const base = isDev ? `http://${window.location.hostname}:3001/api` : `${window.location.origin}/api`;
+    return fetch(`${base}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPassword, ...body }),
+    }).then(r => r.json());
+  }
+
+  function showAdminPanel() {
+    const overlay = document.getElementById('admin-overlay');
+    if (!overlay) return;
+
+    if (overlay.classList.contains('admin-overlay--open')) {
+      overlay.classList.remove('admin-overlay--open');
+      overlay.innerHTML = '';
+      return;
+    }
+
+    // If no password yet, show password prompt
+    if (!adminPassword) {
+      overlay.innerHTML = `
+        <div class="admin-panel">
+          <div class="admin-header">
+            <h2>🔒 Admin Login</h2>
+            <button class="admin-close" id="admin-close">✕</button>
+          </div>
+          <div class="admin-password-form">
+            <input type="password" id="admin-pw-input" class="admin-input" placeholder="Enter admin password..." autofocus />
+            <button class="btn btn--admin-submit" id="admin-pw-submit">Unlock</button>
+            <div class="admin-error" id="admin-pw-error"></div>
+          </div>
+        </div>
+      `;
+      overlay.classList.add('admin-overlay--open');
+
+      document.getElementById('admin-close')?.addEventListener('click', () => {
+        overlay.classList.remove('admin-overlay--open');
+        overlay.innerHTML = '';
+      });
+
+      const submit = () => {
+        const pw = document.getElementById('admin-pw-input')?.value;
+        if (!pw) return;
+        adminPassword = pw;
+        // Test password by fetching users
+        adminFetch('/admin/users', {}).then(data => {
+          if (data.error) {
+            adminPassword = null;
+            document.getElementById('admin-pw-error').textContent = '❌ ' + data.error;
+          } else {
+            renderAdminDashboard(overlay, data.users);
+          }
+        }).catch(() => {
+          adminPassword = null;
+          document.getElementById('admin-pw-error').textContent = '❌ Connection error';
+        });
+      };
+
+      document.getElementById('admin-pw-submit')?.addEventListener('click', submit);
+      document.getElementById('admin-pw-input')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') submit();
+      });
+      return;
+    }
+
+    // Already authenticated — load users
+    adminFetch('/admin/users', {}).then(data => {
+      if (data.error) {
+        adminPassword = null;
+        showAdminPanel();
+      } else {
+        renderAdminDashboard(overlay, data.users);
+      }
+    });
+  }
+
+  function renderAdminDashboard(overlay, users) {
+    overlay.innerHTML = `
+      <div class="admin-panel">
+        <div class="admin-header">
+          <h2>⚙️ Admin Dashboard</h2>
+          <button class="admin-close" id="admin-close-dash">✕</button>
+        </div>
+        <div class="admin-search">
+          <input type="text" id="admin-search" class="admin-input" placeholder="Search users..." />
+        </div>
+        <div class="admin-user-list" id="admin-user-list"></div>
+        <div class="admin-status" id="admin-status"></div>
+      </div>
+    `;
+    overlay.classList.add('admin-overlay--open');
+
+    document.getElementById('admin-close-dash')?.addEventListener('click', () => {
+      overlay.classList.remove('admin-overlay--open');
+      overlay.innerHTML = '';
+    });
+
+    let allUsers = users;
+
+    function renderUsers(filter = '') {
+      const list = document.getElementById('admin-user-list');
+      if (!list) return;
+      const filtered = filter
+        ? allUsers.filter(u => u.username.toLowerCase().includes(filter.toLowerCase()))
+        : allUsers;
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="admin-empty">No users found</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(u => {
+        const isBanned = u.bannedUntil && new Date(u.bannedUntil) > new Date();
+        const banLabel = isBanned
+          ? `<span class="admin-ban-tag">🚫 Banned until ${new Date(u.bannedUntil).toLocaleDateString()}</span>`
+          : '';
+        return `
+          <div class="admin-user-card ${isBanned ? 'admin-user-card--banned' : ''}">
+            <div class="admin-user-info">
+              <span class="admin-user-name">${u.username}</span>
+              <span class="admin-user-stats">⭐ ${u.rating} | ${u.gamesPlayed} games | W${u.wins}/L${u.losses}</span>
+              ${banLabel}
+            </div>
+            <div class="admin-user-actions">
+              <button class="admin-action-btn admin-action-btn--elo" data-user="${u.username}" data-action="elo" title="Modify ELO">📊 ELO</button>
+              <button class="admin-action-btn admin-action-btn--reset" data-user="${u.username}" data-action="reset" title="Reset ELO">🔄 Reset</button>
+              <button class="admin-action-btn admin-action-btn--ban" data-user="${u.username}" data-action="${isBanned ? 'unban' : 'ban'}" title="${isBanned ? 'Unban' : 'Ban'}">${isBanned ? '✅ Unban' : '🔨 Ban'}</button>
+              <button class="admin-action-btn admin-action-btn--delete" data-user="${u.username}" data-action="delete" title="Delete">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Wire action buttons
+      list.querySelectorAll('.admin-action-btn').forEach(btn => {
+        btn.addEventListener('click', () => handleAdminAction(btn.dataset.action, btn.dataset.user));
+      });
+    }
+
+    renderUsers();
+
+    document.getElementById('admin-search')?.addEventListener('input', e => {
+      renderUsers(e.target.value);
+    });
+
+    function showStatus(msg, isError = false) {
+      const el = document.getElementById('admin-status');
+      if (el) {
+        el.textContent = msg;
+        el.className = 'admin-status ' + (isError ? 'admin-status--error' : 'admin-status--success');
+        setTimeout(() => { if (el) el.textContent = ''; }, 3000);
+      }
+    }
+
+    function refreshUsers() {
+      adminFetch('/admin/users', {}).then(data => {
+        if (data.users) {
+          allUsers = data.users;
+          const search = document.getElementById('admin-search')?.value || '';
+          renderUsers(search);
+        }
+      });
+    }
+
+    function handleAdminAction(action, username) {
+      if (action === 'delete') {
+        if (!confirm(`Delete user "${username}" permanently? This cannot be undone.`)) return;
+        adminFetch('/admin/delete', { username }).then(data => {
+          showStatus(data.message || data.error, !!data.error);
+          if (data.success) refreshUsers();
+        });
+
+      } else if (action === 'elo') {
+        const amount = prompt(`Modify ELO for "${username}".\nEnter amount (e.g. 200 or -100):`);
+        if (amount === null) return;
+        adminFetch('/admin/elo', { username, amount: parseInt(amount) }).then(data => {
+          if (data.success) showStatus(`${username}: ${data.oldRating} → ${data.newRating}`);
+          else showStatus(data.error, true);
+          if (data.success) refreshUsers();
+        });
+
+      } else if (action === 'reset') {
+        if (!confirm(`Reset ALL stats for "${username}" to default?`)) return;
+        adminFetch('/admin/reset-elo', { username }).then(data => {
+          showStatus(data.message || data.error, !!data.error);
+          if (data.success) refreshUsers();
+        });
+
+      } else if (action === 'ban') {
+        const hours = prompt(`Ban "${username}" for how many hours?`);
+        if (hours === null) return;
+        adminFetch('/admin/ban', { username, hours: parseInt(hours) }).then(data => {
+          showStatus(data.message || data.error, !!data.error);
+          if (data.success) refreshUsers();
+        });
+
+      } else if (action === 'unban') {
+        adminFetch('/admin/unban', { username }).then(data => {
+          showStatus(data.message || data.error, !!data.error);
+          if (data.success) refreshUsers();
+        });
+      }
+    }
   }
 
   // Init panel visibility

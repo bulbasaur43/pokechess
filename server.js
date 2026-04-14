@@ -132,6 +132,18 @@ function routeRequest(req, res, body) {
     handleGetTeam(req, res);
   } else if (req.method === 'POST' && url === '/api/team') {
     handleSaveTeam(req, res, body);
+  } else if (req.method === 'POST' && url === '/api/admin/users') {
+    handleAdminListUsers(req, res, body);
+  } else if (req.method === 'POST' && url === '/api/admin/delete') {
+    handleAdminDeleteUser(req, res, body);
+  } else if (req.method === 'POST' && url === '/api/admin/elo') {
+    handleAdminModifyElo(req, res, body);
+  } else if (req.method === 'POST' && url === '/api/admin/reset-elo') {
+    handleAdminResetElo(req, res, body);
+  } else if (req.method === 'POST' && url === '/api/admin/ban') {
+    handleAdminBan(req, res, body);
+  } else if (req.method === 'POST' && url === '/api/admin/unban') {
+    handleAdminUnban(req, res, body);
   } else {
     sendJSON(res, 404, { error: 'Not found' });
   }
@@ -226,6 +238,19 @@ function handleLogin(req, res, body) {
   const hash = hashPassword(password, user.salt);
   if (hash !== user.passwordHash) {
     return sendJSON(res, 401, { error: 'Invalid username or password' });
+  }
+
+  // Ban check
+  if (user.bannedUntil) {
+    const banEnd = new Date(user.bannedUntil);
+    if (banEnd > new Date()) {
+      const remaining = Math.ceil((banEnd - new Date()) / (1000 * 60 * 60));
+      return sendJSON(res, 403, { error: `Account banned. ${remaining}h remaining. Expires: ${banEnd.toLocaleString()}` });
+    } else {
+      // Ban expired — clear it
+      delete user.bannedUntil;
+      saveDB(db);
+    }
   }
 
   const token = generateToken();
@@ -378,6 +403,118 @@ function getPublicProfile(user) {
     gamesPlayed: user.gamesPlayed,
     history: user.history,
   };
+}
+
+// ─── Admin API ──────────────────────────────────────────────────────
+
+const ADMIN_PASSWORD = 'megabulbasaur';
+
+function verifyAdmin(body) {
+  return body?.adminPassword === ADMIN_PASSWORD;
+}
+
+function handleAdminListUsers(req, res, body) {
+  if (!verifyAdmin(body)) return sendJSON(res, 403, { error: 'Invalid admin password' });
+
+  const users = Object.entries(db.users).map(([key, u]) => ({
+    username: u.displayName,
+    key,
+    rating: u.rating,
+    peak: u.peak,
+    gamesPlayed: u.gamesPlayed,
+    wins: u.wins,
+    losses: u.losses,
+    bannedUntil: u.bannedUntil || null,
+  }));
+
+  sendJSON(res, 200, { users });
+}
+
+function handleAdminDeleteUser(req, res, body) {
+  if (!verifyAdmin(body)) return sendJSON(res, 403, { error: 'Invalid admin password' });
+  const target = body.username?.toLowerCase();
+  if (!target || !db.users[target]) return sendJSON(res, 404, { error: 'User not found' });
+
+  // Remove all sessions for this user
+  for (const [token, user] of Object.entries(db.sessions)) {
+    if (user === target) delete db.sessions[token];
+  }
+  delete db.users[target];
+  saveDB(db);
+
+  console.log(`🗑️ Admin deleted user: ${target}`);
+  sendJSON(res, 200, { success: true, message: `User '${target}' deleted` });
+}
+
+function handleAdminModifyElo(req, res, body) {
+  if (!verifyAdmin(body)) return sendJSON(res, 403, { error: 'Invalid admin password' });
+  const target = body.username?.toLowerCase();
+  const amount = parseInt(body.amount, 10);
+  if (!target || !db.users[target]) return sendJSON(res, 404, { error: 'User not found' });
+  if (isNaN(amount)) return sendJSON(res, 400, { error: 'Invalid amount' });
+
+  const user = db.users[target];
+  const oldRating = user.rating;
+  user.rating = Math.max(0, user.rating + amount);
+  if (user.rating > user.peak) user.peak = user.rating;
+  saveDB(db);
+
+  console.log(`📊 Admin modified ELO: ${user.displayName} ${oldRating} → ${user.rating} (${amount > 0 ? '+' : ''}${amount})`);
+  sendJSON(res, 200, { success: true, oldRating, newRating: user.rating });
+}
+
+function handleAdminResetElo(req, res, body) {
+  if (!verifyAdmin(body)) return sendJSON(res, 403, { error: 'Invalid admin password' });
+  const target = body.username?.toLowerCase();
+  if (!target || !db.users[target]) return sendJSON(res, 404, { error: 'User not found' });
+
+  const user = db.users[target];
+  user.rating = 1000;
+  user.peak = 1000;
+  user.wins = 0;
+  user.losses = 0;
+  user.draws = 0;
+  user.streak = 0;
+  user.bestStreak = 0;
+  user.gamesPlayed = 0;
+  user.history = [];
+  saveDB(db);
+
+  console.log(`🔄 Admin reset ELO: ${user.displayName}`);
+  sendJSON(res, 200, { success: true, message: `${user.displayName} reset to 1000 ELO` });
+}
+
+function handleAdminBan(req, res, body) {
+  if (!verifyAdmin(body)) return sendJSON(res, 403, { error: 'Invalid admin password' });
+  const target = body.username?.toLowerCase();
+  const hours = parseInt(body.hours, 10);
+  if (!target || !db.users[target]) return sendJSON(res, 404, { error: 'User not found' });
+  if (isNaN(hours) || hours <= 0) return sendJSON(res, 400, { error: 'Invalid ban duration' });
+
+  const user = db.users[target];
+  const banEnd = new Date(Date.now() + hours * 60 * 60 * 1000);
+  user.bannedUntil = banEnd.toISOString();
+
+  // Invalidate their sessions
+  for (const [token, uname] of Object.entries(db.sessions)) {
+    if (uname === target) delete db.sessions[token];
+  }
+  saveDB(db);
+
+  console.log(`🔨 Admin banned ${user.displayName} for ${hours}h until ${banEnd.toLocaleString()}`);
+  sendJSON(res, 200, { success: true, message: `${user.displayName} banned for ${hours} hours`, bannedUntil: banEnd.toISOString() });
+}
+
+function handleAdminUnban(req, res, body) {
+  if (!verifyAdmin(body)) return sendJSON(res, 403, { error: 'Invalid admin password' });
+  const target = body.username?.toLowerCase();
+  if (!target || !db.users[target]) return sendJSON(res, 404, { error: 'User not found' });
+
+  delete db.users[target].bannedUntil;
+  saveDB(db);
+
+  console.log(`✅ Admin unbanned ${db.users[target].displayName}`);
+  sendJSON(res, 200, { success: true, message: `${db.users[target].displayName} unbanned` });
 }
 
 // ─── WebSocket (Matchmaking) ────────────────────────────────────────
