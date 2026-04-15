@@ -572,6 +572,7 @@ export function renderTitleScreen(onStart) {
     if (overlay.classList.contains('admin-overlay--open')) {
       overlay.classList.remove('admin-overlay--open');
       overlay.innerHTML = '';
+      adminPassword = null;
       return;
     }
 
@@ -595,6 +596,7 @@ export function renderTitleScreen(onStart) {
       document.getElementById('admin-close')?.addEventListener('click', () => {
         overlay.classList.remove('admin-overlay--open');
         overlay.innerHTML = '';
+        adminPassword = null;
       });
 
       const submit = () => {
@@ -652,6 +654,7 @@ export function renderTitleScreen(onStart) {
     document.getElementById('admin-close-dash')?.addEventListener('click', () => {
       overlay.classList.remove('admin-overlay--open');
       overlay.innerHTML = '';
+      adminPassword = null;
     });
 
     let allUsers = users;
