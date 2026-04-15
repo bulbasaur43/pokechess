@@ -19,6 +19,8 @@ export function renderTitleScreen(onStart) {
 
   screen.innerHTML = `
     <div class="title-screen__bg">
+      <div class="title-screen__sun" id="title-sun"></div>
+      <div class="title-screen__rain" id="title-rain"></div>
       <div class="title-screen__particles" id="title-particles"></div>
       <div class="title-screen__vine title-screen__vine--tl"></div>
       <div class="title-screen__vine title-screen__vine--tr"></div>
@@ -1009,8 +1011,51 @@ function createParticles() {
     spore.style.opacity = 0.1 + Math.random() * 0.2;
     container.appendChild(spore);
   }
+
+  // Start weather cycle
+  startWeatherCycle();
 }
 
+function startWeatherCycle() {
+  const sun = document.getElementById('title-sun');
+  const rain = document.getElementById('title-rain');
+  if (!sun || !rain) return;
+
+  function createRainDrops() {
+    rain.innerHTML = '';
+    for (let i = 0; i < 60; i++) {
+      const drop = document.createElement('div');
+      drop.className = 'rain-drop';
+      drop.style.left = Math.random() * 100 + '%';
+      drop.style.animationDelay = Math.random() * 1.5 + 's';
+      drop.style.animationDuration = (0.4 + Math.random() * 0.3) + 's';
+      drop.style.opacity = 0.2 + Math.random() * 0.3;
+      rain.appendChild(drop);
+    }
+  }
+
+  function startRain() {
+    if (!document.getElementById('title-sun')) return; // screen removed
+    createRainDrops();
+    sun.classList.add('title-screen__sun--hidden');
+    rain.classList.add('title-screen__rain--active');
+    // After 30 seconds, stop rain
+    setTimeout(() => {
+      sun.classList.remove('title-screen__sun--hidden');
+      rain.classList.remove('title-screen__rain--active');
+      rain.innerHTML = '';
+    }, 30000);
+  }
+
+  // Rain every 5 minutes
+  const weatherInterval = setInterval(() => {
+    if (!document.getElementById('title-sun')) {
+      clearInterval(weatherInterval);
+      return;
+    }
+    startRain();
+  }, 5 * 60 * 1000);
+}
 async function showLeaderboard() {
   const overlay = document.getElementById('leaderboard-overlay');
   if (!overlay) return;
