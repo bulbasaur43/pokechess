@@ -669,8 +669,8 @@ export function renderTitleScreen(onStart) {
         return `
           <div class="admin-user-card ${isBanned ? 'admin-user-card--banned' : ''}">
             <div class="admin-user-info">
-              <span class="admin-user-name">${u.username}</span>
-              <span class="admin-user-stats">⭐ ${u.rating} | ${u.gamesPlayed} games | W${u.wins}/L${u.losses}</span>
+              <span class="admin-user-name">${u.rankEmoji || ''} ${u.username}</span>
+              <span class="admin-user-stats">${u.rank || ''} — ⭐ ${u.rating} | ${u.gamesPlayed} games | W${u.wins}/L${u.losses}</span>
               ${banLabel}
             </div>
             <div class="admin-user-actions">
@@ -726,7 +726,7 @@ export function renderTitleScreen(onStart) {
         const amount = prompt(`Modify ELO for "${username}".\nEnter amount (e.g. 200 or -100):`);
         if (amount === null) return;
         adminFetch('/admin/elo', { username, amount: parseInt(amount) }).then(data => {
-          if (data.success) showStatus(`${username}: ${data.oldRating} → ${data.newRating}`);
+          if (data.success) showStatus(`${username}: ${data.oldRating} → ${data.newRating} ${data.rankEmoji} ${data.rank}`);
           else showStatus(data.error, true);
           if (data.success) refreshUsers();
         });

@@ -409,6 +409,16 @@ function getPublicProfile(user) {
 
 const ADMIN_PASSWORD = 'megabulbasaur';
 
+function getServerRank(rating) {
+  if (rating >= 2000) return { title: 'Champion',  emoji: '👑' };
+  if (rating >= 1700) return { title: 'Master',    emoji: '⭐' };
+  if (rating >= 1400) return { title: 'Expert',    emoji: '🔥' };
+  if (rating >= 1100) return { title: 'Skilled',   emoji: '⚔️' };
+  if (rating >= 800)  return { title: 'Trainer',   emoji: '🎮' };
+  if (rating >= 500)  return { title: 'Rookie',    emoji: '🌱' };
+  return                     { title: 'Beginner',  emoji: '🥚' };
+}
+
 function verifyAdmin(body) {
   return body?.adminPassword === ADMIN_PASSWORD;
 }
@@ -416,16 +426,21 @@ function verifyAdmin(body) {
 function handleAdminListUsers(req, res, body) {
   if (!verifyAdmin(body)) return sendJSON(res, 403, { error: 'Invalid admin password' });
 
-  const users = Object.entries(db.users).map(([key, u]) => ({
-    username: u.displayName,
-    key,
-    rating: u.rating,
-    peak: u.peak,
-    gamesPlayed: u.gamesPlayed,
-    wins: u.wins,
-    losses: u.losses,
-    bannedUntil: u.bannedUntil || null,
-  }));
+  const users = Object.entries(db.users).map(([key, u]) => {
+    const rank = getServerRank(u.rating);
+    return {
+      username: u.displayName,
+      key,
+      rating: u.rating,
+      peak: u.peak,
+      gamesPlayed: u.gamesPlayed,
+      wins: u.wins,
+      losses: u.losses,
+      bannedUntil: u.bannedUntil || null,
+      rank: rank.title,
+      rankEmoji: rank.emoji,
+    };
+  });
 
   sendJSON(res, 200, { users });
 }
@@ -459,8 +474,9 @@ function handleAdminModifyElo(req, res, body) {
   if (user.rating > user.peak) user.peak = user.rating;
   saveDB(db);
 
-  console.log(`📊 Admin modified ELO: ${user.displayName} ${oldRating} → ${user.rating} (${amount > 0 ? '+' : ''}${amount})`);
-  sendJSON(res, 200, { success: true, oldRating, newRating: user.rating });
+  const rank = getServerRank(user.rating);
+  console.log(`📊 Admin modified ELO: ${user.displayName} ${oldRating} → ${user.rating} (${amount > 0 ? '+' : ''}${amount}) — ${rank.emoji} ${rank.title}`);
+  sendJSON(res, 200, { success: true, oldRating, newRating: user.rating, rank: rank.title, rankEmoji: rank.emoji });
 }
 
 function handleAdminResetElo(req, res, body) {
