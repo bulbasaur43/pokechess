@@ -366,6 +366,26 @@ function scoreMove(board, fromRow, fromCol, toRow, toCol, move, aiColor, config)
         else if (typeMult <= 0.5) score -= 2;
       }
 
+      // Bad trade detection (Lv 6+): avoid capturing if we'd lose a more valuable piece
+      if (config.kingSafety >= 1 && preview.wouldKill) {
+        // After capturing, attacker moves to target square — check if enemy can hit back
+        let dangerAfter = 0;
+        for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1],[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]) {
+          const nr = toRow + dr, nc = toCol + dc;
+          if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+            const threat = board[nr][nc];
+            if (threat && threat.color === oppColor && !threat.statusEffect) {
+              dangerAfter += threat.damage;
+            }
+          }
+        }
+        if (dangerAfter >= attacker.hp && pieceValue(attacker) > pieceValue(defender) * 1.2) {
+          // Bad trade — we'd lose a more valuable piece
+          const tradeLoss = pieceValue(attacker) - pieceValue(defender);
+          score -= tradeLoss * 1.5;
+        }
+      }
+
       score -= pieceValue(attacker) * 0.05;
     }
   } else {
