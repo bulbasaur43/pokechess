@@ -144,6 +144,8 @@ function routeRequest(req, res, body) {
     handleAdminBan(req, res, body);
   } else if (req.method === 'POST' && url === '/api/admin/unban') {
     handleAdminUnban(req, res, body);
+  } else if (req.method === 'GET' && url === '/api/online') {
+    handleOnlineCount(req, res);
   } else {
     sendJSON(res, 404, { error: 'Not found' });
   }
@@ -531,6 +533,15 @@ function handleAdminUnban(req, res, body) {
 
   console.log(`✅ Admin unbanned ${db.users[target].displayName}`);
   sendJSON(res, 200, { success: true, message: `${db.users[target].displayName} unbanned` });
+}
+
+// ─── Online Count ───────────────────────────────────────────────────
+
+function handleOnlineCount(req, res) {
+  const online = wss.clients ? wss.clients.size : 0;
+  const inGame = rooms.size * 2;
+  const waiting = waitingPlayer ? 1 : 0;
+  sendJSON(res, 200, { online, inGame, waiting, totalUsers: Object.keys(db.users).length });
 }
 
 // ─── WebSocket (Matchmaking) ────────────────────────────────────────

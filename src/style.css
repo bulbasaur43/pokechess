@@ -236,6 +236,36 @@ body {
   margin-top: -8px;
 }
 
+.live-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(74, 222, 128, 0.06);
+  border: 1px solid rgba(74, 222, 128, 0.15);
+  border-radius: 20px;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: var(--text-dimmed);
+  transition: all 0.3s ease;
+}
+.live-counter__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px #4ade80;
+  animation: livePulse 2s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+.live-counter__text {
+  letter-spacing: 0.02em;
+}
+
+
 .title-screen__teams {
   display: flex;
   align-items: flex-start;

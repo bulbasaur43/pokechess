@@ -28,6 +28,12 @@ export function renderTitleScreen(onStart) {
       </h1>
       <p class="title-screen__tagline">Where Strategy Meets Pokémon Combat</p>
 
+      <!-- Live Player Count -->
+      <div class="live-counter" id="live-counter">
+        <span class="live-counter__dot"></span>
+        <span class="live-counter__text" id="live-counter-text">Connecting...</span>
+      </div>
+
       <!-- Auth Section -->
       <div class="auth-section" id="auth-section"></div>
 
@@ -770,6 +776,34 @@ export function renderTitleScreen(onStart) {
       populateRatingBadge();
     });
   }
+
+  // ── Live Player Counter ──
+  async function updateLiveCounter() {
+    const el = document.getElementById('live-counter-text');
+    if (!el) return; // screen was removed
+    try {
+      const isDev = window.location.port === '5173' || window.location.port === '5174';
+      const base = isDev ? `http://${window.location.hostname}:3001/api` : `${window.location.origin}/api`;
+      const res = await fetch(`${base}/online`);
+      const data = await res.json();
+      const parts = [];
+      parts.push(`${data.online || 0} online`);
+      if (data.inGame > 0) parts.push(`${data.inGame} in-game`);
+      parts.push(`${data.totalUsers || 0} registered`);
+      el.textContent = parts.join(' · ');
+    } catch {
+      el.textContent = 'Offline';
+    }
+  }
+
+  updateLiveCounter();
+  const counterInterval = setInterval(() => {
+    if (!document.getElementById('live-counter')) {
+      clearInterval(counterInterval);
+      return;
+    }
+    updateLiveCounter();
+  }, 10000);
 }
 
 function renderAuthSection() {
