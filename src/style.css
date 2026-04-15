@@ -168,9 +168,10 @@ body {
 .title-screen__bg {
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at 30% 20%, var(--scarlet-glow), transparent 60%),
-              radial-gradient(ellipse at 70% 80%, var(--violet-glow), transparent 60%),
-              var(--bg-primary);
+  background: radial-gradient(ellipse at 30% 20%, rgba(34, 197, 94, 0.08), transparent 60%),
+              radial-gradient(ellipse at 70% 80%, rgba(22, 163, 74, 0.06), transparent 60%),
+              radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.04), transparent 70%),
+              linear-gradient(180deg, #080f08 0%, #0a120a 40%, #0c1a0c 100%);
   z-index: 0;
 }
 
@@ -178,6 +179,66 @@ body {
   position: absolute;
   inset: 0;
   overflow: hidden;
+}
+
+/* ── Vine Decorations ── */
+.title-screen__vine {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.title-screen__vine--tl {
+  top: 0; left: 0;
+  border-top: 2px solid rgba(34, 197, 94, 0.2);
+  border-left: 2px solid rgba(34, 197, 94, 0.2);
+  border-radius: 0 0 80% 0;
+  animation: vineGrowTL 2s ease-out 0.3s forwards;
+  box-shadow: inset 8px 8px 30px rgba(34, 197, 94, 0.05);
+}
+.title-screen__vine--tr {
+  top: 0; right: 0;
+  border-top: 2px solid rgba(34, 197, 94, 0.15);
+  border-right: 2px solid rgba(34, 197, 94, 0.15);
+  border-radius: 0 0 0 80%;
+  animation: vineGrowTR 2s ease-out 0.6s forwards;
+  box-shadow: inset -8px 8px 30px rgba(34, 197, 94, 0.04);
+}
+.title-screen__vine--bl {
+  bottom: 0; left: 0;
+  border-bottom: 2px solid rgba(34, 197, 94, 0.15);
+  border-left: 2px solid rgba(34, 197, 94, 0.15);
+  border-radius: 0 80% 0 0;
+  animation: vineGrowBL 2s ease-out 0.9s forwards;
+  box-shadow: inset 8px -8px 30px rgba(34, 197, 94, 0.04);
+}
+.title-screen__vine--br {
+  bottom: 0; right: 0;
+  border-bottom: 2px solid rgba(34, 197, 94, 0.12);
+  border-right: 2px solid rgba(34, 197, 94, 0.12);
+  border-radius: 80% 0 0 0;
+  animation: vineGrowBR 2s ease-out 1.2s forwards;
+  box-shadow: inset -8px -8px 30px rgba(34, 197, 94, 0.03);
+}
+
+@keyframes vineGrowTL {
+  0% { width: 0; height: 0; opacity: 0; }
+  100% { width: 180px; height: 180px; opacity: 1; }
+}
+@keyframes vineGrowTR {
+  0% { width: 0; height: 0; opacity: 0; }
+  100% { width: 150px; height: 160px; opacity: 1; }
+}
+@keyframes vineGrowBL {
+  0% { width: 0; height: 0; opacity: 0; }
+  100% { width: 160px; height: 140px; opacity: 1; }
+}
+@keyframes vineGrowBR {
+  0% { width: 0; height: 0; opacity: 0; }
+  100% { width: 190px; height: 170px; opacity: 1; }
 }
 
 .particle {

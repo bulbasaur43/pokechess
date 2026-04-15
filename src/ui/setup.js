@@ -20,6 +20,10 @@ export function renderTitleScreen(onStart) {
   screen.innerHTML = `
     <div class="title-screen__bg">
       <div class="title-screen__particles" id="title-particles"></div>
+      <div class="title-screen__vine title-screen__vine--tl"></div>
+      <div class="title-screen__vine title-screen__vine--tr"></div>
+      <div class="title-screen__vine title-screen__vine--bl"></div>
+      <div class="title-screen__vine title-screen__vine--br"></div>
     </div>
 
     <div class="title-screen__content">
