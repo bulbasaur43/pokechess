@@ -12,7 +12,7 @@ import { getAIMove } from './engine/ai.js';
 import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect, isConnected } from './engine/online.js';
 import { reportGameResult, loadPlayerStats, getRankTitle } from './engine/elo.js';
 import { isLoggedIn, reportGameResultToServer } from './engine/auth.js';
-import { POKEMON } from './engine/types.js';
+import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS } from './engine/types.js';
 
 let game = createGame();
 let clockInterval = null;
@@ -34,11 +34,21 @@ function init() {
 
 function startLocalOrAI(clockPreset, options) {
   eloReported = false;
+
+  // Generate AI team based on difficulty
+  const teamPresets = options.teamPresets ? { ...options.teamPresets } : {};
+  if (gameMode === 'ai') {
+    const aiDiff = parseInt(options.aiDifficulty, 10) || 5;
+    const playerTeam = options.playerColor === 'white' ? 'scarlet' : 'violet';
+    const aiTeam = playerTeam === 'scarlet' ? 'violet' : 'scarlet';
+    teamPresets[aiTeam] = generateAITeam(aiTeam, aiDiff);
+  }
+
   game = startGame(game, clockPreset, {
     playerColor: options.playerColor ?? 'white',
     aiDifficulty: options.aiDifficulty ?? 'medium',
     isAIGame: gameMode === 'ai',
-    teamPresets: options.teamPresets ?? {},
+    teamPresets,
   });
   // For local mode, allow both colors
   if (gameMode === 'local') {
@@ -391,6 +401,78 @@ function showAIThinking() {
   ind.className = 'ai-thinking';
   ind.innerHTML = `<div class="ai-thinking__content"><div class="ai-thinking__spinner"></div><span>🤖 AI is thinking...</span></div>`;
   document.body.appendChild(ind);
+}
+
+// ─── AI Team Generation (scales with difficulty) ────────────────────
+
+/**
+ * Generate an AI team that gets stronger with higher difficulty.
+ * Lv 1-3: Default team (basic Pokémon)
+ * Lv 4-5: Mix some stronger Pokémon in
+ * Lv 6-7: Mostly strong Pokémon
+ * Lv 8-9: Best available Pokémon
+ * Lv 10:  Absolute best team + best king
+ */
+function generateAITeam(teamKey, difficulty) {
+  const pool = POKEMON_POOL[teamKey] || [];
+  const kingPool = KING_POOL[teamKey] || [];
+  const defaultTeam = TEAMS[teamKey];
+
+  // Lv 1-3: just use defaults
+  if (difficulty <= 3) {
+    return {
+      backRank: [...defaultTeam.backRank],
+      pawnPokemon: defaultTeam.pawnPokemon,
+    };
+  }
+
+  // Sort pool by requiredElo (strongest last)
+  const sorted = [...pool].sort((a, b) => a.requiredElo - b.requiredElo);
+
+  // How many "upgrades" to apply based on difficulty
+  // Lv4: 2 upgrades, Lv5: 3, Lv6: 4, Lv7: 5, Lv8: 6, Lv9-10: all 8
+  const upgradeSlots = difficulty <= 5 ? difficulty - 2 :
+                       difficulty <= 7 ? difficulty - 1 :
+                       8;
+
+  // Pick the strongest Pokémon available for the upgrades
+  const strongPokemon = sorted.slice(-Math.min(upgradeSlots + 3, sorted.length));
+
+  // Build back rank
+  const backRank = [...defaultTeam.backRank];
+  const slotOrder = [3, 0, 7, 2, 5, 1, 6]; // Queen first, then rooks, bishops, knights (skip index 4 = king)
+  let usedKeys = new Set();
+
+  for (let i = 0; i < Math.min(upgradeSlots, slotOrder.length); i++) {
+    const slot = slotOrder[i];
+    // Pick a strong Pokémon we haven't used yet
+    for (let j = strongPokemon.length - 1; j >= 0; j--) {
+      const key = strongPokemon[j].key;
+      if (!usedKeys.has(key) && key !== backRank[4]) { // don't replace king
+        backRank[slot] = key;
+        usedKeys.add(key);
+        break;
+      }
+    }
+  }
+
+  // Pick best pawn for higher difficulties
+  let pawnPokemon = defaultTeam.pawnPokemon;
+  if (difficulty >= 6) {
+    // Use a mid-tier Pokémon as pawn
+    const midTier = sorted[Math.min(Math.floor(sorted.length * 0.6), sorted.length - 1)];
+    if (midTier) pawnPokemon = midTier.key;
+  }
+
+  // Best king for Lv 9-10
+  const result = { backRank, pawnPokemon };
+  if (difficulty >= 9 && kingPool.length > 1) {
+    // Use the highest-ELO king
+    const bestKing = kingPool.reduce((a, b) => a.requiredElo > b.requiredElo ? a : b);
+    backRank[4] = bestKing.key;
+  }
+
+  return result;
 }
 
 function handleNewGame() {
