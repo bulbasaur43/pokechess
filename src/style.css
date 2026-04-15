@@ -180,12 +180,12 @@ body {
   position: absolute;
   top: -60px;
   right: -60px;
-  width: 200px;
-  height: 200px;
+  width: 250px;
+  height: 250px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(250, 204, 21, 0.15) 0%, rgba(250, 204, 21, 0.05) 40%, transparent 70%);
-  box-shadow: 0 0 80px 30px rgba(250, 204, 21, 0.06),
-              0 0 160px 60px rgba(250, 204, 21, 0.03);
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.4) 0%, rgba(250, 204, 21, 0.15) 35%, rgba(250, 180, 0, 0.05) 60%, transparent 75%);
+  box-shadow: 0 0 100px 50px rgba(250, 204, 21, 0.15),
+              0 0 200px 100px rgba(250, 204, 21, 0.06);
   animation: sunPulse 4s ease-in-out infinite;
   transition: opacity 2s ease;
   z-index: 0;
@@ -193,9 +193,9 @@ body {
 .title-screen__sun::after {
   content: '';
   position: absolute;
-  inset: -40px;
+  inset: -60px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(250, 204, 21, 0.04), transparent 60%);
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.1), rgba(250, 180, 0, 0.03) 50%, transparent 70%);
   animation: sunRays 6s ease-in-out infinite alternate;
 }
 .title-screen__sun--hidden {
