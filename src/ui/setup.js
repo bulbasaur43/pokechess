@@ -772,19 +772,23 @@ export function renderTitleScreen(onStart) {
           return;
         }
         const t = user.savedTeam;
-        const teamColor = t.team === 'scarlet' ? '🔴 Scarlet' : '🟣 Violet';
-
-        // Build roster text
         const roleNames = ['Rook','Knight','Bishop','Queen','True King','Bishop','Knight','Rook'];
-        let info = `${teamColor} — ${username}'s Team\n${'─'.repeat(30)}\n`;
-        if (t.backRank && Array.isArray(t.backRank)) {
-          info += '\nBack Rank:\n';
-          t.backRank.forEach((name, i) => {
-            info += `  ${roleNames[i] || '?'}: ${name}\n`;
-          });
+
+        let info = `${username}'s Saved Team\n${'─'.repeat(30)}\n`;
+
+        for (const side of ['scarlet', 'violet']) {
+          if (!t[side]) continue;
+          const label = side === 'scarlet' ? '🔴 Scarlet' : '🟣 Violet';
+          info += `\n${label}:\n`;
+          if (t[side].backRank && Array.isArray(t[side].backRank)) {
+            t[side].backRank.forEach((name, i) => {
+              info += `  ${roleNames[i] || '?'}: ${name}\n`;
+            });
+          }
+          if (t[side].pawnPokemon) {
+            info += `  Pawn: ${t[side].pawnPokemon}\n`;
+          }
         }
-        if (t.pawn) info += `\nPawn: ${t.pawn}\n`;
-        if (t.king) info += `True King: ${t.king}\n`;
 
         alert(info);
       }
