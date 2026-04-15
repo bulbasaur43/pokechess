@@ -880,7 +880,7 @@ function populateRatingBadge() {
   const winRate = getWinRate(stats);
   const totalGames = stats.wins + stats.losses + stats.draws;
 
-  if (totalGames === 0) {
+  if (totalGames === 0 && stats.rating === 1000) {
     container.innerHTML = `
       <div class="rating-badge rating-badge--new">
         <span class="rating-badge__icon">🥚</span>
