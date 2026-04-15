@@ -394,6 +394,14 @@ function showAIThinking() {
 }
 
 function handleNewGame() {
+  // If game is still in progress, count as a forfeit (loss)
+  if (game.phase !== PHASES.GAME_OVER && !eloReported && gameMode !== 'local') {
+    const playerColor = gameMode === 'online' ? game.onlineColor : game.playerColor;
+    game.winner = playerColor === 'white' ? 'black' : 'white'; // opponent wins
+    eloReported = true;
+    handleEloUpdate();
+  }
+
   if (clockInterval) clearInterval(clockInterval);
   aiThinking = false;
   document.querySelector('.ai-thinking')?.remove();
