@@ -803,6 +803,7 @@ export function renderTitleScreen(onStart) {
             </div>
           `;
           statusEl.className = 'admin-status admin-status--team';
+          statusEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
       }
     }
