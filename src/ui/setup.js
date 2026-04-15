@@ -103,7 +103,7 @@ export function renderTitleScreen(onStart) {
           <h3>🤖 AI Difficulty</h3>
           <div class="difficulty-select difficulty-select--10">
             ${Object.entries(AI_DIFFICULTIES).map(([key, d]) => `
-              <button class="btn btn--diff ${key === '3' ? 'btn--diff--active' : ''}" data-diff="${key}" title="${d.desc}">
+              <button class="btn btn--diff ${key === '5' ? 'btn--diff--active' : ''}" data-diff="${key}" title="${d.desc}">
                 <span class="diff__level">${key}</span>
                 <span class="diff__desc">${d.desc}</span>
               </button>
@@ -172,7 +172,7 @@ export function renderTitleScreen(onStart) {
   // ── State ──
   let selectedMode = 'ai';
   let selectedTeam = 'scarlet';
-  let selectedDifficulty = '3';
+  let selectedDifficulty = '5';
   let selectedPreset = 'medium';
 
   // Current roster (mutable copies of default back rank + pawn)
