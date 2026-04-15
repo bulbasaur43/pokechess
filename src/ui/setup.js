@@ -712,6 +712,8 @@ export function renderTitleScreen(onStart) {
           renderUsers(search);
         }
       });
+      // Also refresh the logged-in user's profile + rating badge
+      refreshProfile().then(() => populateRatingBadge());
     }
 
     function handleAdminAction(action, username) {
