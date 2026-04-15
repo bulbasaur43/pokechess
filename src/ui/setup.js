@@ -977,14 +977,33 @@ function populateRatingBadge() {
 function createParticles() {
   const container = document.getElementById('title-particles');
   if (!container) return;
-  for (let i = 0; i < 30; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = Math.random() * 100 + '%';
-    p.style.animationDelay = Math.random() * 5 + 's';
-    p.style.animationDuration = (3 + Math.random() * 4) + 's';
-    p.style.setProperty('--hue', Math.random() > 0.5 ? '0' : '270');
-    container.appendChild(p);
+
+  // Floating leaves
+  const leafEmojis = ['🍃', '🌿', '🍀', '🌱'];
+  for (let i = 0; i < 15; i++) {
+    const leaf = document.createElement('div');
+    leaf.className = 'particle particle--leaf';
+    leaf.textContent = leafEmojis[Math.floor(Math.random() * leafEmojis.length)];
+    leaf.style.left = Math.random() * 100 + '%';
+    leaf.style.animationDelay = Math.random() * 8 + 's';
+    leaf.style.animationDuration = (6 + Math.random() * 6) + 's';
+    leaf.style.fontSize = (0.6 + Math.random() * 0.8) + 'rem';
+    leaf.style.opacity = 0.15 + Math.random() * 0.25;
+    container.appendChild(leaf);
+  }
+
+  // Spore dots (like Bulbasaur's seed spores)
+  for (let i = 0; i < 25; i++) {
+    const spore = document.createElement('div');
+    spore.className = 'particle particle--spore';
+    spore.style.left = Math.random() * 100 + '%';
+    spore.style.animationDelay = Math.random() * 10 + 's';
+    spore.style.animationDuration = (8 + Math.random() * 8) + 's';
+    const size = 2 + Math.random() * 4;
+    spore.style.width = size + 'px';
+    spore.style.height = size + 'px';
+    spore.style.opacity = 0.1 + Math.random() * 0.2;
+    container.appendChild(spore);
   }
 }
 

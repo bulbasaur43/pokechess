@@ -182,20 +182,52 @@ body {
 
 .particle {
   position: absolute;
-  width: 4px;
-  height: 4px;
-  background: hsl(var(--hue), 80%, 60%);
-  border-radius: 50%;
-  bottom: -10px;
-  animation: particleRise linear infinite;
-  opacity: 0;
+  bottom: -20px;
+  pointer-events: none;
 }
 
-@keyframes particleRise {
-  0% { transform: translateY(0) scale(0); opacity: 0; }
-  20% { opacity: 0.8; }
-  80% { opacity: 0.4; }
-  100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+.particle--leaf {
+  animation: leafFloat linear infinite;
+  filter: drop-shadow(0 0 3px rgba(74, 222, 128, 0.3));
+}
+
+@keyframes leafFloat {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg) scale(0.5);
+    opacity: 0;
+  }
+  10% { opacity: var(--leaf-opacity, 0.3); }
+  50% {
+    transform: translateY(-50vh) translateX(30px) rotate(180deg) scale(1);
+  }
+  80% { opacity: var(--leaf-opacity, 0.2); }
+  100% {
+    transform: translateY(-105vh) translateX(-20px) rotate(360deg) scale(0.7);
+    opacity: 0;
+  }
+}
+
+.particle--spore {
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(74, 222, 128, 0.6), rgba(34, 197, 94, 0.2));
+  box-shadow: 0 0 4px rgba(74, 222, 128, 0.3);
+  animation: sporeDrift ease-in-out infinite;
+}
+
+@keyframes sporeDrift {
+  0% {
+    transform: translateY(0) translateX(0) scale(0);
+    opacity: 0;
+  }
+  15% { opacity: var(--spore-opacity, 0.25); transform: scale(1); }
+  50% {
+    transform: translateY(-45vh) translateX(15px) scale(1.2);
+  }
+  85% { opacity: var(--spore-opacity, 0.15); }
+  100% {
+    transform: translateY(-100vh) translateX(-10px) scale(0.5);
+    opacity: 0;
+  }
 }
 
 .title-screen__content {
