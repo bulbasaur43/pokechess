@@ -23,6 +23,7 @@ export function renderTitleScreen(onStart) {
     </div>
 
     <div class="title-screen__content">
+      <img src="/logo.png" alt="PokéChess" class="title-screen__logo-img" />
       <h1 class="title-screen__logo">
         <span class="title-screen__logo-poke">Poké</span><span class="title-screen__logo-chess">Chess</span>
       </h1>
