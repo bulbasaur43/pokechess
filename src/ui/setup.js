@@ -681,6 +681,7 @@ export function renderTitleScreen(onStart) {
               ${banLabel}
             </div>
             <div class="admin-user-actions">
+              <button class="admin-action-btn admin-action-btn--team" data-user="${u.username}" data-action="team" title="View Team">${u.savedTeam ? '👀 Team' : '—'}</button>
               <button class="admin-action-btn admin-action-btn--elo" data-user="${u.username}" data-action="elo" title="Modify ELO">📊 ELO</button>
               <button class="admin-action-btn admin-action-btn--reset" data-user="${u.username}" data-action="reset" title="Reset ELO">🔄 Reset</button>
               <button class="admin-action-btn admin-action-btn--ban" data-user="${u.username}" data-action="${isBanned ? 'unban' : 'ban'}" title="${isBanned ? 'Unban' : 'Ban'}">${isBanned ? '✅ Unban' : '🔨 Ban'}</button>
@@ -760,6 +761,46 @@ export function renderTitleScreen(onStart) {
           showStatus(data.message || data.error, !!data.error);
           if (data.success) refreshUsers();
         });
+
+      } else if (action === 'team') {
+        const user = allUsers.find(u => u.username === username);
+        if (!user || !user.savedTeam) {
+          showStatus(`${username} has no saved team`, true);
+          return;
+        }
+        const t = user.savedTeam;
+        const teamColor = t.team === 'scarlet' ? '🔴 Scarlet' : '🟣 Violet';
+
+        // Build roster display
+        const roleLabels = { TRUE_KING: '👑 King', QUEEN: '♛ Queen', ROOK: '♜ Rook', BISHOP: '♝ Bishop', KNIGHT: '♞ Knight', KING: '♚ General', PAWN: '♟ Pawn' };
+        let rosterHTML = '';
+        if (t.backRank && Array.isArray(t.backRank)) {
+          rosterHTML += '<div class="admin-team-section"><strong>Back Rank:</strong></div>';
+          rosterHTML += '<div class="admin-team-grid">';
+          t.backRank.forEach((name, i) => {
+            const role = ['ROOK','KNIGHT','BISHOP','QUEEN','TRUE_KING','BISHOP','KNIGHT','ROOK'][i] || '?';
+            rosterHTML += `<div class="admin-team-slot"><span class="admin-team-role">${roleLabels[role] || role}</span><span class="admin-team-pokemon">${name}</span></div>`;
+          });
+          rosterHTML += '</div>';
+        }
+        if (t.pawn) {
+          rosterHTML += `<div class="admin-team-section"><strong>Pawn:</strong> ${t.pawn}</div>`;
+        }
+        if (t.king) {
+          rosterHTML += `<div class="admin-team-section"><strong>True King:</strong> ${t.king}</div>`;
+        }
+
+        // Show in status area as an expanded view
+        const statusEl = document.getElementById('admin-status');
+        if (statusEl) {
+          statusEl.innerHTML = `
+            <div class="admin-team-view">
+              <div class="admin-team-header">${teamColor} — ${username}'s Team</div>
+              ${rosterHTML}
+            </div>
+          `;
+          statusEl.className = 'admin-status admin-status--team';
+        }
       }
     }
   }

@@ -2125,6 +2125,61 @@ body {
 }
 .admin-status--success { color: #4ade80; }
 .admin-status--error { color: #ff6b6b; }
+.admin-status--team { padding: 0; }
+
+.admin-action-btn--team:hover {
+  border-color: #a78bfa;
+  color: #a78bfa;
+  background: rgba(167,139,250,0.08);
+}
+
+.admin-team-view {
+  text-align: left;
+  padding: 12px 16px;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin: 8px 20px 12px;
+}
+.admin-team-header {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.admin-team-section {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 6px 0 4px;
+}
+.admin-team-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.admin-team-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.68rem;
+}
+.admin-team-role {
+  color: var(--text-dimmed);
+  font-size: 0.62rem;
+}
+.admin-team-pokemon {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.72rem;
+}
 
 /* ── Status Toast ── */
 .status-toast {

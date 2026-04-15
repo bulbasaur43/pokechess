@@ -441,6 +441,7 @@ function handleAdminListUsers(req, res, body) {
       bannedUntil: u.bannedUntil || null,
       rank: rank.title,
       rankEmoji: rank.emoji,
+      savedTeam: u.savedTeam || null,
     };
   });
 
