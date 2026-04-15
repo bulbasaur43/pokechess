@@ -774,37 +774,19 @@ export function renderTitleScreen(onStart) {
         const t = user.savedTeam;
         const teamColor = t.team === 'scarlet' ? '🔴 Scarlet' : '🟣 Violet';
 
-        // Build roster display
-        const roleLabels = { TRUE_KING: '👑 King', QUEEN: '♛ Queen', ROOK: '♜ Rook', BISHOP: '♝ Bishop', KNIGHT: '♞ Knight', KING: '♚ General', PAWN: '♟ Pawn' };
-        let rosterHTML = '';
+        // Build roster text
+        const roleNames = ['Rook','Knight','Bishop','Queen','True King','Bishop','Knight','Rook'];
+        let info = `${teamColor} — ${username}'s Team\n${'─'.repeat(30)}\n`;
         if (t.backRank && Array.isArray(t.backRank)) {
-          rosterHTML += '<div class="admin-team-section"><strong>Back Rank:</strong></div>';
-          rosterHTML += '<div class="admin-team-grid">';
+          info += '\nBack Rank:\n';
           t.backRank.forEach((name, i) => {
-            const role = ['ROOK','KNIGHT','BISHOP','QUEEN','TRUE_KING','BISHOP','KNIGHT','ROOK'][i] || '?';
-            rosterHTML += `<div class="admin-team-slot"><span class="admin-team-role">${roleLabels[role] || role}</span><span class="admin-team-pokemon">${name}</span></div>`;
+            info += `  ${roleNames[i] || '?'}: ${name}\n`;
           });
-          rosterHTML += '</div>';
         }
-        if (t.pawn) {
-          rosterHTML += `<div class="admin-team-section"><strong>Pawn:</strong> ${t.pawn}</div>`;
-        }
-        if (t.king) {
-          rosterHTML += `<div class="admin-team-section"><strong>True King:</strong> ${t.king}</div>`;
-        }
+        if (t.pawn) info += `\nPawn: ${t.pawn}\n`;
+        if (t.king) info += `True King: ${t.king}\n`;
 
-        // Show in status area as an expanded view
-        const statusEl = document.getElementById('admin-status');
-        if (statusEl) {
-          statusEl.innerHTML = `
-            <div class="admin-team-view">
-              <div class="admin-team-header">${teamColor} — ${username}'s Team</div>
-              ${rosterHTML}
-            </div>
-          `;
-          statusEl.className = 'admin-status admin-status--team';
-          statusEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+        alert(info);
       }
     }
   }
