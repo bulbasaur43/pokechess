@@ -104,6 +104,8 @@ export const POKEMON = {
   GARCHOMP:     { name: 'Garchomp',     types: ['DRAGON','GROUND'],    team: 'scarlet', emoji: '🦈', img: SPRITE(445),  desc: 'Mach Pokémon',          hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
   BLAZIKEN:     { name: 'Blaziken',     types: ['FIRE','FIGHTING'],    team: 'scarlet', emoji: '🐔', img: SPRITE(257),  desc: 'Blaze Pokémon',         hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   SCEPTILE:     { name: 'Sceptile',     types: ['GRASS','DRAGON'],     team: 'scarlet', emoji: '🦎', img: SPRITE(254),  desc: 'Forest Pokémon',        hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
+  GHOLDENGO:    { name: 'Gholdengo',    types: ['STEEL','GHOST'],      team: 'scarlet', emoji: '💰', img: SPRITE(1000), desc: 'Coin Entity Pokémon',    hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
+  CHI_YU:       { name: 'Chi-Yu',       types: ['DARK','FIRE'],        team: 'scarlet', emoji: '🐟', img: SPRITE(1004), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
 
   // ── Violet Team (Black) ──
   MIRAIDON:     { name: 'Miraidon',     types: ['ELECTRIC','DRAGON'],  team: 'violet',  emoji: '🐲', img: SPRITE(1008), desc: 'The Iron Serpent',      hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
@@ -124,6 +126,8 @@ export const POKEMON = {
   LUCARIO:      { name: 'Lucario',      types: ['FIGHTING','STEEL'],   team: 'violet',  emoji: '🐺', img: SPRITE(448),  desc: 'Aura Pokémon',          hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   GARDEVOIR:    { name: 'Gardevoir',    types: ['PSYCHIC','FAIRY'],    team: 'violet',  emoji: '💃', img: SPRITE(282),  desc: 'Embrace Pokémon',       hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
   SYLVEON:      { name: 'Sylveon',      types: ['FAIRY','NORMAL'],     team: 'violet',  emoji: '🎀', img: SPRITE(700),  desc: 'Intertwining Pokémon',   hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
+  DRAGAPULT:    { name: 'Dragapult',    types: ['DRAGON','GHOST'],     team: 'violet',  emoji: '🐉', img: SPRITE(887),  desc: 'Stealth Pokémon',       hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
+  CHIEN_PAO:    { name: 'Chien-Pao',    types: ['DARK','ICE'],         team: 'violet',  emoji: '🐆', img: SPRITE(1002), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
 };
 
 // ─── Team Rosters ───────────────────────────────────────────────────
@@ -176,6 +180,8 @@ export const POKEMON_POOL = {
     { key: 'WALKING_WAKE', requiredElo: 1100 },
     { key: 'GARCHOMP',     requiredElo: 1200 },
     { key: 'GOUGING_FIRE', requiredElo: 1300 },
+    { key: 'GHOLDENGO',    requiredElo: 1400 },
+    { key: 'CHI_YU',       requiredElo: 1600 },
   ],
   violet: [
     { key: 'IRON_MOTH',    requiredElo: 0 },
@@ -193,6 +199,8 @@ export const POKEMON_POOL = {
     { key: 'IRON_VALIANT', requiredElo: 1100 },
     { key: 'LUCARIO',      requiredElo: 1200 },
     { key: 'IRON_LEAVES',  requiredElo: 1300 },
+    { key: 'DRAGAPULT',    requiredElo: 1400 },
+    { key: 'CHIEN_PAO',    requiredElo: 1600 },
   ],
 };
 
@@ -200,11 +208,11 @@ export const POKEMON_POOL = {
 export const KING_POOL = {
   scarlet: [
     { key: 'KORAIDON',  requiredElo: 0 },
-    { key: 'BULBASAUR', requiredElo: 1500 },
+    { key: 'BULBASAUR', requiredElo: 2000 },
   ],
   violet: [
     { key: 'MIRAIDON', requiredElo: 0 },
-    { key: 'PIKACHU',  requiredElo: 1500 },
+    { key: 'PIKACHU',  requiredElo: 2000 },
   ],
 };
 
