@@ -840,6 +840,7 @@ export function renderTitleScreen(onStart) {
       clearInterval(counterInterval);
       return;
     }
+    if (document.hidden) return; // Don't poll when tab is in background
     updateLiveCounter();
   }, 10000);
 }
