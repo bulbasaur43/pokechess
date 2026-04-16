@@ -243,6 +243,8 @@ export const ABILITIES = {
   GARCHOMP:     { name: 'Rough Skin',      effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '🦈', color: '#e0c068' },
   BLAZIKEN:     { name: 'Blaze Kick',      effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '🦵', color: '#f08030' },
   SCEPTILE:     { name: 'Leech Seed',      effect: 'drain',   damage: 1, heal: 1,targets: 'adjacent_enemies', emoji: '🌿', color: '#78c850' },
+  GHOLDENGO:    { name: 'Make It Rain',    effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '💰', color: '#f8d030' },
+  CHI_YU:       { name: 'Ruination',       effect: 'damage',  damage: 4,         targets: 'random_1',         emoji: '🔥', color: '#f08030' },
 
   // ── Violet Team ──
   IRON_MOTH:    { name: 'Fiery Dance',     effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '🔥', color: '#f08030' },
@@ -261,6 +263,8 @@ export const ABILITIES = {
   LUCARIO:      { name: 'Aura Sphere',     effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '💙', color: '#6890f0' },
   GARDEVOIR:    { name: 'Heal Pulse',      effect: 'heal_allies', heal: 2,       targets: 'adjacent_allies',  emoji: '💖', color: '#ee99ac' },
   SYLVEON:      { name: 'Draining Kiss',   effect: 'drain',   damage: 1, heal: 1,targets: 'random_1',         emoji: '💋', color: '#ee99ac' },
+  DRAGAPULT:    { name: 'Phantom Force',   effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '👻', color: '#705898' },
+  CHIEN_PAO:    { name: 'Sword of Ruin',   effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '❄️', color: '#64c8ff', bonusStatus: 'frozen', bonusTargets: 'random_1' },
 };
 
 // White = Scarlet, Black = Violet
