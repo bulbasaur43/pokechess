@@ -10,7 +10,7 @@
 
 import { getLegalMoves } from './moves.js';
 import { resolveBattle, getBattlePreview } from './battle.js';
-import { POKEMON, getTypeMultiplier } from './types.js';
+import { POKEMON, ABILITIES, getTypeMultiplier } from './types.js';
 import { getPiece, cloneBoard, ROLES } from './board.js';
 
 // ─── Difficulty Config ──────────────────────────────────────────────
@@ -39,7 +39,17 @@ function pieceValue(piece) {
   const base = ROLE_VALUES[piece.role] ?? 1;
   const hpFactor = piece.hp / piece.maxHp;
   const dmgBonus = piece.damage * 0.2;
-  return base * (0.4 + 0.6 * hpFactor) + dmgBonus;
+  // Ability bonus: pieces with strong abilities are worth more
+  const ability = ABILITIES[piece.pokemon];
+  let abilityBonus = 0;
+  if (ability) {
+    if (ability.effect === 'damage') abilityBonus += ability.damage * 0.3;
+    else if (ability.effect === 'drain') abilityBonus += (ability.damage + Math.max(0, ability.heal || 0)) * 0.25;
+    else if (ability.effect === 'status') abilityBonus += 0.8;
+    else if (ability.effect === 'heal') abilityBonus += 0.5;
+    else if (ability.effect === 'heal_allies') abilityBonus += 0.6;
+  }
+  return base * (0.4 + 0.6 * hpFactor) + dmgBonus + abilityBonus;
 }
 
 // ─── Fast threat map (computed once per board state) ─────────────────
@@ -255,9 +265,29 @@ function evaluateBoard(board, aiColor, config) {
         if (kingSafety > 0 && aiKingPos) {
           const dist = Math.abs(r - aiKingPos.r) + Math.abs(c - aiKingPos.c);
           if (dist <= 2) score -= (3 - dist) * 0.5 * kingSafety;
-          if (dist <= 1) score -= piece.damage * 0.3 * kingSafety;
+          if (dist <= 1) {
+            score -= piece.damage * 0.3 * kingSafety;
+            // Check if this piece has a damaging ability that hits adjacent enemies
+            const ability = ABILITIES[piece.pokemon];
+            if (ability && (ability.effect === 'damage' || ability.effect === 'drain') &&
+                (ability.targets === 'adjacent_enemies' || ability.targets === 'adjacent_all')) {
+              score -= ability.damage * 0.5 * kingSafety;
+              // Could this ability kill our king?
+              if (ability.damage >= aiKingPos.piece.hp) {
+                score -= 20 * kingSafety;
+              }
+            }
+            if (ability && ability.effect === 'status') {
+              score -= 1.5 * kingSafety; // Stun/freeze near king is dangerous
+            }
+          }
         }
 
+        // Stunned/frozen enemies near our king = GOOD for us (they can't attack)
+        if (piece.statusEffect && kingSafety > 0 && aiKingPos) {
+          const dist = Math.abs(r - aiKingPos.r) + Math.abs(c - aiKingPos.c);
+          if (dist <= 2) score += 1.5 * kingSafety; // Stunned enemy near king is safe
+        }
         if (piece.statusEffect) score += 0.7;
       }
     }
@@ -490,11 +520,107 @@ function scoreMove(board, fromRow, fromCol, toRow, toCol, move, aiColor, config)
   return score;
 }
 
+// ─── King Threat Detection ──────────────────────────────────────────
+
+/**
+ * Find all opponent moves/abilities that can kill our TRUE_KING next turn.
+ */
+function findKingThreats(board, myColor, oppColor) {
+  let kingR = -1, kingC = -1, kingPiece = null;
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = board[r][c];
+      if (p && p.color === myColor && p.role === 'TRUE_KING') {
+        kingR = r; kingC = c; kingPiece = p;
+      }
+    }
+  }
+  if (!kingPiece) return [];
+
+  const threats = [];
+  const oppMoves = getAllMovesForColor(board, oppColor, null);
+
+  for (const m of oppMoves) {
+    if (!m.move.isCapture) continue;
+    const target = board[m.toRow]?.[m.toCol];
+    if (!target || target.role !== 'TRUE_KING' || target.color !== myColor) continue;
+
+    const attacker = board[m.fromRow][m.fromCol];
+    const typeMult = getTypeMultiplier(attacker.types, kingPiece.types);
+    const dmg = Math.max(1, Math.floor(attacker.damage * typeMult));
+
+    if (dmg >= kingPiece.hp) {
+      threats.push({ fromRow: m.fromRow, fromCol: m.fromCol, toRow: m.toRow, toCol: m.toCol, damage: dmg });
+    }
+  }
+
+  // Also check adjacent enemy abilities that could kill the king
+  const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+  for (const [dr, dc] of DIRS) {
+    const r = kingR + dr, c = kingC + dc;
+    if (r < 0 || r > 7 || c < 0 || c > 7) continue;
+    const adj = board[r][c];
+    if (!adj || adj.color !== oppColor || adj.statusEffect) continue;
+    const ability = ABILITIES[adj.pokemon];
+    if (!ability) continue;
+    if ((ability.effect === 'damage' || ability.effect === 'drain') &&
+        (ability.targets === 'adjacent_enemies' || ability.targets === 'adjacent_all')) {
+      if (ability.damage >= kingPiece.hp) {
+        threats.push({ fromRow: r, fromCol: c, toRow: kingR, toCol: kingC, damage: ability.damage, isAbility: true });
+      }
+    }
+  }
+
+  return threats;
+}
+
 // ─── Minimax with alpha-beta + quiescence ───────────────────────────
 
 function minimaxSearch(board, aiColor, enPassantTarget, config) {
   const moves = getAllMovesForColor(board, aiColor, enPassantTarget);
   if (moves.length === 0) return null;
+
+  // ── EMERGENCY KING DEFENSE ──
+  // If opponent can kill our king next move, ONLY consider moves that prevent it
+  if (config.kingSafety >= 1) {
+    const oppColor = aiColor === 'white' ? 'black' : 'white';
+    const kingThreats = findKingThreats(board, aiColor, oppColor);
+
+    if (kingThreats.length > 0) {
+      // Find moves that remove ALL lethal threats
+      const defensiveMoves = moves.filter(m => {
+        const simBoard = simulateMove(board, m.fromRow, m.fromCol, m.toRow, m.toCol, m.move);
+        const remainingThreats = findKingThreats(simBoard, aiColor, oppColor);
+        return remainingThreats.length === 0;
+      });
+
+      if (defensiveMoves.length > 0) {
+        // Search only defensive moves with full minimax
+        if (config.depth === 0) {
+          // At depth 0, just pick the best defensive move
+          const scored = defensiveMoves.map(m => ({
+            ...m,
+            score: scoreMove(board, m.fromRow, m.fromCol, m.toRow, m.toCol, m.move, aiColor, config),
+          }));
+          scored.sort((a, b) => b.score - a.score);
+          return scored[0];
+        }
+        // Use minimax on defensive moves only
+        let bestMove = defensiveMoves[0];
+        let bestScore = -Infinity;
+        for (const m of defensiveMoves) {
+          const simBoard = simulateMove(board, m.fromRow, m.fromCol, m.toRow, m.toCol, m.move);
+          const score = minimax(simBoard, config.depth - 1, -Infinity, Infinity, false, aiColor, null, config);
+          if (score > bestScore) {
+            bestScore = score;
+            bestMove = m;
+          }
+        }
+        return bestMove;
+      }
+      // No fully safe move exists — fall through to normal search but the huge penalties will guide it
+    }
+  }
 
   // Depth 0: just score moves directly
   if (config.depth === 0) {
@@ -526,7 +652,7 @@ function minimaxSearch(board, aiColor, enPassantTarget, config) {
   scored.sort((a, b) => b.heuristic - a.heuristic);
 
   // Prune move list for performance at higher depths
-  const maxMoves = config.depth >= 4 ? 12 : config.depth >= 3 ? 18 : scored.length;
+  const maxMoves = config.depth >= 4 ? 16 : config.depth >= 3 ? 24 : scored.length;
   const prunedMoves = scored.slice(0, maxMoves);
 
   let bestMove = null;
@@ -588,7 +714,7 @@ function minimax(board, depth, alpha, beta, isMaximizing, aiColor, enPassantTarg
   });
 
   // Width pruning at deeper levels
-  const maxWidth = depth >= 3 ? 10 : depth >= 2 ? 16 : ordered.length;
+  const maxWidth = depth >= 3 ? 14 : depth >= 2 ? 20 : ordered.length;
   const searchMoves = ordered.slice(0, maxWidth);
 
   if (isMaximizing) {
@@ -669,7 +795,7 @@ function quiescence(board, alpha, beta, isMaximizing, aiColor, config, maxDepth)
 }
 
 /**
- * Simulate a move — type-aware damage
+ * Simulate a move — type-aware damage + ability estimation
  */
 function simulateMove(board, fromRow, fromCol, toRow, toCol, move) {
   const newBoard = cloneBoard(board);
@@ -685,6 +811,25 @@ function simulateMove(board, fromRow, fromCol, toRow, toCol, move) {
       if (newHp <= 0) {
         newBoard[fromRow][fromCol] = null;
         newBoard[toRow][toCol] = { ...attacker, hasMoved: true };
+
+        // Estimate ability damage after kill (attacker moves to target square)
+        const ability = ABILITIES[attacker.pokemon];
+        if (ability && (ability.effect === 'damage' || ability.effect === 'drain') &&
+            (ability.targets === 'adjacent_enemies' || ability.targets === 'adjacent_all')) {
+          const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+          for (const [dr, dc] of DIRS) {
+            const nr = toRow + dr, nc = toCol + dc;
+            if (nr < 0 || nr > 7 || nc < 0 || nc > 7) continue;
+            const adj = newBoard[nr][nc];
+            if (!adj || adj.color === attacker.color) continue;
+            const newAdjHp = adj.hp - ability.damage;
+            if (newAdjHp <= 0) {
+              newBoard[nr][nc] = null;
+            } else {
+              newBoard[nr][nc] = { ...adj, hp: newAdjHp };
+            }
+          }
+        }
       } else {
         newBoard[toRow][toCol] = { ...defender, hp: newHp };
       }
@@ -695,6 +840,25 @@ function simulateMove(board, fromRow, fromCol, toRow, toCol, move) {
   } else {
     newBoard[fromRow][fromCol] = null;
     newBoard[toRow][toCol] = { ...attacker, hasMoved: true };
+
+    // Estimate ability effects after non-capture moves too
+    const ability = ABILITIES[attacker.pokemon];
+    if (ability && (ability.effect === 'damage' || ability.effect === 'drain') &&
+        (ability.targets === 'adjacent_enemies' || ability.targets === 'adjacent_all')) {
+      const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+      for (const [dr, dc] of DIRS) {
+        const nr = toRow + dr, nc = toCol + dc;
+        if (nr < 0 || nr > 7 || nc < 0 || nc > 7) continue;
+        const adj = newBoard[nr][nc];
+        if (!adj || adj.color === attacker.color) continue;
+        const newAdjHp = adj.hp - ability.damage;
+        if (newAdjHp <= 0) {
+          newBoard[nr][nc] = null;
+        } else {
+          newBoard[nr][nc] = { ...adj, hp: newAdjHp };
+        }
+      }
+    }
   }
 
   return newBoard;
