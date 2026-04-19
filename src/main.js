@@ -292,7 +292,7 @@ function handleBattleInline(battleResult, targetRow, targetCol, callback) {
   showDamageNumber(targetRow, targetCol, battleResult.damageDealt, battleResult.isCritical);
   if (battleResult.outcome === 'kill') showStatusToast(battleResult.message, 'kill');
   else if (battleResult.isCritical) showStatusToast('💥 CRITICAL HIT!', 'crit');
-  setTimeout(() => { renderAll(); callback?.(); }, 350);
+  setTimeout(() => { renderAll(); callback?.(); }, 500);
 }
 
 // ─── Can the current human player act? ──────────────────────────────
@@ -339,12 +339,12 @@ function performAIMove() {
   if (battleResult) {
     renderAll();
     handleBattleInline(battleResult, aiMove.toRow, aiMove.toCol, () => {
-      if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 100);
+      if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 500);
       if (isAITurn()) scheduleAIMove();
     });
   } else {
     renderAll();
-    if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 100);
+    if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 500);
     if (game.statusMessage) showStatusToast(game.statusMessage, 'promoted');
     if (game.pendingOptionalAttack && game.currentPlayer === game.aiColor) {
       game = skipOptionalAttack(game);
@@ -411,12 +411,12 @@ function handleCellClick(row, col, isLegalMove, moveData) {
     if (battleResult) {
       renderAll();
       handleBattleInline(battleResult, row, col, () => {
-        if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 100);
+        if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 500);
         if (isAITurn()) scheduleAIMove();
       });
     } else {
       renderAll();
-      if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 100);
+      if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 500);
       if (game.statusMessage) showStatusToast(game.statusMessage, 'promoted');
       if (isAITurn()) scheduleAIMove();
     }
