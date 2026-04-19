@@ -764,7 +764,7 @@ initDB().then(() => {
     console.log(`⚔️ PokéChess server on http://localhost:${PORT}`);
     console.log(`   API: http://localhost:${PORT}/api/...`);
     console.log(`   WS:  ws://localhost:${PORT}`);
-    if (UPSTASH_URL) console.log('   📦 Redis: connected');
+    if (UPSTASH_URL && UPSTASH_TOKEN) console.log('   📦 Redis: connected');
     else console.log('   📦 Redis: not configured (using local file only)');
   });
 });
