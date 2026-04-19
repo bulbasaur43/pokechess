@@ -730,6 +730,7 @@ function handleMove(ws, msg) {
       type: 'opponent_move',
       fromRow: msg.fromRow, fromCol: msg.fromCol,
       toRow: msg.toRow, toCol: msg.toCol,
+      randomValues: msg.randomValues || [],
     }));
   }
   room.moves.push(msg);

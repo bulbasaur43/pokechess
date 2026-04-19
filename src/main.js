@@ -20,6 +20,27 @@ let aiThinking = false;
 let gameMode = 'ai'; // 'ai' | 'online' | 'local'
 let eloReported = false; // Track if we've already reported ELO for this game
 let processingMove = false; // Block input during opponent's move animation
+let opponentMoveQueue = []; // Queue for incoming opponent moves
+
+// Capture all Math.random() calls during move execution for online sync
+function withRandomCapture(fn) {
+  const values = [];
+  const orig = Math.random;
+  Math.random = () => { const v = orig.call(Math); values.push(v); return v; };
+  const result = fn();
+  Math.random = orig;
+  return { result, randomValues: values };
+}
+
+// Replay captured random values during opponent's move
+function withRandomReplay(values, fn) {
+  let idx = 0;
+  const orig = Math.random;
+  Math.random = () => idx < values.length ? values[idx++] : orig.call(Math);
+  const result = fn();
+  Math.random = orig;
+  return result;
+}
 
 function init() {
   renderTitleScreen((clockPreset, options) => {
@@ -84,44 +105,9 @@ function startOnlineMatch(clockPreset, options) {
       showStatusToast(`Match found! You are ${msg.yourColor === 'white' ? 'Team Scarlet' : 'Team Violet'}`, 'default');
     },
     onOpponentMove: (msg) => {
-      // Block player input while processing opponent's move
-      processingMove = true;
-      game = selectPiece(game, msg.fromRow, msg.fromCol);
-      const { game: newGame, battleResult } = executeMove(game, msg.toRow, msg.toCol);
-      game = newGame;
-
-      const finishOpponentMove = () => {
-        // Skip optional attacks for online opponent
-        if (game.pendingOptionalAttack && game.currentPlayer !== game.onlineColor) {
-          game = skipOptionalAttack(game);
-        }
-        processingMove = false;
-        renderAll();
-      };
-
-      if (battleResult) {
-        renderAll();
-        handleBattleInline(battleResult, msg.toRow, msg.toCol, () => {
-          if (game.lastAbility) {
-            setTimeout(() => {
-              playAbilityAnimation(game.lastAbility);
-              setTimeout(finishOpponentMove, 600);
-            }, 100);
-          } else {
-            finishOpponentMove();
-          }
-        });
-      } else {
-        renderAll();
-        if (game.lastAbility) {
-          setTimeout(() => {
-            playAbilityAnimation(game.lastAbility);
-            setTimeout(finishOpponentMove, 600);
-          }, 100);
-        } else {
-          finishOpponentMove();
-        }
-      }
+      // Queue the move and process sequentially
+      opponentMoveQueue.push(msg);
+      if (!processingMove) processNextOpponentMove();
     },
     onOpponentResigned: () => {
       game.phase = PHASES.GAME_OVER;
@@ -148,6 +134,58 @@ function startOnlineMatch(clockPreset, options) {
     // Fall back to AI
     gameMode = 'ai';
     startLocalOrAI(clockPreset, { ...options, isAIGame: true });
+  });
+}
+
+// Process opponent moves one at a time from the queue
+function processNextOpponentMove() {
+  if (opponentMoveQueue.length === 0) {
+    processingMove = false;
+    return;
+  }
+
+  processingMove = true;
+  const msg = opponentMoveQueue.shift();
+
+  // Replay the sender's random values so both clients get the same results
+  withRandomReplay(msg.randomValues || [], () => {
+    game = selectPiece(game, msg.fromRow, msg.fromCol);
+    const { game: newGame, battleResult } = executeMove(game, msg.toRow, msg.toCol);
+    game = newGame;
+
+    const finishOpponentMove = () => {
+      // Skip optional attacks for online opponent
+      if (game.pendingOptionalAttack && game.currentPlayer !== game.onlineColor) {
+        game = skipOptionalAttack(game);
+      }
+      renderAll();
+      // Process next queued move (or unlock input)
+      processNextOpponentMove();
+    };
+
+    if (battleResult) {
+      renderAll();
+      handleBattleInline(battleResult, msg.toRow, msg.toCol, () => {
+        if (game.lastAbility) {
+          setTimeout(() => {
+            playAbilityAnimation(game.lastAbility);
+            setTimeout(finishOpponentMove, 600);
+          }, 100);
+        } else {
+          finishOpponentMove();
+        }
+      });
+    } else {
+      renderAll();
+      if (game.lastAbility) {
+        setTimeout(() => {
+          playAbilityAnimation(game.lastAbility);
+          setTimeout(finishOpponentMove, 600);
+        }, 100);
+      } else {
+        finishOpponentMove();
+      }
+    }
   });
 }
 
@@ -348,12 +386,26 @@ function handleCellClick(row, col, isLegalMove, moveData) {
   if (isLegalMove && game.selectedPiece) {
     const fromRow = game.selectedPiece.row;
     const fromCol = game.selectedPiece.col;
-    const { game: newGame, battleResult } = executeMove(game, row, col);
-    game = newGame;
+
+    // Capture random values during move for online sync
+    let battleResult, randomValues;
+    if (gameMode === 'online') {
+      const captured = withRandomCapture(() => {
+        const result = executeMove(game, row, col);
+        return result;
+      });
+      battleResult = captured.result.battleResult;
+      game = captured.result.game;
+      randomValues = captured.randomValues;
+    } else {
+      const result = executeMove(game, row, col);
+      battleResult = result.battleResult;
+      game = result.game;
+    }
 
     // Send move to server if online
     if (gameMode === 'online' && isConnected()) {
-      sendMove(fromRow, fromCol, row, col);
+      sendMove(fromRow, fromCol, row, col, randomValues);
     }
 
     if (battleResult) {

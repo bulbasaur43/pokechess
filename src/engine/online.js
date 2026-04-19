@@ -75,11 +75,12 @@ export function findMatch(team, timePreset) {
   }));
 }
 
-export function sendMove(fromRow, fromCol, toRow, toCol) {
+export function sendMove(fromRow, fromCol, toRow, toCol, randomValues) {
   if (!ws || ws.readyState !== 1) return;
   ws.send(JSON.stringify({
     type: 'move',
     fromRow, fromCol, toRow, toCol,
+    randomValues: randomValues || [],
   }));
 }
 
