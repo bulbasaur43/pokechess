@@ -33,8 +33,8 @@ export function resolveBattle(attacker, defender) {
 
   // Intimidate debuff: -1 damage
   if (attacker.intimidated) {
-    baseDamage = Math.max(1, baseDamage - 1);
-    result.messages.push('💪 Intimidated! -1 damage.');
+    baseDamage = Math.max(1, baseDamage - 2);
+    result.messages.push('💪 Intimidated! -2 damage.');
   }
 
   // Type effectiveness
@@ -100,7 +100,7 @@ export function resolveBattle(attacker, defender) {
 export function getBattlePreview(attacker, defender) {
   const typeMult = getTypeMultiplier(attacker.types, defender.types);
   let atkDamage = attacker.damage;
-  if (attacker.intimidated) atkDamage = Math.max(1, atkDamage - 1);
+  if (attacker.intimidated) atkDamage = Math.max(1, atkDamage - 2);
   let baseDamage = Math.max(1, Math.floor(atkDamage * typeMult));
 
   const defHpAfter = Math.max(0, defender.hp - baseDamage);

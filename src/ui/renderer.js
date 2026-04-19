@@ -256,7 +256,7 @@ function createBattleTooltip(preview, attacker, defender) {
       <span>${defName}</span>
     </div>
     ${typeEffLabel ? `<div class="battle-tooltip__type-eff">${typeEffLabel}</div>` : ''}
-    ${preview.isIntimidated ? '<div class="battle-tooltip__debuff">💪 Intimidated (-1 DMG)</div>' : ''}
+    ${preview.isIntimidated ? '<div class="battle-tooltip__debuff">💪 Intimidated (-2 DMG)</div>' : ''}
     <div class="battle-tooltip__damage">
       ${tierEmoji[tier] ?? '⚔️'} ${tierLabel[tier] ?? 'Standard'} — ${preview.baseDamage} DMG
     </div>
