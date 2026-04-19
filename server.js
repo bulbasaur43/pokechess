@@ -83,9 +83,9 @@ function saveDB(data) {
   // Debounce Redis save (1s) to avoid hammering the API
   if (redisSaveTimeout) clearTimeout(redisSaveTimeout);
   redisSaveTimeout = setTimeout(() => {
-    redisSet(DB_KEY, data).then(() => {
-      console.log('📦 Saved to Redis');
-    });
+    redisSet(DB_KEY, data)
+      .then(() => console.log('📦 Saved to Redis'))
+      .catch(e => console.error('📦 Redis save failed:', e.message));
   }, 1000);
 }
 
@@ -767,4 +767,12 @@ initDB().then(() => {
     if (UPSTASH_URL && UPSTASH_TOKEN) console.log('   📦 Redis: connected');
     else console.log('   📦 Redis: not configured (using local file only)');
   });
+});
+
+// Prevent crashes from killing the server
+process.on('uncaughtException', (err) => {
+  console.error('⚠️ Uncaught exception:', err.message);
+});
+process.on('unhandledRejection', (err) => {
+  console.error('⚠️ Unhandled rejection:', err?.message || err);
 });
