@@ -644,6 +644,9 @@ wss.on('connection', (ws) => {
 
   console.log(`🔌 ${ws.id} connected`);
 
+  // Keep-alive: mark connection as alive when pong is received
+  ws.on('pong', () => { ws.isAlive = true; });
+
   ws.on('message', (data) => {
     let msg;
     try { msg = JSON.parse(data); } catch { return; }
