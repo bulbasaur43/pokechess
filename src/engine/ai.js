@@ -451,13 +451,13 @@ function scoreMove(board, fromRow, fromCol, toRow, toCol, move, aiColor, config)
       if (advancement >= 6) score += 2 * config.posWeight;
     }
 
-    // Development
-    if (config.posWeight >= 0.3) {
+    // Development — BUT NOT THE KING
+    if (config.posWeight >= 0.3 && attacker.role !== 'TRUE_KING') {
       const startRow = isWhite ? 7 : 0;
       if (fromRow === startRow) score += 0.3 * config.posWeight;
     }
 
-    // Move toward opponent king
+    // Move toward opponent king (non-king pieces only)
     if (config.posWeight >= 0.7 && attacker.role !== 'TRUE_KING') {
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
@@ -471,22 +471,59 @@ function scoreMove(board, fromRow, fromCol, toRow, toCol, move, aiColor, config)
       }
     }
 
-    // Don't move king into danger
+    // ── TRUE_KING movement penalties ──
     if (attacker.role === 'TRUE_KING' && config.kingSafety > 0) {
-      // Quick adjacency check for enemy pieces
-      let adjEnemyCount = 0;
-      for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]]) {
-        const nr = toRow + dr, nc = toCol + dc;
-        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
-          const adj = board[nr][nc];
-          if (adj && adj.color === oppColor) {
-            score -= 3 * config.kingSafety;
-            adjEnemyCount++;
+      // Count total pieces for early/mid/endgame detection
+      let totalPieces = 0;
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          if (board[r][c]) totalPieces++;
+        }
+      }
+      const isEarlyGame = totalPieces >= 20;
+      const isMidGame = totalPieces >= 12;
+
+      // Any king move costs a small penalty (prefer developing other pieces)
+      score -= 0.5 * config.kingSafety;
+
+      // Early/mid game: penalize moving king FORWARD (toward opponent)
+      if (isMidGame) {
+        const kingHomeRow = isWhite ? 7 : 0;
+        const rowsFromHome = Math.abs(toRow - kingHomeRow);
+        const oldRowsFromHome = Math.abs(fromRow - kingHomeRow);
+        if (rowsFromHome > oldRowsFromHome) {
+          // Moving king forward = very bad early, less bad mid
+          score -= rowsFromHome * (isEarlyGame ? 5 : 2) * config.kingSafety;
+        }
+        // King should stay on back rank in early game
+        if (isEarlyGame && toRow !== kingHomeRow) {
+          score -= 3 * config.kingSafety;
+        }
+      }
+
+      // Check 2-square radius for enemy threats (wider than just adjacent)
+      let nearbyEnemyDanger = 0;
+      for (let dr = -2; dr <= 2; dr++) {
+        for (let dc = -2; dc <= 2; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const nr = toRow + dr, nc = toCol + dc;
+          if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+            const adj = board[nr][nc];
+            if (adj && adj.color === oppColor && !adj.statusEffect) {
+              const dist = Math.abs(dr) + Math.abs(dc);
+              if (dist <= 1) {
+                score -= 4 * config.kingSafety; // Adjacent enemy = very dangerous
+                nearbyEnemyDanger += adj.damage;
+              } else {
+                score -= 1 * config.kingSafety; // 2 squares away = risky
+              }
+            }
           }
         }
       }
-      // Moving king toward danger is terrible
-      if (adjEnemyCount >= 2) score -= 10 * config.kingSafety;
+      // Multiple threats = exponentially worse
+      if (nearbyEnemyDanger >= 6) score -= 15 * config.kingSafety;
+      else if (nearbyEnemyDanger >= 3) score -= 5 * config.kingSafety;
     }
 
     // Check if this move exposes our king (moving a piece away from king defense)
