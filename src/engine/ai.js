@@ -135,9 +135,22 @@ const CENTER_TABLE = [
   [-2, -1, -1, -1, -1, -1, -1, -2],
 ];
 
+// King wants to stay on back rank, behind pawns
+const KING_TABLE = [
+  [-3, -4, -4, -5, -5, -4, -4, -3],
+  [-3, -4, -4, -5, -5, -4, -4, -3],
+  [-3, -4, -4, -5, -5, -4, -4, -3],
+  [-3, -3, -4, -4, -4, -4, -3, -3],
+  [-2, -3, -3, -4, -4, -3, -3, -2],
+  [-1, -2, -2, -2, -2, -2, -2, -1],
+  [ 2,  2,  0,  0,  0,  0,  2,  2],
+  [ 2,  3,  1,  0,  0,  1,  3,  2],
+];
+
 function getPST(piece, row, col, isWhite) {
   // Mirror row for black (PSTs are from white's perspective)
   const r = isWhite ? row : 7 - row;
+  if (piece.role === 'TRUE_KING') return KING_TABLE[r][col] * 0.15;
   if (piece.isPawn || piece.role === 'PAWN') return PAWN_TABLE[r][col] * 0.1;
   if (piece.role === 'KNIGHT' || piece.role === 'KING') return KNIGHT_TABLE[r][col] * 0.1;
   return CENTER_TABLE[r][col] * 0.08;
