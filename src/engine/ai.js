@@ -323,20 +323,28 @@ function evaluateBoard(board, aiColor, config) {
     score += defenders * 0.5 * kingSafety;
     score -= enemyPressure * 0.3 * kingSafety;
 
+    const kingHpPercent = aiKingPos.piece.hp / aiKingPos.piece.maxHp;
+    // Wounded king urgency: amplify all penalties when king is hurt
+    const woundedMult = kingHpPercent <= 0.3 ? 3 : kingHpPercent <= 0.5 ? 2 : kingHpPercent <= 0.7 ? 1.5 : 1;
+
     // Exposed king is very bad
     if (oppThreatMap && oppThreatMap[aiKingPos.r][aiKingPos.c] > 0) {
-      score -= 5 * kingSafety;
+      score -= 5 * kingSafety * woundedMult;
       // LETHAL THREAT: can opponent kill our king?
       if (oppThreatMap[aiKingPos.r][aiKingPos.c] >= aiKingPos.piece.hp) {
-        score -= 50 * kingSafety; // Extremely urgent — king can die!
+        score -= 50 * kingSafety * woundedMult; // Extremely urgent — king can die!
       }
     }
 
-    const kingHpPercent = aiKingPos.piece.hp / aiKingPos.piece.maxHp;
-    if (kingHpPercent <= 0.5) score -= (1 - kingHpPercent) * 8 * kingSafety;
+    // Wounded king penalty — scales quadratically
+    if (kingHpPercent < 1) {
+      const urgency = (1 - kingHpPercent);
+      score -= urgency * urgency * 30 * kingSafety; // At 1 HP: (0.9)^2 * 30 * 4 = ~97
+    }
 
-    // Penalize few defenders around king
-    if (defenders <= 1) score -= 2 * kingSafety;
+    // Penalize few defenders around king — more critical when wounded
+    if (defenders <= 1) score -= 2 * kingSafety * woundedMult;
+    if (defenders === 0) score -= 5 * kingSafety * woundedMult; // No defenders = disaster
 
     if (isEndgame) {
       const edgeDist = Math.min(aiKingPos.r, 7 - aiKingPos.r, aiKingPos.c, 7 - aiKingPos.c);
