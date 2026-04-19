@@ -238,7 +238,7 @@ export const ABILITIES = {
   WALKING_WAKE: { name: 'Hydro Steam',     effect: 'drain',   damage: 1, heal: 1,targets: 'adjacent_enemies', emoji: '🌊', color: '#6890f0' },
   GOUGING_FIRE: { name: 'Burning Bulwark', effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '🔥', color: '#f08030' },
   BULBASAUR:    { name: 'Vine Drain',      effect: 'drain',   damage: 2, heal: 3,targets: 'adjacent_enemies', emoji: '☠️', color: '#50c030' },
-  CHARIZARD:    { name: 'Heat Wave',       effect: 'damage',  damage: 1,         targets: 'random_1',         emoji: '🔥', color: '#f08030' },
+  CHARIZARD:    { name: 'Heat Wave',       effect: 'damage',  damage: 3,         targets: 'adjacent_enemies', emoji: '🔥', color: '#f08030' },
   DRAGONITE:    { name: 'Multiscale',      effect: 'heal',    heal: 2,           targets: 'self',             emoji: '💚', color: '#7038f8' },
   GARCHOMP:     { name: 'Rough Skin',      effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '🦈', color: '#e0c068' },
   BLAZIKEN:     { name: 'Blaze Kick',      effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '🦵', color: '#f08030' },
