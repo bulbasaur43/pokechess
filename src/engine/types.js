@@ -87,11 +87,11 @@ const SPRITE = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/s
 export const POKEMON = {
   // ── Scarlet Team (White) — Default ──
   KORAIDON:     { name: 'Koraidon',     types: ['FIGHTING','DRAGON'],  team: 'scarlet', emoji: '🦎', img: SPRITE(1007), desc: 'The Winged King',       hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
-  SANDY_SHOCKS: { name: 'Sandy Shocks', types: ['ELECTRIC','GROUND'],  team: 'scarlet', emoji: '🧲', img: SPRITE(989),  desc: 'Ancient Magneton',      hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
+  SANDY_SHOCKS: { name: 'Sandy Shocks', types: ['ELECTRIC','GROUND'],  team: 'scarlet', emoji: '🧲', img: SPRITE(989),  desc: 'Ancient Magneton',      hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
   FLUTTER_MANE: { name: 'Flutter Mane', types: ['GHOST','FAIRY'],      team: 'scarlet', emoji: '👻', img: SPRITE(987),  desc: 'Ancient Misdreavus',    hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   RAGING_BOLT:  { name: 'Raging Bolt',  types: ['ELECTRIC','DRAGON'],  team: 'scarlet', emoji: '🦕', img: SPRITE(1021), desc: 'Ancient Raikou',        hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
   ROARING_MOON: { name: 'Roaring Moon', types: ['DRAGON','DARK'],      team: 'scarlet', emoji: '🌙', img: SPRITE(1005), desc: 'Ancient Salamence',     hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
-  SCREAM_TAIL:  { name: 'Scream Tail',  types: ['FAIRY','PSYCHIC'],    team: 'scarlet', emoji: '🎀', img: SPRITE(985),  desc: 'Ancient Jigglypuff',    hp: 6,  maxHp: 6,  damage: 2, damageTier: 'weak' },
+  SCREAM_TAIL:  { name: 'Scream Tail',  types: ['FAIRY','PSYCHIC'],    team: 'scarlet', emoji: '🎀', img: SPRITE(985),  desc: 'Ancient Jigglypuff',    hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
   GREAT_TUSK:   { name: 'Great Tusk',   types: ['GROUND','FIGHTING'],  team: 'scarlet', emoji: '🐘', img: SPRITE(984),  desc: 'Ancient Donphan',       hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
   BRUTE_BONNET: { name: 'Brute Bonnet', types: ['GRASS','DARK'],       team: 'scarlet', emoji: '🍄', img: SPRITE(986),  desc: 'Ancient Amoonguss',     hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
   SLITHER_WING: { name: 'Slither Wing', types: ['BUG','FIGHTING'],     team: 'scarlet', emoji: '🦗', img: SPRITE(988),  desc: 'Ancient Volcarona',     hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
@@ -112,7 +112,7 @@ export const POKEMON = {
   IRON_MOTH:    { name: 'Iron Moth',    types: ['FIRE','POISON'],      team: 'violet',  emoji: '🦋', img: SPRITE(994),  desc: 'Future Volcarona',      hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
   IRON_CROWN:   { name: 'Iron Crown',   types: ['STEEL','PSYCHIC'],    team: 'violet',  emoji: '👑', img: SPRITE(1023), desc: 'Future Cobalion',       hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   IRON_BOULDER: { name: 'Iron Boulder', types: ['ROCK','PSYCHIC'],     team: 'violet',  emoji: '🗿', img: SPRITE(1022), desc: 'Future Terrakion',      hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
-  IRON_JUGULIS: { name: 'Iron Jugulis', types: ['DARK','FLYING'],      team: 'violet',  emoji: '🦅', img: SPRITE(993),  desc: 'Future Hydreigon',      hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
+  IRON_JUGULIS: { name: 'Iron Jugulis', types: ['DARK','FLYING'],      team: 'violet',  emoji: '🦅', img: SPRITE(993),  desc: 'Future Hydreigon',      hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   IRON_BUNDLE:  { name: 'Iron Bundle',  types: ['ICE','WATER'],        team: 'violet',  emoji: '🐧', img: SPRITE(991),  desc: 'Future Delibird',       hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
   IRON_TREADS:  { name: 'Iron Treads',  types: ['GROUND','STEEL'],     team: 'violet',  emoji: '🛞', img: SPRITE(990),  desc: 'Future Donphan',        hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
   IRON_HANDS:   { name: 'Iron Hands',   types: ['FIGHTING','ELECTRIC'],team: 'violet',  emoji: '🤖', img: SPRITE(992),  desc: 'Future Hariyama',       hp: 10, maxHp: 10, damage: 3, damageTier: 'standard' },
