@@ -19,13 +19,13 @@ const LEVEL_CONFIG = {
   1:  { depth: 0, topN: Infinity, posWeight: 0,    captureBonus: 0,   kingSafety: 0,   typeAware: false, quiesce: false, label: 'Lv 1',  emoji: '1️⃣',  desc: 'Complete beginner',  rating: 400  },
   2:  { depth: 0, topN: Infinity, posWeight: 0,    captureBonus: 0.5, kingSafety: 0,   typeAware: false, quiesce: false, label: 'Lv 2',  emoji: '2️⃣',  desc: 'Slightly aware',     rating: 550  },
   3:  { depth: 0, topN: 5,        posWeight: 0.3,  captureBonus: 1,   kingSafety: 0,   typeAware: false, quiesce: false, label: 'Lv 3',  emoji: '3️⃣',  desc: 'Basic strategy',     rating: 700  },
-  4:  { depth: 0, topN: 3,        posWeight: 0.5,  captureBonus: 1.5, kingSafety: 0.5, typeAware: true,  quiesce: false, label: 'Lv 4',  emoji: '4️⃣',  desc: 'Developing player',  rating: 850  },
-  5:  { depth: 1, topN: 2,        posWeight: 0.7,  captureBonus: 2,   kingSafety: 0.7, typeAware: true,  quiesce: false, label: 'Lv 5',  emoji: '5️⃣',  desc: 'Competent',          rating: 1000 },
-  6:  { depth: 2, topN: 2,        posWeight: 0.8,  captureBonus: 2,   kingSafety: 1,   typeAware: true,  quiesce: false, label: 'Lv 6',  emoji: '6️⃣',  desc: 'Skilled',            rating: 1150 },
-  7:  { depth: 2, topN: 1,        posWeight: 1,    captureBonus: 2.5, kingSafety: 1.2, typeAware: true,  quiesce: true,  label: 'Lv 7',  emoji: '7️⃣',  desc: 'Tough opponent',     rating: 1300 },
-  8:  { depth: 3, topN: 1,        posWeight: 1,    captureBonus: 3,   kingSafety: 1.5, typeAware: true,  quiesce: true,  label: 'Lv 8',  emoji: '8️⃣',  desc: 'Advanced',           rating: 1500 },
-  9:  { depth: 3, topN: 1,        posWeight: 1.3,  captureBonus: 3.5, kingSafety: 2,   typeAware: true,  quiesce: true,  label: 'Lv 9',  emoji: '9️⃣',  desc: 'Expert tactician',   rating: 1700 },
-  10: { depth: 4, topN: 1,        posWeight: 1.5,  captureBonus: 4,   kingSafety: 2.5, typeAware: true,  quiesce: true,  label: 'Lv 10', emoji: '🔟', desc: 'Grandmaster',        rating: 2000 },
+  4:  { depth: 0, topN: 3,        posWeight: 0.5,  captureBonus: 1.5, kingSafety: 1,   typeAware: true,  quiesce: false, label: 'Lv 4',  emoji: '4️⃣',  desc: 'Developing player',  rating: 850  },
+  5:  { depth: 1, topN: 2,        posWeight: 0.7,  captureBonus: 2,   kingSafety: 1.5, typeAware: true,  quiesce: false, label: 'Lv 5',  emoji: '5️⃣',  desc: 'Competent',          rating: 1000 },
+  6:  { depth: 2, topN: 2,        posWeight: 0.8,  captureBonus: 2,   kingSafety: 2,   typeAware: true,  quiesce: false, label: 'Lv 6',  emoji: '6️⃣',  desc: 'Skilled',            rating: 1150 },
+  7:  { depth: 2, topN: 1,        posWeight: 1,    captureBonus: 2.5, kingSafety: 3,   typeAware: true,  quiesce: true,  label: 'Lv 7',  emoji: '7️⃣',  desc: 'Tough opponent',     rating: 1300 },
+  8:  { depth: 3, topN: 1,        posWeight: 1,    captureBonus: 3,   kingSafety: 4,   typeAware: true,  quiesce: true,  label: 'Lv 8',  emoji: '8️⃣',  desc: 'Advanced',           rating: 1500 },
+  9:  { depth: 3, topN: 1,        posWeight: 1.3,  captureBonus: 3.5, kingSafety: 5,   typeAware: true,  quiesce: true,  label: 'Lv 9',  emoji: '9️⃣',  desc: 'Expert tactician',   rating: 1700 },
+  10: { depth: 4, topN: 1,        posWeight: 1.5,  captureBonus: 4,   kingSafety: 6,   typeAware: true,  quiesce: true,  label: 'Lv 10', emoji: '🔟', desc: 'Grandmaster',        rating: 2000 },
 };
 
 // ─── Piece values ───────────────────────────────────────────────────
@@ -277,20 +277,27 @@ function evaluateBoard(board, aiColor, config) {
         }
       }
     }
-    score += defenders * 0.3 * kingSafety;
-    score -= enemyPressure * 0.15 * kingSafety;
+    score += defenders * 0.5 * kingSafety;
+    score -= enemyPressure * 0.3 * kingSafety;
 
-    // Exposed king is bad
+    // Exposed king is very bad
     if (oppThreatMap && oppThreatMap[aiKingPos.r][aiKingPos.c] > 0) {
-      score -= 2 * kingSafety;
+      score -= 5 * kingSafety;
+      // LETHAL THREAT: can opponent kill our king?
+      if (oppThreatMap[aiKingPos.r][aiKingPos.c] >= aiKingPos.piece.hp) {
+        score -= 50 * kingSafety; // Extremely urgent — king can die!
+      }
     }
 
     const kingHpPercent = aiKingPos.piece.hp / aiKingPos.piece.maxHp;
-    if (kingHpPercent <= 0.5) score -= (1 - kingHpPercent) * 4 * kingSafety;
+    if (kingHpPercent <= 0.5) score -= (1 - kingHpPercent) * 8 * kingSafety;
+
+    // Penalize few defenders around king
+    if (defenders <= 1) score -= 2 * kingSafety;
 
     if (isEndgame) {
       const edgeDist = Math.min(aiKingPos.r, 7 - aiKingPos.r, aiKingPos.c, 7 - aiKingPos.c);
-      if (edgeDist <= 1) score -= 0.5 * kingSafety;
+      if (edgeDist <= 1) score -= 1 * kingSafety;
     }
   }
 
@@ -425,11 +432,56 @@ function scoreMove(board, fromRow, fromCol, toRow, toCol, move, aiColor, config)
     // Don't move king into danger
     if (attacker.role === 'TRUE_KING' && config.kingSafety > 0) {
       // Quick adjacency check for enemy pieces
+      let adjEnemyCount = 0;
       for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]]) {
         const nr = toRow + dr, nc = toCol + dc;
         if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
           const adj = board[nr][nc];
-          if (adj && adj.color === oppColor) score -= 1.5 * config.kingSafety;
+          if (adj && adj.color === oppColor) {
+            score -= 3 * config.kingSafety;
+            adjEnemyCount++;
+          }
+        }
+      }
+      // Moving king toward danger is terrible
+      if (adjEnemyCount >= 2) score -= 10 * config.kingSafety;
+    }
+
+    // Check if this move exposes our king (moving a piece away from king defense)
+    if (config.kingSafety >= 1.5 && attacker.role !== 'TRUE_KING') {
+      // Find our king
+      let kingR = -1, kingC = -1;
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = board[r][c];
+          if (p && p.color === aiColor && p.role === 'TRUE_KING') {
+            kingR = r; kingC = c;
+          }
+        }
+      }
+      if (kingR >= 0) {
+        // Check if opponent can threaten king after this move
+        const simBoard = cloneBoard(board);
+        simBoard[fromRow][fromCol] = null;
+        simBoard[toRow][toCol] = attacker;
+        // Check all opponent pieces for attacks on king
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            const p = simBoard[r][c];
+            if (!p || p.color !== oppColor || p.statusEffect) continue;
+            const threats = getLegalMoves(simBoard, r, c, null);
+            for (const t of threats) {
+              if (t.row === kingR && t.col === kingC && t.isCapture) {
+                // This move exposes our king to attack!
+                const preview = getBattlePreview(p, simBoard[kingR][kingC] || board[kingR][kingC]);
+                if (preview.wouldKill) {
+                  score -= 100 * config.kingSafety; // NEVER expose king to lethal threat
+                } else {
+                  score -= 15 * config.kingSafety; // Still bad
+                }
+              }
+            }
+          }
         }
       }
     }
