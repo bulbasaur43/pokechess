@@ -284,7 +284,7 @@ export const ABILITIES = {
   SYLVEON:      { name: 'Draining Kiss',   effect: 'drain',   damage: 1, heal: 1,targets: 'random_1',         emoji: '💋', color: '#ee99ac' },
   DRAGAPULT:    { name: 'Phantom Force',   effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '👻', color: '#705898' },
   CHIEN_PAO:    { name: 'Sword of Ruin',   effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '❄️', color: '#64c8ff', bonusStatus: 'frozen', bonusTargets: 'random_1' },
-  ZAPDOS:       { name: 'Static Storm',    effect: 'damage',  damage: 1,         targets: 'radius_2_enemies', emoji: '⚡', color: '#f8d030' },
+  ZAPDOS:       { name: 'Static Storm',    effect: 'damage',  damage: 2,         targets: 'radius_2_enemies', emoji: '⚡', color: '#f8d030' },
   BRAMBLEGHAST: { name: 'Thorny Trap',     effect: 'counter', damage: 2,         targets: 'self',             emoji: '🌿', color: '#78c850' },
 };
 
