@@ -500,8 +500,10 @@ function endTurn(game) {
   // Tick down intimidate timers on ALL pieces (not color-specific)
   newGame.board = tickIntimidateTimers(newGame.board);
 
-  // Tick down lava trails
-  newGame.lavaTrails = tickLavaTrails(newGame.lavaTrails);
+  // Tick down lava trails (only once per full round, not every half-turn)
+  if (newGame.currentPlayer === 'white') {
+    newGame.lavaTrails = tickLavaTrails(newGame.lavaTrails);
+  }
 
   return newGame;
 }
