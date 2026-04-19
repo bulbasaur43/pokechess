@@ -878,6 +878,10 @@ function minimaxSearch(board, aiColor, enPassantTarget, config) {
                 (ability.targets === 'adjacent_enemies' || ability.targets === 'adjacent_all')) {
               return false; // Adjacent enemy ability could hit king
             }
+            if (ability && ability.effect === 'status' &&
+                (ability.targets === 'adjacent_enemies' || ability.targets === 'adjacent_all')) {
+              return false; // Stun/freeze king = sitting duck for follow-up
+            }
           }
 
           return true; // Safe capture!
