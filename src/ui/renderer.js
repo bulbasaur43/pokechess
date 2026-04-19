@@ -85,10 +85,20 @@ export function renderBoard(game, callbacks) {
         const lava = game.lavaTrails.find(t => t.row === row && t.col === col);
         if (lava) {
           cell.classList.add('cell--lava-trail');
-          const lavaOverlay = document.createElement('div');
-          lavaOverlay.className = 'cell__lava-overlay';
-          lavaOverlay.textContent = '🔥';
-          cell.appendChild(lavaOverlay);
+          // Lava pool container with bubbles
+          const lavaPool = document.createElement('div');
+          lavaPool.className = 'cell__lava-pool';
+          // Bubble particles
+          for (let b = 0; b < 4; b++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'cell__lava-bubble';
+            bubble.style.setProperty('--bx', `${15 + Math.random() * 70}%`);
+            bubble.style.setProperty('--by', `${20 + Math.random() * 60}%`);
+            bubble.style.setProperty('--bd', `${0.6 + Math.random() * 1.2}s`);
+            bubble.style.setProperty('--bdelay', `${Math.random() * 1.5}s`);
+            lavaPool.appendChild(bubble);
+          }
+          cell.appendChild(lavaPool);
         }
       }
 
