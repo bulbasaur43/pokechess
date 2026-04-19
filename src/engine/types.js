@@ -109,7 +109,7 @@ export const POKEMON = {
 
   // ── Violet Team (Black) ──
   MIRAIDON:     { name: 'Miraidon',     types: ['ELECTRIC','DRAGON'],  team: 'violet',  emoji: '🐲', img: SPRITE(1008), desc: 'The Iron Serpent',      hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
-  IRON_MOTH:    { name: 'Iron Moth',    types: ['FIRE','POISON'],      team: 'violet',  emoji: '🦋', img: SPRITE(994),  desc: 'Future Volcarona',      hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
+  IRON_MOTH:    { name: 'Iron Moth',    types: ['FIRE','POISON'],      team: 'violet',  emoji: '🦋', img: SPRITE(994),  desc: 'Future Volcarona',      hp: 9,  maxHp: 9,  damage: 2, damageTier: 'weak' },
   IRON_CROWN:   { name: 'Iron Crown',   types: ['STEEL','PSYCHIC'],    team: 'violet',  emoji: '👑', img: SPRITE(1023), desc: 'Future Cobalion',       hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
   IRON_BOULDER: { name: 'Iron Boulder', types: ['ROCK','PSYCHIC'],     team: 'violet',  emoji: '🗿', img: SPRITE(1022), desc: 'Future Terrakion',      hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
   IRON_JUGULIS: { name: 'Iron Jugulis', types: ['DARK','FLYING'],      team: 'violet',  emoji: '🦅', img: SPRITE(993),  desc: 'Future Hydreigon',      hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },

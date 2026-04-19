@@ -424,6 +424,18 @@ function scoreMove(board, fromRow, fromCol, toRow, toCol, move, aiColor, config)
       }
 
       score -= pieceValue(attacker) * 0.05;
+
+      // Counter-aggression: bonus for capturing enemy pieces deep in our territory
+      if (config.kingSafety >= 2) {
+        const isWhite = aiColor === 'white';
+        const defenderDepth = isWhite ? (7 - toRow) : toRow; // How deep the defender is in our half
+        if (defenderDepth >= 5) {
+          // Enemy piece is deep in our territory — punish the overextension
+          score += 2.0 * config.kingSafety * 0.3;
+        } else if (defenderDepth >= 4) {
+          score += 1.0 * config.kingSafety * 0.3;
+        }
+      }
     }
   } else {
     // Non-captures
