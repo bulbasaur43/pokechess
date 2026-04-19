@@ -389,7 +389,14 @@ function handleEloReport(req, res, body) {
   const expected = 1 / (1 + Math.pow(10, (oppRating - oldRating) / 400));
   const actual = result === 'win' ? 1 : result === 'draw' ? 0.5 : 0;
   const k = user.gamesPlayed < 10 ? 40 : user.gamesPlayed < 30 ? 32 : 24;
-  const change = Math.round(k * (actual - expected));
+  let change = Math.round(k * (actual - expected));
+
+  // Minimum +5 ELO gain for beating tough AI bots (lv 7-10)
+  if (gameMode === 'ai' && result === 'win') {
+    const level = parseInt(aiDifficulty, 10);
+    if (level >= 7 && level <= 10 && change < 5) change = 5;
+  }
+
   const newRating = Math.max(100, oldRating + change);
 
   user.rating = newRating;

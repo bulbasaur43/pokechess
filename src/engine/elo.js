@@ -9,13 +9,27 @@ const STORAGE_KEY = 'pokechess_elo';
 const DEFAULT_RATING = 1000;
 const K_FACTOR_BASE = 32;
 
-// AI difficulty → approximate ELO rating
+// AI difficulty → approximate ELO rating (supports both named and numeric levels)
 const AI_RATINGS = {
   easy:   600,
   medium: 1000,
   hard:   1400,
   expert: 1800,
+  // Numeric levels (used by the 1-10 difficulty slider)
+  '1': 400,
+  '2': 550,
+  '3': 700,
+  '4': 850,
+  '5': 1000,
+  '6': 1150,
+  '7': 1300,
+  '8': 1500,
+  '9': 1700,
+  '10': 2000,
 };
+
+// Minimum ELO gain for beating tough bots (levels 7-10)
+const MIN_ELO_GAIN_LEVELS = { '7': 5, '8': 5, '9': 5, '10': 5 };
 
 /**
  * Load player stats — uses server profile if logged in, localStorage otherwise
@@ -141,7 +155,17 @@ export function reportGameResult(result, gameMode, options = {}) {
     return { stats, change: 0, oldRating, newRating: oldRating };
   }
 
-  const change = calculateEloChange(oldRating, opponentRating, result, stats.gamesPlayed);
+  let change = calculateEloChange(oldRating, opponentRating, result, stats.gamesPlayed);
+
+  // Minimum ELO gain for beating tough AI bots (lv 7-10)
+  if (gameMode === 'ai' && result === 'win') {
+    const level = String(options.aiDifficulty);
+    const minGain = MIN_ELO_GAIN_LEVELS[level] ?? 0;
+    if (minGain > 0 && change < minGain) {
+      change = minGain;
+    }
+  }
+
   const newRating = Math.max(100, oldRating + change); // Floor at 100
 
   // Update stats
