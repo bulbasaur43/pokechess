@@ -234,7 +234,7 @@ export function executeMove(game, toRow, toCol) {
       newGame = endTurn(newGame);
 
       // Magcargo lava trail: place lava on the square it left
-      newGame = placeLavaTrail(newGame, fromRow, fromCol, attacker);
+      newGame = placeLavaTrail(newGame, fromRow, fromCol, toRow, toCol, attacker);
 
       // Apply lava damage if attacker landed on a lava trail
       newGame = applyLavaDamage(newGame, toRow, toCol);
@@ -319,7 +319,7 @@ export function executeMove(game, toRow, toCol) {
     newGame = endTurn(newGame);
 
     // Magcargo lava trail: place lava on the square it left
-    newGame = placeLavaTrail(newGame, fromRow, fromCol, attacker);
+    newGame = placeLavaTrail(newGame, fromRow, fromCol, toRow, toCol, attacker);
 
     // Apply lava damage if piece landed on a lava trail
     newGame = applyLavaDamage(newGame, toRow, toCol);
@@ -756,23 +756,46 @@ function tickLavaTrails(trails) {
 }
 
 /**
- * Place a lava trail on the from-square if the mover is Magcargo
+ * Place a lava trail along the ENTIRE path from (fromRow,fromCol) to (toRow,toCol)
+ * Works for straight-line moves (rank, file, diagonal)
  */
-function placeLavaTrail(game, fromRow, fromCol, piece) {
+function placeLavaTrail(game, fromRow, fromCol, toRow, toCol, piece) {
   if (piece.pokemon !== 'MAGCARGO') return game;
   const ability = ABILITIES[piece.pokemon];
   if (!ability || ability.effect !== 'lava_trail') return game;
 
-  // Don't place lava where another piece already is
-  if (game.board[fromRow]?.[fromCol]) return game;
+  // Calculate direction of movement
+  const dr = Math.sign(toRow - fromRow);
+  const dc = Math.sign(toCol - fromCol);
 
-  let newTrails = [...(game.lavaTrails || []), {
-    row: fromRow,
-    col: fromCol,
-    turnsLeft: ability.duration || 5,
-    damage: ability.damage || 2,
-    ownerColor: piece.color,
-  }];
+  // Trace path from start to one step before destination
+  const pathSquares = [];
+  let r = fromRow, c = fromCol;
+  while (r !== toRow || c !== toCol) {
+    // Don't place lava where a piece currently sits (except the start which Magcargo just left)
+    if (!game.board[r]?.[c]) {
+      pathSquares.push({ row: r, col: c });
+    }
+    r += dr;
+    c += dc;
+  }
+  // Don't place on destination (Magcargo is there now)
+
+  if (pathSquares.length === 0) return game;
+
+  let newTrails = [...(game.lavaTrails || [])];
+
+  for (const sq of pathSquares) {
+    // Don't double-stack lava on same square
+    if (newTrails.some(t => t.row === sq.row && t.col === sq.col)) continue;
+    newTrails.push({
+      row: sq.row,
+      col: sq.col,
+      turnsLeft: ability.duration || 5,
+      damage: ability.damage || 2,
+      ownerColor: piece.color,
+    });
+  }
 
   // Cap at 5 active lava trails — remove oldest if over limit
   const MAX_LAVA_TRAILS = 5;
