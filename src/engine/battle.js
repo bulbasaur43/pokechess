@@ -4,7 +4,7 @@
  * Type effectiveness: super effective = 2x, not very effective = 0.5x
  */
 
-import { POKEMON, TYPES, getTypeMultiplier } from './types.js';
+import { POKEMON, TYPES, getTypeMultiplier, ABILITIES } from './types.js';
 
 const CRIT_RATE = 0.08;
 const CRIT_MULTIPLIER = 2;
@@ -30,6 +30,12 @@ export function resolveBattle(attacker, defender) {
 
   // Calculate base damage
   let baseDamage = attacker.damage;
+
+  // Intimidate debuff: -1 damage
+  if (attacker.intimidated) {
+    baseDamage = Math.max(1, baseDamage - 1);
+    result.messages.push('💪 Intimidated! -1 damage.');
+  }
 
   // Type effectiveness
   const typeMult = getTypeMultiplier(attacker.types, defender.types);
@@ -75,6 +81,16 @@ export function resolveBattle(attacker, defender) {
     result.messages.push('Attacker returns to original square.');
   }
 
+  // Brambleghast counter: reflect damage back to attacker
+  result.counterDamage = 0;
+  if (defender.pokemon === 'BRAMBLEGHAST') {
+    const counterAbility = ABILITIES?.BRAMBLEGHAST;
+    if (counterAbility && counterAbility.effect === 'counter') {
+      result.counterDamage = counterAbility.damage || 2;
+      result.messages.push(`🌿 Thorny Trap! ${atkName} takes ${result.counterDamage} damage back!`);
+    }
+  }
+
   return result;
 }
 
@@ -83,11 +99,19 @@ export function resolveBattle(attacker, defender) {
  */
 export function getBattlePreview(attacker, defender) {
   const typeMult = getTypeMultiplier(attacker.types, defender.types);
-  let baseDamage = Math.max(1, Math.floor(attacker.damage * typeMult));
+  let atkDamage = attacker.damage;
+  if (attacker.intimidated) atkDamage = Math.max(1, atkDamage - 1);
+  let baseDamage = Math.max(1, Math.floor(atkDamage * typeMult));
 
   const defHpAfter = Math.max(0, defender.hp - baseDamage);
   const wouldKill = defHpAfter <= 0;
   const critDamage = baseDamage * CRIT_MULTIPLIER;
+
+  // Brambleghast counter warning
+  let counterDamage = 0;
+  if (defender.pokemon === 'BRAMBLEGHAST') {
+    counterDamage = ABILITIES?.BRAMBLEGHAST?.damage || 2;
+  }
 
   return {
     baseDamage,
@@ -99,5 +123,7 @@ export function getBattlePreview(attacker, defender) {
     wouldKill,
     critPercent: Math.round(CRIT_RATE * 100),
     attackerDamageTier: attacker.damageTier,
+    isIntimidated: !!attacker.intimidated,
+    counterDamage,
   };
 }

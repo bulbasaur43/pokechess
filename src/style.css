@@ -1842,6 +1842,76 @@ body {
   50% { transform: translateY(-3px); }
 }
 
+/* ── Lava Trail Overlay ── */
+.cell--lava-trail {
+  position: relative;
+}
+
+.cell--lava-trail::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 100, 0, 0.35), rgba(255, 50, 0, 0.15));
+  pointer-events: none;
+  z-index: 1;
+  animation: lavaPulse 1.5s ease-in-out infinite;
+}
+
+.cell__lava-overlay {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 0.7rem;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.8;
+  animation: lavaFlicker 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes lavaPulse {
+  0%, 100% { background: radial-gradient(circle, rgba(255, 100, 0, 0.25), rgba(255, 50, 0, 0.1)); }
+  50% { background: radial-gradient(circle, rgba(255, 120, 0, 0.45), rgba(255, 60, 0, 0.2)); }
+}
+
+@keyframes lavaFlicker {
+  0% { opacity: 0.6; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1.1); }
+}
+
+/* ── Intimidate Debuff ── */
+.piece--intimidated {
+  filter: brightness(0.85) saturate(0.7) drop-shadow(0 0 6px rgba(255, 100, 50, 0.5)) !important;
+}
+
+.piece__status--intimidate {
+  top: auto !important;
+  bottom: -4px;
+  left: -4px;
+  right: auto !important;
+  font-size: 0.7rem;
+  animation: intimidatePulse 1.2s ease-in-out infinite !important;
+}
+
+@keyframes intimidatePulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+/* ── Battle Tooltip: Counter Warning ── */
+.battle-tooltip__counter {
+  font-size: 0.65rem;
+  color: #78c850;
+  font-weight: 700;
+  padding: 2px 0;
+}
+
+.battle-tooltip__debuff {
+  font-size: 0.65rem;
+  color: #f08030;
+  font-weight: 700;
+  padding: 2px 0;
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════
    ABILITY ANIMATIONS (generic, color-driven)

@@ -115,6 +115,8 @@ export const POKEMON = {
   SCEPTILE:     { name: 'Sceptile',     types: ['GRASS','DRAGON'],     team: 'scarlet', emoji: '🦎', img: SPRITE(254),  desc: 'Forest Pokémon',        hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
   GHOLDENGO:    { name: 'Gholdengo',    types: ['STEEL','GHOST'],      team: 'scarlet', emoji: '💰', img: SPRITE(1000), desc: 'Coin Entity Pokémon',    hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
   CHI_YU:       { name: 'Chi-Yu',       types: ['DARK','FIRE'],        team: 'scarlet', emoji: '🐟', img: SPRITE(1004), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
+  INCINEROAR:   { name: 'Incineroar',   types: ['FIRE','DARK'],        team: 'scarlet', emoji: '🐯', img: SPRITE(727),  desc: 'Heel Pokémon',          hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
+  MAGCARGO:     { name: 'Magcargo',     types: ['FIRE','ROCK'],        team: 'scarlet', emoji: '🐌', img: SPRITE(219),  desc: 'Lava Pokémon',          hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
 
   // ── Violet Team (Black) ──
   MIRAIDON:     { name: 'Miraidon',     types: ['ELECTRIC','DRAGON'],  team: 'violet',  emoji: '🐲', img: SPRITE(1008), desc: 'The Iron Serpent',      hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
@@ -137,6 +139,8 @@ export const POKEMON = {
   SYLVEON:      { name: 'Sylveon',      types: ['FAIRY','NORMAL'],     team: 'violet',  emoji: '🎀', img: SPRITE(700),  desc: 'Intertwining Pokémon',   hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
   DRAGAPULT:    { name: 'Dragapult',    types: ['DRAGON','GHOST'],     team: 'violet',  emoji: '🐉', img: SPRITE(887),  desc: 'Stealth Pokémon',       hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
   CHIEN_PAO:    { name: 'Chien-Pao',    types: ['DARK','ICE'],         team: 'violet',  emoji: '🐆', img: SPRITE(1002), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
+  ZAPDOS:       { name: 'Zapdos',       types: ['ELECTRIC','FLYING'],  team: 'violet',  emoji: '⚡', img: SPRITE(145),  desc: 'Electric Pokémon',      hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
+  BRAMBLEGHAST: { name: 'Brambleghast', types: ['GRASS','GHOST'],      team: 'violet',  emoji: '🌿', img: SPRITE(947),  desc: 'Tumbleweed Pokémon',    hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
 };
 
 // ─── Team Rosters ───────────────────────────────────────────────────
@@ -191,6 +195,8 @@ export const POKEMON_POOL = {
     { key: 'GOUGING_FIRE', requiredElo: 1300 },
     { key: 'GHOLDENGO',    requiredElo: 1400 },
     { key: 'CHI_YU',       requiredElo: 1600 },
+    { key: 'INCINEROAR',   requiredElo: 1900 },
+    { key: 'MAGCARGO',     requiredElo: 1750 },
   ],
   violet: [
     { key: 'IRON_MOTH',    requiredElo: 0 },
@@ -210,6 +216,8 @@ export const POKEMON_POOL = {
     { key: 'IRON_LEAVES',  requiredElo: 1300 },
     { key: 'DRAGAPULT',    requiredElo: 1400 },
     { key: 'CHIEN_PAO',    requiredElo: 1600 },
+    { key: 'ZAPDOS',       requiredElo: 1900 },
+    { key: 'BRAMBLEGHAST', requiredElo: 1750 },
   ],
 };
 
@@ -237,7 +245,7 @@ export const ABILITIES = {
 
   // ── Scarlet Team ──
   SANDY_SHOCKS: { name: 'Electromagnet',   effect: 'status',  status: 'stunned', targets: 'random_1',         emoji: '🧲', color: '#f8d030' },
-  FLUTTER_MANE: { name: 'Perish Song',     effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '💀', color: '#705898' },
+  FLUTTER_MANE: { name: 'Perish Song',     effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '💀', color: '#705898' },
   RAGING_BOLT:  { name: 'Thunderclap',     effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '⚡', color: '#f8d030' },
   ROARING_MOON: { name: 'Throat Chop',     effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '🌑', color: '#705848' },
   SCREAM_TAIL:  { name: 'Hyper Scream',    effect: 'status',  status: 'stunned', targets: 'adjacent_enemies', emoji: '😵', color: '#ff82c8' },
@@ -254,6 +262,8 @@ export const ABILITIES = {
   SCEPTILE:     { name: 'Leech Seed',      effect: 'drain',   damage: 1, heal: 1,targets: 'adjacent_enemies', emoji: '🌿', color: '#78c850' },
   GHOLDENGO:    { name: 'Make It Rain',    effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '💰', color: '#f8d030' },
   CHI_YU:       { name: 'Ruination',       effect: 'damage',  damage: 4,         targets: 'random_1',         emoji: '🔥', color: '#f08030' },
+  INCINEROAR:   { name: 'Intimidate',      effect: 'intimidate', duration: 3,    targets: 'adjacent_enemies', emoji: '💪', color: '#705848' },
+  MAGCARGO:     { name: 'Lava Trail',      effect: 'lava_trail', damage: 2, duration: 3, targets: 'self',  emoji: '🌋', color: '#f08030' },
 
   // ── Violet Team ──
   IRON_MOTH:    { name: 'Fiery Dance',     effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '🔥', color: '#f08030' },
@@ -274,6 +284,8 @@ export const ABILITIES = {
   SYLVEON:      { name: 'Draining Kiss',   effect: 'drain',   damage: 1, heal: 1,targets: 'random_1',         emoji: '💋', color: '#ee99ac' },
   DRAGAPULT:    { name: 'Phantom Force',   effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '👻', color: '#705898' },
   CHIEN_PAO:    { name: 'Sword of Ruin',   effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '❄️', color: '#64c8ff', bonusStatus: 'frozen', bonusTargets: 'random_1' },
+  ZAPDOS:       { name: 'Static Storm',    effect: 'damage',  damage: 2,         targets: 'radius_2_enemies', emoji: '⚡', color: '#f8d030' },
+  BRAMBLEGHAST: { name: 'Thorny Trap',     effect: 'counter', damage: 2,         targets: 'self',             emoji: '🌿', color: '#78c850' },
 };
 
 // White = Scarlet, Black = Violet

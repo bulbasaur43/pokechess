@@ -48,6 +48,8 @@ export function createGame() {
     clockRunning: false,
     // Optional attack state (Flutter Mane / Iron Crown)
     pendingOptionalAttack: null,
+    // Lava trail hazards (Magcargo)
+    lavaTrails: [],
     // Player & AI config
     playerColor: 'white',   // 'white' = scarlet/ancient, 'black' = violet/future
     aiColor: 'black',
@@ -89,6 +91,7 @@ export function startGame(game, clockPreset = 'medium', options = {}) {
     clockPreset,
     clockRunning: true,
     pendingOptionalAttack: null,
+    lavaTrails: [],
     playerColor,
     aiColor,
     aiDifficulty,
@@ -230,10 +233,21 @@ export function executeMove(game, toRow, toCol) {
 
       newGame = endTurn(newGame);
 
-      // Apply special abilities
-      newGame = applySpecialAbilities(newGame, toRow, toCol);
+      // Magcargo lava trail: place lava on the square it left
+      newGame = placeLavaTrail(newGame, fromRow, fromCol, attacker);
 
-      // Check if ability killed a TRUE_KING
+      // Apply lava damage if attacker landed on a lava trail
+      newGame = applyLavaDamage(newGame, toRow, toCol);
+
+      // Apply special abilities
+      newGame = applySpecialAbilities(newGame, toRow, toCol, fromRow, fromCol);
+
+      // Apply counter damage (Brambleghast thorns)
+      if (battleResult.counterDamage > 0) {
+        newGame = applyCounterDamage(newGame, toRow, toCol, battleResult.counterDamage, attacker);
+      }
+
+      // Check if ability or counter killed a TRUE_KING
       if (!trueKingExists(newGame.board, 'white')) {
         newGame.phase = PHASES.GAME_OVER;
         newGame.winner = 'black';
@@ -257,9 +271,14 @@ export function executeMove(game, toRow, toCol) {
       newGame = endTurn(newGame);
 
       // Attacker still triggers ability from their position on attack
-      newGame = applySpecialAbilities(newGame, fromRow, fromCol);
+      newGame = applySpecialAbilities(newGame, fromRow, fromCol, fromRow, fromCol);
 
-      // Check if ability killed a TRUE_KING
+      // Apply counter damage (Brambleghast thorns)
+      if (battleResult.counterDamage > 0) {
+        newGame = applyCounterDamage(newGame, fromRow, fromCol, battleResult.counterDamage, attacker);
+      }
+
+      // Check if ability or counter killed a TRUE_KING
       if (!trueKingExists(newGame.board, 'white')) {
         newGame.phase = PHASES.GAME_OVER;
         newGame.winner = 'black';
@@ -299,8 +318,14 @@ export function executeMove(game, toRow, toCol) {
 
     newGame = endTurn(newGame);
 
+    // Magcargo lava trail: place lava on the square it left
+    newGame = placeLavaTrail(newGame, fromRow, fromCol, attacker);
+
+    // Apply lava damage if piece landed on a lava trail
+    newGame = applyLavaDamage(newGame, toRow, toCol);
+
     // Apply special abilities
-    newGame = applySpecialAbilities(newGame, toRow, toCol);
+    newGame = applySpecialAbilities(newGame, toRow, toCol, fromRow, fromCol);
 
     // Check if ability killed a TRUE_KING
     if (!trueKingExists(newGame.board, 'white')) {
@@ -349,7 +374,7 @@ export function executeOptionalAttack(game, targetRow, targetCol) {
   };
 
   // Set cooldown on the attacker
-  const updatedAttacker = { ...attacker, optionalAttackCooldown: 2 };
+  const updatedAttacker = { ...attacker, optionalAttackCooldown: 1 };
 
   if (battleResult.outcome === 'kill') {
     newGame.capturedPieces = {
@@ -472,6 +497,12 @@ function endTurn(game) {
   // Decrement bike cooldowns and optional attack cooldowns
   newGame.board = tickCooldowns(newGame.board, newGame.currentPlayer);
 
+  // Tick down intimidate timers on ALL pieces (not color-specific)
+  newGame.board = tickIntimidateTimers(newGame.board);
+
+  // Tick down lava trails
+  newGame.lavaTrails = tickLavaTrails(newGame.lavaTrails);
+
   return newGame;
 }
 
@@ -500,12 +531,15 @@ function tickCooldowns(board, color) {
 
 const ADJACENT_DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
 
-function applySpecialAbilities(game, row, col) {
+function applySpecialAbilities(game, row, col, fromRow, fromCol) {
   const piece = game.board[row]?.[col];
   if (!piece) return game;
 
   const ability = ABILITIES[piece.pokemon];
   if (!ability) return game;
+
+  // Counter and lava_trail are passive — don't trigger on move
+  if (ability.effect === 'counter' || ability.effect === 'lava_trail') return game;
 
   const newBoard = cloneBoard(game.board);
   const self = newBoard[row][col];
@@ -525,6 +559,22 @@ function applySpecialAbilities(game, row, col) {
     else adjAllies.push({ r, c, target });
   }
 
+  // Gather radius-2 enemies (Chebyshev distance <= 2)
+  const radius2Enemies = [];
+  if (ability.targets === 'radius_2_enemies') {
+    for (let dr = -2; dr <= 2; dr++) {
+      for (let dc = -2; dc <= 2; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const r = row + dr, c = col + dc;
+        if (r < 0 || r > 7 || c < 0 || c > 7) continue;
+        const target = newBoard[r][c];
+        if (target && target.color !== piece.color) {
+          radius2Enemies.push({ r, c, target });
+        }
+      }
+    }
+  }
+
   // Select targets based on targeting mode
   let targets = [];
   if (ability.targets === 'adjacent_enemies') targets = adjEnemies;
@@ -532,6 +582,7 @@ function applySpecialAbilities(game, row, col) {
   else if (ability.targets === 'adjacent_allies') targets = adjAllies;
   else if (ability.targets === 'random_1') targets = pickRandom(adjEnemies, 1);
   else if (ability.targets === 'random_2') targets = pickRandom(adjEnemies, 2);
+  else if (ability.targets === 'radius_2_enemies') targets = radius2Enemies;
   else if (ability.targets === 'self') targets = [];
 
   // Apply effects
@@ -579,6 +630,14 @@ function applySpecialAbilities(game, row, col) {
       if (newHp !== t.target.hp) {
         newBoard[t.r][t.c] = { ...t.target, hp: newHp };
         affected.push({ row: t.r, col: t.c, name: t.target.pokemon, healed: newHp - t.target.hp });
+      }
+    }
+  } else if (ability.effect === 'intimidate') {
+    // Apply intimidate debuff: -1 damage for N turns
+    for (const t of targets) {
+      if (!t.target.intimidated) {
+        newBoard[t.r][t.c] = { ...t.target, intimidated: true, intimidateTimer: ability.duration || 3 };
+        affected.push({ row: t.r, col: t.c, name: t.target.pokemon });
       }
     }
   }
@@ -633,6 +692,124 @@ function clearStatusEffects(board, color) {
     }
   }
   return newBoard;
+}
+
+/**
+ * Apply counter-damage to the attacker (Brambleghast thorns)
+ * attackerRow/Col is where the attacker currently is on the board
+ */
+function applyCounterDamage(game, attackerRow, attackerCol, counterDmg, attackerPiece) {
+  const piece = game.board[attackerRow]?.[attackerCol];
+  if (!piece) return game;
+  // Only apply to the actual attacker
+  if (piece.id !== attackerPiece.id) return game;
+
+  const newBoard = cloneBoard(game.board);
+  const newHp = Math.max(0, piece.hp - counterDmg);
+
+  if (newHp <= 0) {
+    newBoard[attackerRow][attackerCol] = null;
+    const newGame = {
+      ...game,
+      board: newBoard,
+      capturedPieces: {
+        ...game.capturedPieces,
+        [piece.color]: [...game.capturedPieces[piece.color], piece],
+      },
+    };
+    return newGame;
+  } else {
+    newBoard[attackerRow][attackerCol] = { ...piece, hp: newHp };
+    return { ...game, board: newBoard };
+  }
+}
+
+/**
+ * Tick down intimidate timers on all pieces (every turn switch)
+ */
+function tickIntimidateTimers(board) {
+  const newBoard = cloneBoard(board);
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = newBoard[r][c];
+      if (p && p.intimidated) {
+        const newTimer = (p.intimidateTimer || 1) - 1;
+        if (newTimer <= 0) {
+          newBoard[r][c] = { ...p, intimidated: false, intimidateTimer: 0 };
+        } else {
+          newBoard[r][c] = { ...p, intimidateTimer: newTimer };
+        }
+      }
+    }
+  }
+  return newBoard;
+}
+
+/**
+ * Tick down lava trail durations, remove expired ones
+ */
+function tickLavaTrails(trails) {
+  if (!trails || trails.length === 0) return [];
+  return trails
+    .map(t => ({ ...t, turnsLeft: t.turnsLeft - 1 }))
+    .filter(t => t.turnsLeft > 0);
+}
+
+/**
+ * Place a lava trail on the from-square if the mover is Magcargo
+ */
+function placeLavaTrail(game, fromRow, fromCol, piece) {
+  if (piece.pokemon !== 'MAGCARGO') return game;
+  const ability = ABILITIES[piece.pokemon];
+  if (!ability || ability.effect !== 'lava_trail') return game;
+
+  // Don't place lava where another piece already is
+  if (game.board[fromRow]?.[fromCol]) return game;
+
+  const newTrails = [...(game.lavaTrails || []), {
+    row: fromRow,
+    col: fromCol,
+    turnsLeft: ability.duration || 3,
+    damage: ability.damage || 2,
+    ownerColor: piece.color,
+  }];
+  return { ...game, lavaTrails: newTrails };
+}
+
+/**
+ * Apply lava damage to a piece that landed on a lava trail square
+ */
+function applyLavaDamage(game, row, col) {
+  if (!game.lavaTrails || game.lavaTrails.length === 0) return game;
+  const piece = game.board[row]?.[col];
+  if (!piece) return game;
+
+  // Find lava at this position owned by the enemy
+  const lavaIdx = game.lavaTrails.findIndex(t => t.row === row && t.col === col && t.ownerColor !== piece.color);
+  if (lavaIdx === -1) return game;
+
+  const lava = game.lavaTrails[lavaIdx];
+  const newBoard = cloneBoard(game.board);
+  const newHp = Math.max(0, piece.hp - lava.damage);
+
+  if (newHp <= 0) {
+    newBoard[row][col] = null;
+  } else {
+    newBoard[row][col] = { ...piece, hp: newHp };
+  }
+
+  // Remove the lava trail that was triggered
+  const newTrails = [...game.lavaTrails];
+  newTrails.splice(lavaIdx, 1);
+
+  const newGame = {
+    ...game,
+    board: newBoard,
+    lavaTrails: newTrails,
+    statusMessage: `🌋 ${POKEMON[piece.pokemon]?.name || 'A piece'} stepped on lava! -${lava.damage} HP!`,
+  };
+
+  return newGame;
 }
 
 /**

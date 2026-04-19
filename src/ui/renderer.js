@@ -80,6 +80,18 @@ export function renderBoard(game, callbacks) {
         }
       }
 
+      // Lava trail overlay
+      if (game.lavaTrails && game.lavaTrails.length > 0) {
+        const lava = game.lavaTrails.find(t => t.row === row && t.col === col);
+        if (lava) {
+          cell.classList.add('cell--lava-trail');
+          const lavaOverlay = document.createElement('div');
+          lavaOverlay.className = 'cell__lava-overlay';
+          lavaOverlay.textContent = '🔥';
+          cell.appendChild(lavaOverlay);
+        }
+      }
+
       // Piece
       const piece = game.board[row][col];
       if (piece) {
@@ -190,6 +202,16 @@ function createPieceElement(piece) {
     el.appendChild(statusIcon);
   }
 
+  // Intimidate debuff indicator
+  if (piece.intimidated) {
+    el.classList.add('piece--intimidated');
+    const intimIcon = document.createElement('div');
+    intimIcon.className = 'piece__status piece__status--intimidate';
+    intimIcon.textContent = '💪';
+    intimIcon.title = `Intimidated! -1 DMG (${piece.intimidateTimer || 0} turns left)`;
+    el.appendChild(intimIcon);
+  }
+
   return el;
 }
 
@@ -224,6 +246,7 @@ function createBattleTooltip(preview, attacker, defender) {
       <span>${defName}</span>
     </div>
     ${typeEffLabel ? `<div class="battle-tooltip__type-eff">${typeEffLabel}</div>` : ''}
+    ${preview.isIntimidated ? '<div class="battle-tooltip__debuff">💪 Intimidated (-1 DMG)</div>' : ''}
     <div class="battle-tooltip__damage">
       ${tierEmoji[tier] ?? '⚔️'} ${tierLabel[tier] ?? 'Standard'} — ${preview.baseDamage} DMG
     </div>
@@ -231,6 +254,7 @@ function createBattleTooltip(preview, attacker, defender) {
       ❤️ ${defender.hp}/${defender.maxHp} HP → ${preview.defenderHpAfter} HP
     </div>
     <div class="battle-tooltip__eff ${preview.wouldKill ? 'super-effective' : 'normal'}">${killText}</div>
+    ${preview.counterDamage > 0 ? `<div class="battle-tooltip__counter">🌿 Thorns: ${preview.counterDamage} DMG reflected!</div>` : ''}
     <div class="battle-tooltip__stats">${preview.critPercent}% crit (${preview.critDamage} DMG)</div>
   `;
 
