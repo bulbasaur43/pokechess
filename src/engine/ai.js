@@ -830,8 +830,36 @@ function getAbilityPositionBonus(board, fromRow, fromCol, toRow, toCol, aiColor,
 // ─── Minimax with alpha-beta + quiescence ───────────────────────────
 
 function minimaxSearch(board, aiColor, enPassantTarget, config) {
-  const moves = getAllMovesForColor(board, aiColor, enPassantTarget);
+  let moves = getAllMovesForColor(board, aiColor, enPassantTarget);
   if (moves.length === 0) return null;
+
+  // ── HARD KING LOCK: Do NOT move the king in early/mid game ──
+  // No heuristic can be overridden by minimax — this is a hard filter
+  if (config.kingSafety >= 1) {
+    let totalPieces = 0;
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        if (board[r][c]) totalPieces++;
+      }
+    }
+    // In early/mid game (12+ pieces), remove all king non-capture moves
+    if (totalPieces >= 12) {
+      const oppColor = aiColor === 'white' ? 'black' : 'white';
+      const kingThreats = findKingThreats(board, aiColor, oppColor);
+      const kingIsUnderThreat = kingThreats.length > 0;
+
+      if (!kingIsUnderThreat) {
+        const filteredMoves = moves.filter(m => {
+          const piece = board[m.fromRow][m.fromCol];
+          // Allow king captures (taking enemy pieces is fine)
+          if (piece && piece.role === 'TRUE_KING' && !m.move.isCapture) return false;
+          return true;
+        });
+        // Only apply filter if we still have moves left
+        if (filteredMoves.length > 0) moves = filteredMoves;
+      }
+    }
+  }
 
   // ── TACTICAL SCENARIOS (Lv 7-10) ──
   // Run quick forced-win checks before full minimax
