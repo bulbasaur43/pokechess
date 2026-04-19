@@ -115,7 +115,7 @@ export const POKEMON = {
   SCEPTILE:     { name: 'Sceptile',     types: ['GRASS','DRAGON'],     team: 'scarlet', emoji: '🦎', img: SPRITE(254),  desc: 'Forest Pokémon',        hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
   GHOLDENGO:    { name: 'Gholdengo',    types: ['STEEL','GHOST'],      team: 'scarlet', emoji: '💰', img: SPRITE(1000), desc: 'Coin Entity Pokémon',    hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
   CHI_YU:       { name: 'Chi-Yu',       types: ['DARK','FIRE'],        team: 'scarlet', emoji: '🐟', img: SPRITE(1004), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
-  INCINEROAR:   { name: 'Incineroar',   types: ['FIRE','DARK'],        team: 'scarlet', emoji: '🐯', img: SPRITE(727),  desc: 'Heel Pokémon',          hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
+  INCINEROAR:   { name: 'Incineroar',   types: ['FIRE','DARK'],        team: 'violet',  emoji: '🐯', img: SPRITE(727),  desc: 'Heel Pokémon',          hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
   MAGCARGO:     { name: 'Magcargo',     types: ['FIRE','ROCK'],        team: 'scarlet', emoji: '🐌', img: SPRITE(219),  desc: 'Lava Pokémon',          hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
 
   // ── Violet Team (Black) ──
@@ -139,7 +139,7 @@ export const POKEMON = {
   SYLVEON:      { name: 'Sylveon',      types: ['FAIRY','NORMAL'],     team: 'violet',  emoji: '🎀', img: SPRITE(700),  desc: 'Intertwining Pokémon',   hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
   DRAGAPULT:    { name: 'Dragapult',    types: ['DRAGON','GHOST'],     team: 'violet',  emoji: '🐉', img: SPRITE(887),  desc: 'Stealth Pokémon',       hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
   CHIEN_PAO:    { name: 'Chien-Pao',    types: ['DARK','ICE'],         team: 'violet',  emoji: '🐆', img: SPRITE(1002), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
-  ZAPDOS:       { name: 'Zapdos',       types: ['ELECTRIC','FLYING'],  team: 'violet',  emoji: '⚡', img: SPRITE(145),  desc: 'Electric Pokémon',      hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
+  ZAPDOS:       { name: 'Zapdos',       types: ['ELECTRIC','FLYING'],  team: 'scarlet', emoji: '⚡', img: SPRITE(145),  desc: 'Electric Pokémon',      hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   BRAMBLEGHAST: { name: 'Brambleghast', types: ['GRASS','GHOST'],      team: 'violet',  emoji: '🌿', img: SPRITE(947),  desc: 'Tumbleweed Pokémon',    hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
 };
 
@@ -195,8 +195,8 @@ export const POKEMON_POOL = {
     { key: 'GOUGING_FIRE', requiredElo: 1300 },
     { key: 'GHOLDENGO',    requiredElo: 1400 },
     { key: 'CHI_YU',       requiredElo: 1600 },
-    { key: 'INCINEROAR',   requiredElo: 1900 },
     { key: 'MAGCARGO',     requiredElo: 1750 },
+    { key: 'ZAPDOS',       requiredElo: 1900 },
   ],
   violet: [
     { key: 'IRON_MOTH',    requiredElo: 0 },
@@ -216,8 +216,8 @@ export const POKEMON_POOL = {
     { key: 'IRON_LEAVES',  requiredElo: 1300 },
     { key: 'DRAGAPULT',    requiredElo: 1400 },
     { key: 'CHIEN_PAO',    requiredElo: 1600 },
-    { key: 'ZAPDOS',       requiredElo: 1900 },
     { key: 'BRAMBLEGHAST', requiredElo: 1750 },
+    { key: 'INCINEROAR',   requiredElo: 1900 },
   ],
 };
 
@@ -262,7 +262,7 @@ export const ABILITIES = {
   SCEPTILE:     { name: 'Leech Seed',      effect: 'drain',   damage: 1, heal: 1,targets: 'adjacent_enemies', emoji: '🌿', color: '#78c850' },
   GHOLDENGO:    { name: 'Make It Rain',    effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '💰', color: '#f8d030' },
   CHI_YU:       { name: 'Ruination',       effect: 'damage',  damage: 4,         targets: 'random_1',         emoji: '🔥', color: '#f08030' },
-  INCINEROAR:   { name: 'Intimidate',      effect: 'intimidate', duration: 3,    targets: 'adjacent_enemies', emoji: '💪', color: '#705848' },
+  INCINEROAR:   { name: 'Intimidate',      effect: 'intimidate', duration: 5,    targets: 'adjacent_enemies', emoji: '💪', color: '#705848' },
   MAGCARGO:     { name: 'Lava Trail',      effect: 'lava_trail', damage: 2, duration: 5, targets: 'self',  emoji: '🌋', color: '#f08030' },
 
   // ── Violet Team ──

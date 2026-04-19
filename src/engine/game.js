@@ -766,13 +766,20 @@ function placeLavaTrail(game, fromRow, fromCol, piece) {
   // Don't place lava where another piece already is
   if (game.board[fromRow]?.[fromCol]) return game;
 
-  const newTrails = [...(game.lavaTrails || []), {
+  let newTrails = [...(game.lavaTrails || []), {
     row: fromRow,
     col: fromCol,
-    turnsLeft: ability.duration || 3,
+    turnsLeft: ability.duration || 5,
     damage: ability.damage || 2,
     ownerColor: piece.color,
   }];
+
+  // Cap at 5 active lava trails — remove oldest if over limit
+  const MAX_LAVA_TRAILS = 5;
+  while (newTrails.length > MAX_LAVA_TRAILS) {
+    newTrails.shift();
+  }
+
   return { ...game, lavaTrails: newTrails };
 }
 
