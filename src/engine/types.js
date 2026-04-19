@@ -116,7 +116,7 @@ export const POKEMON = {
   IRON_BUNDLE:  { name: 'Iron Bundle',  types: ['ICE','WATER'],        team: 'violet',  emoji: '🐧', img: SPRITE(991),  desc: 'Future Delibird',       hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
   IRON_TREADS:  { name: 'Iron Treads',  types: ['GROUND','STEEL'],     team: 'violet',  emoji: '🛞', img: SPRITE(990),  desc: 'Future Donphan',        hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
   IRON_HANDS:   { name: 'Iron Hands',   types: ['FIGHTING','ELECTRIC'],team: 'violet',  emoji: '🤖', img: SPRITE(992),  desc: 'Future Hariyama',       hp: 10, maxHp: 10, damage: 3, damageTier: 'standard' },
-  IRON_THORNS:  { name: 'Iron Thorns',  types: ['ROCK','ELECTRIC'],    team: 'violet',  emoji: '⚡', img: SPRITE(995),  desc: 'Future Tyranitar',      hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
+  IRON_THORNS:  { name: 'Iron Thorns',  types: ['ROCK','ELECTRIC'],    team: 'violet',  emoji: '⚡', img: SPRITE(995),  desc: 'Future Tyranitar',      hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
   IRON_VALIANT: { name: 'Iron Valiant', types: ['FAIRY','FIGHTING'],   team: 'violet',  emoji: '⚔️', img: SPRITE(1006), desc: 'Future Gallade',        hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
   IRON_LEAVES:  { name: 'Iron Leaves',  types: ['GRASS','PSYCHIC'],    team: 'violet',  emoji: '🍃', img: SPRITE(1010), desc: 'Future Virizion',       hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   // Violet classics
