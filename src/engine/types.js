@@ -62,22 +62,31 @@ export const TYPE_CHART = C;
 export function getTypeMultiplier(attackerTypes, defenderTypes) {
   if (!attackerTypes?.length || !defenderTypes?.length) return 1;
 
-  // Use attacker's primary type
-  const atkType = attackerTypes[0];
-  const chart = C[atkType];
-  if (!chart) return 1;
+  // Check each attacker type and use the best multiplier
+  let bestMultiplier = 1;
 
-  // Multiply against all defender types
-  let multiplier = 1;
-  for (const defType of defenderTypes) {
-    const eff = chart[defType];
-    if (eff !== undefined) multiplier *= eff;
+  for (const atkType of attackerTypes) {
+    const chart = C[atkType];
+    if (!chart) continue;
+
+    // Multiply against ALL defender types (allows 4x for dual weaknesses)
+    let mult = 1;
+    for (const defType of defenderTypes) {
+      const eff = chart[defType];
+      if (eff !== undefined) mult *= eff;
+    }
+
+    if (mult > bestMultiplier) bestMultiplier = mult;
+    // Also track if this type is better even when resisted
+    if (bestMultiplier <= 1 && mult > bestMultiplier) bestMultiplier = mult;
   }
 
-  // Clamp: in this game we simplify to 2x, 1x, 0.5x, or 0x 
-  if (multiplier >= 2) return 2;
-  if (multiplier <= 0) return 0.5; // no full immunities in PokéChess — just resist
-  if (multiplier < 1) return 0.5;
+  // Tiers: 4x, 2x, 1x, 0.5x, 0.25x — no full immunities in PokéChess
+  if (bestMultiplier >= 4) return 4;
+  if (bestMultiplier >= 2) return 2;
+  if (bestMultiplier <= 0) return 0.25; // double immunity/resist → still does something
+  if (bestMultiplier <= 0.25) return 0.25;
+  if (bestMultiplier < 1) return 0.5;
   return 1;
 }
 
