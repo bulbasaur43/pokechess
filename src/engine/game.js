@@ -756,30 +756,44 @@ function tickLavaTrails(trails) {
 }
 
 /**
- * Place a lava trail along the ENTIRE path from (fromRow,fromCol) to (toRow,toCol)
- * Works for straight-line moves (rank, file, diagonal)
+ * Place a lava trail along the path from (fromRow,fromCol) to (toRow,toCol)
+ * Straight-line moves (rank, file, diagonal) get full trail
+ * Knight (L-shape) moves just place lava on the origin square
  */
 function placeLavaTrail(game, fromRow, fromCol, toRow, toCol, piece) {
   if (piece.pokemon !== 'MAGCARGO') return game;
   const ability = ABILITIES[piece.pokemon];
   if (!ability || ability.effect !== 'lava_trail') return game;
 
-  // Calculate direction of movement
-  const dr = Math.sign(toRow - fromRow);
-  const dc = Math.sign(toCol - fromCol);
+  const rowDiff = toRow - fromRow;
+  const colDiff = toCol - fromCol;
+  const absR = Math.abs(rowDiff);
+  const absC = Math.abs(colDiff);
 
-  // Trace path from start to one step before destination
+  // Determine if this is a straight-line move (rank, file, or diagonal)
+  const isStraightLine = absR === 0 || absC === 0 || absR === absC;
+
   const pathSquares = [];
-  let r = fromRow, c = fromCol;
-  while (r !== toRow || c !== toCol) {
-    // Don't place lava where a piece currently sits (except the start which Magcargo just left)
-    if (!game.board[r]?.[c]) {
-      pathSquares.push({ row: r, col: c });
+
+  if (isStraightLine && (absR + absC > 0)) {
+    // Trace the straight-line path (excluding destination)
+    const dr = Math.sign(rowDiff);
+    const dc = Math.sign(colDiff);
+    let r = fromRow, c = fromCol;
+    while (r !== toRow || c !== toCol) {
+      // Skip squares that have a piece on them
+      if (!game.board[r]?.[c]) {
+        pathSquares.push({ row: r, col: c });
+      }
+      r += dr;
+      c += dc;
     }
-    r += dr;
-    c += dc;
+  } else {
+    // Knight or other non-straight move — just place on origin
+    if (!game.board[fromRow]?.[fromCol]) {
+      pathSquares.push({ row: fromRow, col: fromCol });
+    }
   }
-  // Don't place on destination (Magcargo is there now)
 
   if (pathSquares.length === 0) return game;
 
@@ -795,12 +809,6 @@ function placeLavaTrail(game, fromRow, fromCol, toRow, toCol, piece) {
       damage: ability.damage || 2,
       ownerColor: piece.color,
     });
-  }
-
-  // Cap at 5 active lava trails — remove oldest if over limit
-  const MAX_LAVA_TRAILS = 5;
-  while (newTrails.length > MAX_LAVA_TRAILS) {
-    newTrails.shift();
   }
 
   return { ...game, lavaTrails: newTrails };
