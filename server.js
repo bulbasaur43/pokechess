@@ -17,36 +17,102 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const DIST_DIR = join(__dirname, 'dist');
 const DB_FILE = './data/users.json';
 
-// ─── Database (JSON file) ───────────────────────────────────────────
+// ─── Upstash Redis (persistent storage across deploys) ──────────────
 
-function loadDB() {
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+const DB_KEY = 'pokechess_db';
+
+async function redisGet(key) {
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) return null;
+  try {
+    const res = await fetch(`${UPSTASH_URL}/get/${key}`, {
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
+    });
+    const data = await res.json();
+    return data.result ? JSON.parse(data.result) : null;
+  } catch (e) {
+    console.error('Redis GET error:', e.message);
+    return null;
+  }
+}
+
+async function redisSet(key, value) {
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
+  try {
+    await fetch(`${UPSTASH_URL}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${UPSTASH_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(['SET', key, JSON.stringify(value)]),
+    });
+  } catch (e) {
+    console.error('Redis SET error:', e.message);
+  }
+}
+
+// ─── Database ───────────────────────────────────────────────────────
+
+// Local file load (fallback for dev / initial migration)
+function loadDBLocal() {
   try {
     if (existsSync(DB_FILE)) {
       return JSON.parse(readFileSync(DB_FILE, 'utf-8'));
     }
   } catch (e) {
-    console.error('DB load error:', e.message);
+    console.error('Local DB load error:', e.message);
   }
   return { users: {}, sessions: {} };
 }
 
-function saveDB(db) {
+// Debounced Redis save to batch rapid writes
+let redisSaveTimeout = null;
+
+function saveDB(data) {
+  // Always save locally (fast, sync)
   try {
-    // Ensure directory exists
     const dir = DB_FILE.substring(0, DB_FILE.lastIndexOf('/'));
-    if (!existsSync(dir)) {
-      import('fs').then(fs => fs.mkdirSync(dir, { recursive: true }));
-    }
-    writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+    writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
   } catch (e) {
-    console.error('DB save error:', e.message);
+    console.error('Local DB save error:', e.message);
+  }
+
+  // Debounce Redis save (1s) to avoid hammering the API
+  if (redisSaveTimeout) clearTimeout(redisSaveTimeout);
+  redisSaveTimeout = setTimeout(() => {
+    redisSet(DB_KEY, data).then(() => {
+      console.log('📦 Saved to Redis');
+    });
+  }, 1000);
+}
+
+// Load from Redis on startup, migrate local data if needed
+async function initDB() {
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) {
+    console.log(`📦 Redis not configured — using local file (${Object.keys(db.users).length} users)`);
+    return;
+  }
+
+  const redisData = await redisGet(DB_KEY);
+  if (redisData && redisData.users && Object.keys(redisData.users).length > 0) {
+    db = redisData;
+    console.log(`📦 Loaded ${Object.keys(db.users).length} users from Redis`);
+  } else if (Object.keys(db.users).length > 0) {
+    // Migrate existing local data to Redis
+    await redisSet(DB_KEY, db);
+    console.log(`📦 Migrated ${Object.keys(db.users).length} local users to Redis`);
+  } else {
+    console.log('📦 Starting with empty database');
   }
 }
 
 // Ensure data directory exists
 try { mkdirSync('./data', { recursive: true }); } catch { }
 
-let db = loadDB();
+let db = loadDBLocal();
 
 function hashPassword(password, salt) {
   return createHash('sha256').update(password + salt).digest('hex');
@@ -692,9 +758,13 @@ setInterval(() => {
   });
 }, 30000);
 
-// Start
-httpServer.listen(PORT, () => {
-  console.log(`⚔️ PokéChess server on http://localhost:${PORT}`);
-  console.log(`   API: http://localhost:${PORT}/api/...`);
-  console.log(`   WS:  ws://localhost:${PORT}`);
+// Start — load from Redis first, then listen
+initDB().then(() => {
+  httpServer.listen(PORT, () => {
+    console.log(`⚔️ PokéChess server on http://localhost:${PORT}`);
+    console.log(`   API: http://localhost:${PORT}/api/...`);
+    console.log(`   WS:  ws://localhost:${PORT}`);
+    if (UPSTASH_URL) console.log('   📦 Redis: connected');
+    else console.log('   📦 Redis: not configured (using local file only)');
+  });
 });
