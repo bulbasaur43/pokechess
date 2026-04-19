@@ -19,6 +19,7 @@ let clockInterval = null;
 let aiThinking = false;
 let gameMode = 'ai'; // 'ai' | 'online' | 'local'
 let eloReported = false; // Track if we've already reported ELO for this game
+let processingMove = false; // Block input during opponent's move animation
 
 function init() {
   renderTitleScreen((clockPreset, options) => {
@@ -83,23 +84,43 @@ function startOnlineMatch(clockPreset, options) {
       showStatusToast(`Match found! You are ${msg.yourColor === 'white' ? 'Team Scarlet' : 'Team Violet'}`, 'default');
     },
     onOpponentMove: (msg) => {
-      // Execute opponent's move
+      // Block player input while processing opponent's move
+      processingMove = true;
       game = selectPiece(game, msg.fromRow, msg.fromCol);
       const { game: newGame, battleResult } = executeMove(game, msg.toRow, msg.toCol);
       game = newGame;
+
+      const finishOpponentMove = () => {
+        // Skip optional attacks for online opponent
+        if (game.pendingOptionalAttack && game.currentPlayer !== game.onlineColor) {
+          game = skipOptionalAttack(game);
+        }
+        processingMove = false;
+        renderAll();
+      };
+
       if (battleResult) {
         renderAll();
         handleBattleInline(battleResult, msg.toRow, msg.toCol, () => {
-          if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 100);
+          if (game.lastAbility) {
+            setTimeout(() => {
+              playAbilityAnimation(game.lastAbility);
+              setTimeout(finishOpponentMove, 600);
+            }, 100);
+          } else {
+            finishOpponentMove();
+          }
         });
       } else {
         renderAll();
-        if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 100);
-      }
-      // Skip AI optional attacks for online opponent
-      if (game.pendingOptionalAttack && game.currentPlayer !== game.onlineColor) {
-        game = skipOptionalAttack(game);
-        renderAll();
+        if (game.lastAbility) {
+          setTimeout(() => {
+            playAbilityAnimation(game.lastAbility);
+            setTimeout(finishOpponentMove, 600);
+          }, 100);
+        } else {
+          finishOpponentMove();
+        }
       }
     },
     onOpponentResigned: () => {
@@ -241,6 +262,7 @@ function handleBattleInline(battleResult, targetRow, targetCol, callback) {
 function canPlayerAct() {
   if (game.phase !== PHASES.PLAY) return false;
   if (aiThinking) return false;
+  if (processingMove) return false;
   if (gameMode === 'local') return true; // Both can play
   if (gameMode === 'ai') return game.currentPlayer === game.playerColor;
   if (gameMode === 'online') return game.currentPlayer === game.onlineColor;
@@ -607,11 +629,19 @@ function playAbilityAnimation(ability) {
 
   const fx = TYPE_FX[primaryType] || TYPE_FX.NORMAL;
 
-  // Center point
-  const cr = a.reduce((s, x) => s + x.row, 0) / a.length;
-  const cc = a.reduce((s, x) => s + x.col, 0) / a.length;
-  const cx = rect.left + cc * cs + cs / 2;
-  const cy = rect.top + cr * cs + cs / 2;
+  // Center point — use actual cell positions (works with flipped board)
+  const getCellCenter = (r, c) => {
+    const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+    if (cell) {
+      const cr = cell.getBoundingClientRect();
+      return { x: cr.left + cr.width / 2, y: cr.top + cr.height / 2 };
+    }
+    // Fallback to calculated position
+    return { x: rect.left + c * cs + cs / 2, y: rect.top + r * cs + cs / 2 };
+  };
+  const centers = a.map(t => getCellCenter(t.row, t.col));
+  const cx = centers.reduce((s, c) => s + c.x, 0) / centers.length;
+  const cy = centers.reduce((s, c) => s + c.y, 0) / centers.length;
 
   const isStatus = ability.effectName === 'frozen' || ability.effectName === 'stunned';
   const isHeal = ability.effectName === 'heal' || ability.effectName === 'heal_allies';
@@ -633,8 +663,9 @@ function playAbilityAnimation(ability) {
   } else {
     // Beam lines to each target
     a.forEach(t => {
-      const tx = rect.left + t.col * cs + cs / 2;
-      const ty = rect.top + t.row * cs + cs / 2;
+      const tc = getCellCenter(t.row, t.col);
+      const tx = tc.x;
+      const ty = tc.y;
       const ang = Math.atan2(ty - cy, tx - cx);
       const d = Math.hypot(tx - cx, ty - cy);
       const b = document.createElement('div');
@@ -667,8 +698,9 @@ function playAbilityAnimation(ability) {
 
   // ── Type-specific particles on each affected square ──
   a.forEach(t => {
-    const tx = rect.left + t.col * cs + cs / 2;
-    const ty = rect.top + t.row * cs + cs / 2;
+    const tc = getCellCenter(t.row, t.col);
+    const tx = tc.x;
+    const ty = tc.y;
 
     const particleCount = isHeal ? 3 : fx.count;
     setTimeout(() => {
