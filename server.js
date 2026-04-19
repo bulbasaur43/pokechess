@@ -30,7 +30,16 @@ async function redisGet(key) {
       headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
     });
     const data = await res.json();
-    return data.result ? JSON.parse(data.result) : null;
+    if (!res.ok) {
+      console.error(`Redis GET failed (${res.status}):`, data.error || JSON.stringify(data));
+      return null;
+    }
+    if (data.result) {
+      console.log(`📦 Redis GET: found data (${data.result.length} chars)`);
+      return JSON.parse(data.result);
+    }
+    console.log('📦 Redis GET: key not found (empty)');
+    return null;
   } catch (e) {
     console.error('Redis GET error:', e.message);
     return null;
@@ -40,14 +49,23 @@ async function redisGet(key) {
 async function redisSet(key, value) {
   if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
   try {
-    await fetch(`${UPSTASH_URL}`, {
+    const jsonValue = JSON.stringify(value);
+    const res = await fetch(`${UPSTASH_URL}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${UPSTASH_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(['SET', key, JSON.stringify(value)]),
+      body: JSON.stringify(['SET', key, jsonValue]),
     });
+    const data = await res.json();
+    if (!res.ok) {
+      console.error(`Redis SET failed (${res.status}):`, data.error || JSON.stringify(data));
+      return;
+    }
+    if (data.result !== 'OK') {
+      console.error('Redis SET unexpected response:', JSON.stringify(data));
+    }
   } catch (e) {
     console.error('Redis SET error:', e.message);
   }
