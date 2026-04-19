@@ -7,7 +7,7 @@
 import { initBoard, movePiece, removePiece, promotePawn, trueKingExists, cloneBoard, getPiece, ROLES } from './board.js';
 import { getLegalMoves } from './moves.js';
 import { resolveBattle, getBattlePreview } from './battle.js';
-import { POKEMON, TEAMS, COLOR_TO_TEAM, ABILITIES } from './types.js';
+import { POKEMON, TEAMS, COLOR_TO_TEAM, ABILITIES, getTypeMultiplier } from './types.js';
 
 export const PHASES = {
   TITLE: 'TITLE',
@@ -698,7 +698,7 @@ function clearStatusEffects(board, color) {
 
 /**
  * Apply counter-damage to the attacker (Brambleghast thorns)
- * attackerRow/Col is where the attacker currently is on the board
+ * Also deal 2 type-effective damage to a random enemy anywhere on the board
  */
 function applyCounterDamage(game, attackerRow, attackerCol, counterDmg, attackerPiece) {
   const piece = game.board[attackerRow]?.[attackerCol];
@@ -711,19 +711,57 @@ function applyCounterDamage(game, attackerRow, attackerCol, counterDmg, attacker
 
   if (newHp <= 0) {
     newBoard[attackerRow][attackerCol] = null;
-    const newGame = {
-      ...game,
-      board: newBoard,
-      capturedPieces: {
-        ...game.capturedPieces,
-        [piece.color]: [...game.capturedPieces[piece.color], piece],
-      },
-    };
-    return newGame;
   } else {
     newBoard[attackerRow][attackerCol] = { ...piece, hp: newHp };
-    return { ...game, board: newBoard };
   }
+
+  // Find Brambleghast's types for type effectiveness calc
+  const brambleTypes = POKEMON.BRAMBLEGHAST?.types || ['GRASS', 'GHOST'];
+
+  // Find all enemies on the board (enemies of Brambleghast = same color as attacker)
+  const enemies = [];
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = newBoard[r][c];
+      if (p && p.color === attackerPiece.color && !(r === attackerRow && c === attackerCol)) {
+        enemies.push({ r, c, target: p });
+      }
+    }
+  }
+
+  // Pick a random enemy and deal 2 type-effective damage
+  let statusMsg = '';
+  if (enemies.length > 0) {
+    const chosen = enemies[Math.floor(Math.random() * enemies.length)];
+    const typeMult = getTypeMultiplier(brambleTypes, chosen.target.types);
+    const baseDmg = 2;
+    const finalDmg = Math.max(1, Math.floor(baseDmg * typeMult));
+    const targetHp = Math.max(0, chosen.target.hp - finalDmg);
+    const targetName = POKEMON[chosen.target.pokemon]?.name || 'enemy';
+
+    if (targetHp <= 0) {
+      newBoard[chosen.r][chosen.c] = null;
+      statusMsg = `\n🌿 Thorny Trap also eliminated ${targetName}!`;
+    } else {
+      newBoard[chosen.r][chosen.c] = { ...chosen.target, hp: targetHp };
+      statusMsg = `\n🌿 Thorny Trap also hit ${targetName} for ${finalDmg} DMG!`;
+    }
+  }
+
+  let newGame = { ...game, board: newBoard };
+  if (statusMsg) {
+    newGame.statusMessage = (game.statusMessage || '') + statusMsg;
+  }
+
+  // Handle attacker death
+  if (newHp <= 0) {
+    newGame.capturedPieces = {
+      ...newGame.capturedPieces,
+      [piece.color]: [...newGame.capturedPieces[piece.color], piece],
+    };
+  }
+
+  return newGame;
 }
 
 /**
