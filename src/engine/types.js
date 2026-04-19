@@ -139,7 +139,7 @@ export const POKEMON = {
   SYLVEON:      { name: 'Sylveon',      types: ['FAIRY','NORMAL'],     team: 'violet',  emoji: '🎀', img: SPRITE(700),  desc: 'Intertwining Pokémon',   hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
   DRAGAPULT:    { name: 'Dragapult',    types: ['DRAGON','GHOST'],     team: 'violet',  emoji: '🐉', img: SPRITE(887),  desc: 'Stealth Pokémon',       hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
   CHIEN_PAO:    { name: 'Chien-Pao',    types: ['DARK','ICE'],         team: 'violet',  emoji: '🐆', img: SPRITE(1002), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
-  ZAPDOS:       { name: 'Zapdos',       types: ['ELECTRIC','FLYING'],  team: 'scarlet', emoji: '⚡', img: SPRITE(145),  desc: 'Electric Pokémon',      hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
+  ZAPDOS:       { name: 'Zapdos',       types: ['ELECTRIC','FLYING'],  team: 'scarlet', emoji: '⚡', img: SPRITE(145),  desc: 'Electric Pokémon',      hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
   BRAMBLEGHAST: { name: 'Brambleghast', types: ['GRASS','GHOST'],      team: 'violet',  emoji: '🌿', img: SPRITE(947),  desc: 'Tumbleweed Pokémon',    hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
 };
 
@@ -284,7 +284,7 @@ export const ABILITIES = {
   SYLVEON:      { name: 'Draining Kiss',   effect: 'drain',   damage: 1, heal: 1,targets: 'random_1',         emoji: '💋', color: '#ee99ac' },
   DRAGAPULT:    { name: 'Phantom Force',   effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '👻', color: '#705898' },
   CHIEN_PAO:    { name: 'Sword of Ruin',   effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '❄️', color: '#64c8ff', bonusStatus: 'frozen', bonusTargets: 'random_1' },
-  ZAPDOS:       { name: 'Static Storm',    effect: 'damage',  damage: 2,         targets: 'radius_2_enemies', emoji: '⚡', color: '#f8d030' },
+  ZAPDOS:       { name: 'Static Storm',    effect: 'damage',  damage: 1,         targets: 'radius_2_enemies', emoji: '⚡', color: '#f8d030' },
   BRAMBLEGHAST: { name: 'Thorny Trap',     effect: 'counter', damage: 2,         targets: 'self',             emoji: '🌿', color: '#78c850' },
 };
 
