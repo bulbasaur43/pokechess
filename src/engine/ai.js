@@ -16,16 +16,16 @@ import { getPiece, cloneBoard, ROLES } from './board.js';
 // ─── Difficulty Config ──────────────────────────────────────────────
 
 const LEVEL_CONFIG = {
-  1:  { depth: 0, topN: Infinity, posWeight: 0,    captureBonus: 0,   kingSafety: 0,   typeAware: false, quiesce: false, label: 'Lv 1',  emoji: '1️⃣',  desc: 'Complete beginner',  rating: 400  },
-  2:  { depth: 0, topN: Infinity, posWeight: 0,    captureBonus: 0.5, kingSafety: 0,   typeAware: false, quiesce: false, label: 'Lv 2',  emoji: '2️⃣',  desc: 'Slightly aware',     rating: 550  },
-  3:  { depth: 0, topN: 5,        posWeight: 0.3,  captureBonus: 1,   kingSafety: 0,   typeAware: false, quiesce: false, label: 'Lv 3',  emoji: '3️⃣',  desc: 'Basic strategy',     rating: 700  },
-  4:  { depth: 0, topN: 3,        posWeight: 0.5,  captureBonus: 1.5, kingSafety: 1,   typeAware: true,  quiesce: false, label: 'Lv 4',  emoji: '4️⃣',  desc: 'Developing player',  rating: 850  },
-  5:  { depth: 1, topN: 2,        posWeight: 0.7,  captureBonus: 2,   kingSafety: 1.5, typeAware: true,  quiesce: false, label: 'Lv 5',  emoji: '5️⃣',  desc: 'Competent',          rating: 1000 },
-  6:  { depth: 2, topN: 2,        posWeight: 0.8,  captureBonus: 2,   kingSafety: 2,   typeAware: true,  quiesce: false, label: 'Lv 6',  emoji: '6️⃣',  desc: 'Skilled',            rating: 1150 },
-  7:  { depth: 2, topN: 1,        posWeight: 1,    captureBonus: 2.5, kingSafety: 3,   typeAware: true,  quiesce: true,  label: 'Lv 7',  emoji: '7️⃣',  desc: 'Tough opponent',     rating: 1300 },
-  8:  { depth: 3, topN: 1,        posWeight: 1,    captureBonus: 3,   kingSafety: 4,   typeAware: true,  quiesce: true,  label: 'Lv 8',  emoji: '8️⃣',  desc: 'Advanced',           rating: 1500 },
-  9:  { depth: 3, topN: 1,        posWeight: 1.3,  captureBonus: 3.5, kingSafety: 5,   typeAware: true,  quiesce: true,  label: 'Lv 9',  emoji: '9️⃣',  desc: 'Expert tactician',   rating: 1700 },
-  10: { depth: 4, topN: 1,        posWeight: 1.5,  captureBonus: 4,   kingSafety: 6,   typeAware: true,  quiesce: true,  label: 'Lv 10', emoji: '🔟', desc: 'Grandmaster',        rating: 2000 },
+  1:  { depth: 0, topN: Infinity, posWeight: 0,    captureBonus: 0,   kingSafety: 0,   typeAware: false, quiesce: false, tactics: false, label: 'Lv 1',  emoji: '1️⃣',  desc: 'Complete beginner',  rating: 400  },
+  2:  { depth: 0, topN: Infinity, posWeight: 0,    captureBonus: 0.5, kingSafety: 0,   typeAware: false, quiesce: false, tactics: false, label: 'Lv 2',  emoji: '2️⃣',  desc: 'Slightly aware',     rating: 550  },
+  3:  { depth: 0, topN: 5,        posWeight: 0.3,  captureBonus: 1,   kingSafety: 0,   typeAware: false, quiesce: false, tactics: false, label: 'Lv 3',  emoji: '3️⃣',  desc: 'Basic strategy',     rating: 700  },
+  4:  { depth: 0, topN: 3,        posWeight: 0.5,  captureBonus: 1.5, kingSafety: 1,   typeAware: true,  quiesce: false, tactics: false, label: 'Lv 4',  emoji: '4️⃣',  desc: 'Developing player',  rating: 850  },
+  5:  { depth: 1, topN: 2,        posWeight: 0.7,  captureBonus: 2,   kingSafety: 1.5, typeAware: true,  quiesce: false, tactics: false, label: 'Lv 5',  emoji: '5️⃣',  desc: 'Competent',          rating: 1000 },
+  6:  { depth: 2, topN: 2,        posWeight: 0.8,  captureBonus: 2,   kingSafety: 2,   typeAware: true,  quiesce: false, tactics: false, label: 'Lv 6',  emoji: '6️⃣',  desc: 'Skilled',            rating: 1150 },
+  7:  { depth: 2, topN: 1,        posWeight: 1,    captureBonus: 2.5, kingSafety: 3,   typeAware: true,  quiesce: true,  tactics: true,  label: 'Lv 7',  emoji: '7️⃣',  desc: 'Tough opponent',     rating: 1300 },
+  8:  { depth: 3, topN: 1,        posWeight: 1,    captureBonus: 3,   kingSafety: 4,   typeAware: true,  quiesce: true,  tactics: true,  label: 'Lv 8',  emoji: '8️⃣',  desc: 'Advanced',           rating: 1500 },
+  9:  { depth: 3, topN: 1,        posWeight: 1.3,  captureBonus: 3.5, kingSafety: 5,   typeAware: true,  quiesce: true,  tactics: true,  label: 'Lv 9',  emoji: '9️⃣',  desc: 'Expert tactician',   rating: 1700 },
+  10: { depth: 4, topN: 1,        posWeight: 1.5,  captureBonus: 4,   kingSafety: 6,   typeAware: true,  quiesce: true,  tactics: true,  label: 'Lv 10', emoji: '🔟', desc: 'Grandmaster',        rating: 2000 },
 };
 
 // ─── Piece values ───────────────────────────────────────────────────
@@ -516,6 +516,10 @@ function scoreMove(board, fromRow, fromCol, toRow, toCol, move, aiColor, config)
       }
     }
   }
+  // Ability positioning bonus for tactical levels
+  if (config.tactics) {
+    score += getAbilityPositionBonus(board, fromRow, fromCol, toRow, toCol, aiColor, config);
+  }
 
   return score;
 }
@@ -574,11 +578,172 @@ function findKingThreats(board, myColor, oppColor) {
   return threats;
 }
 
+// ─── Tactical Scenario Planning (Lv 7-10) ─────────────────────────
+
+/**
+ * Run tactical scenarios before minimax for higher-level AIs.
+ * Checks for forced king-capture sequences and ability positioning.
+ * Returns a move if a forced win is found, otherwise null.
+ */
+function runTacticalScenarios(board, aiColor, moves, config) {
+  const oppColor = aiColor === 'white' ? 'black' : 'white';
+
+  // Find opponent king position
+  let oppKingR = -1, oppKingC = -1, oppKing = null;
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = board[r][c];
+      if (p && p.color === oppColor && p.role === 'TRUE_KING') {
+        oppKingR = r; oppKingC = c; oppKing = p;
+      }
+    }
+  }
+  if (!oppKing) return null;
+
+  // ── Scenario 1: Can we kill the king THIS turn? ──
+  for (const m of moves) {
+    if (!m.move.isCapture) continue;
+    const target = board[m.toRow]?.[m.toCol];
+    if (!target || target.role !== 'TRUE_KING') continue;
+    const attacker = board[m.fromRow][m.fromCol];
+    const typeMult = getTypeMultiplier(attacker.types, oppKing.types);
+    const dmg = Math.max(1, Math.floor(attacker.damage * typeMult));
+    if (dmg >= oppKing.hp) return m; // Immediate king kill!
+  }
+
+  // ── Scenario 2: Can we force a king kill in 2 moves? ──
+  // My move → opponent responds → I kill king
+  for (const m of moves) {
+    const simBoard1 = simulateMove(board, m.fromRow, m.fromCol, m.toRow, m.toCol, m.move);
+
+    // After our move, check if ability damage kills the king
+    const oppKingAfter = simBoard1[oppKingR]?.[oppKingC];
+    if (!oppKingAfter || oppKingAfter.color !== oppColor || oppKingAfter.role !== 'TRUE_KING') {
+      return m; // Our move (or its ability) already killed the king
+    }
+
+    // Now simulate opponent's best response
+    const oppMoves = getAllMovesForColor(simBoard1, oppColor, null);
+    let canForceKill = true;
+
+    // For each opponent response, can we STILL kill the king?
+    // (limit to top 8 opponent moves for performance)
+    const topOppMoves = oppMoves.slice(0, 8);
+    for (const om of topOppMoves) {
+      const simBoard2 = simulateMove(simBoard1, om.fromRow, om.fromCol, om.toRow, om.toCol, om.move);
+      // Can we kill the king from this position?
+      const aiMoves2 = getAllMovesForColor(simBoard2, aiColor, null);
+      let canKill = false;
+      for (const am of aiMoves2) {
+        if (!am.move.isCapture) continue;
+        const t = simBoard2[am.toRow]?.[am.toCol];
+        if (!t || t.role !== 'TRUE_KING') continue;
+        const atk = simBoard2[am.fromRow][am.fromCol];
+        const tm = getTypeMultiplier(atk.types, t.types);
+        const d = Math.max(1, Math.floor(atk.damage * tm));
+        if (d >= t.hp) { canKill = true; break; }
+      }
+      if (!canKill) { canForceKill = false; break; }
+    }
+
+    if (canForceKill && topOppMoves.length > 0) return m; // Forced win!
+  }
+
+  // ── Scenario 3: Ability positioning — move pieces with abilities next to enemy king ──
+  // Returns null (no forced win), but we add bonuses via the scoring system
+  return null;
+}
+
+/**
+ * Score bonus for ability positioning (called from scoreMove for tactical levels).
+ * Rewards moving pieces with strong abilities adjacent to the opponent's king,
+ * and values moves that place status-effect pieces near the king defensively.
+ */
+function getAbilityPositionBonus(board, fromRow, fromCol, toRow, toCol, aiColor, config) {
+  const piece = board[fromRow][fromCol];
+  if (!piece) return 0;
+  const oppColor = aiColor === 'white' ? 'black' : 'white';
+  let bonus = 0;
+
+  // Find opponent king
+  let oppKingR = -1, oppKingC = -1;
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = board[r][c];
+      if (p && p.color === oppColor && p.role === 'TRUE_KING') {
+        oppKingR = r; oppKingC = c;
+      }
+    }
+  }
+  if (oppKingR < 0) return 0;
+
+  const ability = ABILITIES[piece.pokemon];
+  if (!ability) return 0;
+
+  const distBefore = Math.abs(fromRow - oppKingR) + Math.abs(fromCol - oppKingC);
+  const distAfter = Math.abs(toRow - oppKingR) + Math.abs(toCol - oppKingC);
+
+  // Offensive: moving a damaging ability piece adjacent to enemy king
+  if ((ability.effect === 'damage' || ability.effect === 'drain') &&
+      (ability.targets === 'adjacent_enemies' || ability.targets === 'adjacent_all' ||
+       ability.targets === 'random_1' || ability.targets === 'random_2')) {
+    const isAdjacentAfter = Math.abs(toRow - oppKingR) <= 1 && Math.abs(toCol - oppKingC) <= 1;
+    const wasAdjacent = Math.abs(fromRow - oppKingR) <= 1 && Math.abs(fromCol - oppKingC) <= 1;
+    if (isAdjacentAfter && !wasAdjacent) {
+      bonus += ability.damage * 1.5; // Big bonus for positioning ability near king
+      // Even bigger if it could kill the king
+      const oppKing = board[oppKingR][oppKingC];
+      if (oppKing && ability.damage >= oppKing.hp) bonus += 15;
+    }
+    // Getting closer is good
+    if (distAfter < distBefore) bonus += ability.damage * 0.3;
+  }
+
+  // Status abilities near enemy king (stun/freeze their king!)
+  if (ability.effect === 'status' &&
+      (ability.targets === 'adjacent_enemies' || ability.targets === 'adjacent_all')) {
+    const isAdjacentAfter = Math.abs(toRow - oppKingR) <= 1 && Math.abs(toCol - oppKingC) <= 1;
+    if (isAdjacentAfter) bonus += 3; // Stunning the king is very valuable
+  }
+
+  // Defensive: moving a status-ability piece near our own king
+  let aiKingR = -1, aiKingC = -1;
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = board[r][c];
+      if (p && p.color === aiColor && p.role === 'TRUE_KING') {
+        aiKingR = r; aiKingC = c;
+      }
+    }
+  }
+  if (aiKingR >= 0 && ability.effect === 'status' &&
+      (ability.targets === 'adjacent_enemies' || ability.targets === 'adjacent_all')) {
+    const nearOwnKing = Math.abs(toRow - aiKingR) <= 2 && Math.abs(toCol - aiKingC) <= 2;
+    const wasNear = Math.abs(fromRow - aiKingR) <= 2 && Math.abs(fromCol - aiKingC) <= 2;
+    if (nearOwnKing && !wasNear) bonus += 1.5 * config.kingSafety * 0.3; // Defensive positioning
+  }
+
+  // Heal abilities: stay near allies (especially king)
+  if ((ability.effect === 'heal' || ability.effect === 'heal_allies') && aiKingR >= 0) {
+    const nearOwnKing = Math.abs(toRow - aiKingR) <= 1 && Math.abs(toCol - aiKingC) <= 1;
+    if (nearOwnKing) bonus += 1;
+  }
+
+  return bonus;
+}
+
 // ─── Minimax with alpha-beta + quiescence ───────────────────────────
 
 function minimaxSearch(board, aiColor, enPassantTarget, config) {
   const moves = getAllMovesForColor(board, aiColor, enPassantTarget);
   if (moves.length === 0) return null;
+
+  // ── TACTICAL SCENARIOS (Lv 7-10) ──
+  // Run quick forced-win checks before full minimax
+  if (config.tactics) {
+    const tacticalMove = runTacticalScenarios(board, aiColor, moves, config);
+    if (tacticalMove) return tacticalMove;
+  }
 
   // ── EMERGENCY KING DEFENSE ──
   // If opponent can kill our king next move, ONLY consider moves that prevent it
