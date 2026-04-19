@@ -451,10 +451,35 @@ function scoreMove(board, fromRow, fromCol, toRow, toCol, move, aiColor, config)
         const isWhite = aiColor === 'white';
         const defenderDepth = isWhite ? (7 - toRow) : toRow; // How deep the defender is in our half
         if (defenderDepth >= 5) {
-          // Enemy piece is deep in our territory — punish the overextension
           score += 2.0 * config.kingSafety * 0.3;
         } else if (defenderDepth >= 4) {
           score += 1.0 * config.kingSafety * 0.3;
+        }
+
+        // CRITICAL: Capturing pieces near our king = best defense
+        // Find our king position
+        let myKingR = -1, myKingC = -1, myKing = null;
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            const p = board[r][c];
+            if (p && p.color === aiColor && p.role === 'TRUE_KING') {
+              myKingR = r; myKingC = c; myKing = p;
+            }
+          }
+        }
+        if (myKing && myKingR >= 0) {
+          const distToKing = Math.abs(toRow - myKingR) + Math.abs(toCol - myKingC);
+          const kingHpPct = myKing.hp / myKing.maxHp;
+          const wMult = kingHpPct <= 0.3 ? 3 : kingHpPct <= 0.5 ? 2 : kingHpPct <= 0.7 ? 1.5 : 1;
+
+          if (distToKing <= 2) {
+            // Killing a piece near our king = defense!
+            score += pieceValue(defender) * 0.8 * config.kingSafety * 0.3 * wMult;
+          }
+          if (distToKing <= 3 && defender.damage >= 3) {
+            // High-damage piece threatening our king area
+            score += defender.damage * 0.5 * config.kingSafety * 0.3 * wMult;
+          }
         }
       }
     }
