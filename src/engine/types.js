@@ -263,7 +263,7 @@ export const ABILITIES = {
   GHOLDENGO:    { name: 'Make It Rain',    effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '💰', color: '#f8d030' },
   CHI_YU:       { name: 'Ruination',       effect: 'damage',  damage: 4,         targets: 'random_1',         emoji: '🔥', color: '#f08030' },
   INCINEROAR:   { name: 'Intimidate',      effect: 'intimidate', duration: 3,    targets: 'adjacent_enemies', emoji: '💪', color: '#705848' },
-  MAGCARGO:     { name: 'Lava Trail',      effect: 'lava_trail', damage: 2, duration: 3, targets: 'self',  emoji: '🌋', color: '#f08030' },
+  MAGCARGO:     { name: 'Lava Trail',      effect: 'lava_trail', damage: 2, duration: 5, targets: 'self',  emoji: '🌋', color: '#f08030' },
 
   // ── Violet Team ──
   IRON_MOTH:    { name: 'Fiery Dance',     effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '🔥', color: '#f08030' },
