@@ -1858,7 +1858,7 @@ body {
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 9999;
-  animation: genericWaveExpand 0.9s ease-out forwards;
+  animation: genericWaveExpand 0.5s ease-out forwards;
 }
 
 @keyframes genericWaveExpand {
@@ -1875,7 +1875,7 @@ body {
   transform-origin: 0 50%;
   pointer-events: none;
   z-index: 9999;
-  animation: genericBeamShoot 0.6s ease-out forwards;
+  animation: genericBeamShoot 0.35s ease-out forwards;
   box-shadow: 0 0 8px var(--beam-color, #fff), 0 0 16px color-mix(in srgb, var(--beam-color, #fff) 40%, transparent);
 }
 
@@ -1896,7 +1896,7 @@ body {
   pointer-events: none;
   z-index: 9999;
   transform: translate(-50%, -50%);
-  animation: genericParticleBurst 0.6s ease-out forwards;
+  animation: genericParticleBurst 0.4s ease-out forwards;
   box-shadow: 0 0 6px var(--particle-color, #fff);
 }
 
@@ -1913,7 +1913,7 @@ body {
 
 /* ── Cell Flash (highlight affected square) ── */
 .cell--ability-flash {
-  animation: genericCellFlash 1.2s ease;
+  animation: genericCellFlash 0.6s ease;
 }
 
 @keyframes genericCellFlash {
@@ -1929,7 +1929,7 @@ body {
   pointer-events: none;
   z-index: 10000;
   transform: translate(-50%, -50%);
-  animation: typeEmojiRise 0.8s ease-out forwards;
+  animation: typeEmojiRise 0.5s ease-out forwards;
   filter: drop-shadow(0 0 4px rgba(255,255,255,0.5));
 }
 
@@ -1940,7 +1940,7 @@ body {
 
 /* Flame: rising + flickering */
 .ability-type-emoji--flame {
-  animation: typeEmojiFlame 0.8s ease-out forwards;
+  animation: typeEmojiFlame 0.5s ease-out forwards;
 }
 @keyframes typeEmojiFlame {
   0%   { opacity: 1; transform: translate(-50%, -50%) scale(1.2); filter: brightness(1.5); }
@@ -1950,7 +1950,7 @@ body {
 
 /* Crystal: spinning + fading */
 .ability-type-emoji--crystal {
-  animation: typeEmojiCrystal 0.9s ease-out forwards;
+  animation: typeEmojiCrystal 0.5s ease-out forwards;
 }
 @keyframes typeEmojiCrystal {
   0%   { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1.1); }
@@ -1959,7 +1959,7 @@ body {
 
 /* Wisp: ghostly fade */
 .ability-type-emoji--wisp {
-  animation: typeEmojiWisp 1s ease-out forwards;
+  animation: typeEmojiWisp 0.6s ease-out forwards;
 }
 @keyframes typeEmojiWisp {
   0%   { opacity: 0.9; transform: translate(-50%, -50%) scale(0.8); }
@@ -1969,7 +1969,7 @@ body {
 
 /* Leaf: swaying fall */
 .ability-type-emoji--leaf {
-  animation: typeEmojiLeaf 1s ease-in-out forwards;
+  animation: typeEmojiLeaf 0.6s ease-in-out forwards;
 }
 @keyframes typeEmojiLeaf {
   0%   { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
@@ -1992,7 +1992,7 @@ body {
 
 /* Sparkle: pulsing twinkle */
 .ability-type-emoji--sparkle {
-  animation: typeEmojiSparkle 0.8s ease-out forwards;
+  animation: typeEmojiSparkle 0.5s ease-out forwards;
 }
 @keyframes typeEmojiSparkle {
   0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(0deg); }
@@ -2003,7 +2003,7 @@ body {
 
 /* Burst: explosive outward */
 .ability-type-emoji--burst {
-  animation: typeEmojiBurst 0.6s ease-out forwards;
+  animation: typeEmojiBurst 0.4s ease-out forwards;
 }
 @keyframes typeEmojiBurst {
   0%   { opacity: 1; transform: translate(-50%, -50%) scale(1.5); filter: brightness(2); }
@@ -2013,7 +2013,7 @@ body {
 
 /* Droplet: falling splash */
 .ability-type-emoji--droplet {
-  animation: typeEmojiDroplet 0.7s ease-in forwards;
+  animation: typeEmojiDroplet 0.45s ease-in forwards;
 }
 @keyframes typeEmojiDroplet {
   0%   { opacity: 1; transform: translate(-50%, -50%) translateY(-20px) scale(0.8); }
@@ -2024,7 +2024,7 @@ body {
 
 /* Ring: expanding psychic circle */
 .ability-type-emoji--ring {
-  animation: typeEmojiRing 0.9s ease-out forwards;
+  animation: typeEmojiRing 0.5s ease-out forwards;
 }
 @keyframes typeEmojiRing {
   0%   { opacity: 1; transform: translate(-50%, -50%) scale(0.5) rotate(0deg); }

@@ -339,12 +339,12 @@ function performAIMove() {
   if (battleResult) {
     renderAll();
     handleBattleInline(battleResult, aiMove.toRow, aiMove.toCol, () => {
-      if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 500);
+      if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 300);
       if (isAITurn()) scheduleAIMove();
     });
   } else {
     renderAll();
-    if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 500);
+    if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 300);
     if (game.statusMessage) showStatusToast(game.statusMessage, 'promoted');
     if (game.pendingOptionalAttack && game.currentPlayer === game.aiColor) {
       game = skipOptionalAttack(game);
@@ -411,12 +411,12 @@ function handleCellClick(row, col, isLegalMove, moveData) {
     if (battleResult) {
       renderAll();
       handleBattleInline(battleResult, row, col, () => {
-        if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 500);
+        if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 300);
         if (isAITurn()) scheduleAIMove();
       });
     } else {
       renderAll();
-      if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 500);
+      if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 300);
       if (game.statusMessage) showStatusToast(game.statusMessage, 'promoted');
       if (isAITurn()) scheduleAIMove();
     }
@@ -709,8 +709,8 @@ function playAbilityAnimation(ability) {
         w.style.top = `${cy}px`;
         w.style.setProperty('--wave-color', color);
         document.body.appendChild(w);
-        setTimeout(() => w.remove(), 1000);
-      }, i * 180);
+        setTimeout(() => w.remove(), 600);
+      }, i * 100);
     }
   } else {
     // Beam lines to each target
@@ -726,7 +726,7 @@ function playAbilityAnimation(ability) {
       b.style.width = `${d}px`; b.style.transform = `rotate(${ang}rad)`;
       b.style.setProperty('--beam-color', color);
       document.body.appendChild(b);
-      setTimeout(() => b.remove(), 700);
+      setTimeout(() => b.remove(), 450);
 
       // Type trail particles along beam
       if (fx.trail) {
@@ -741,8 +741,8 @@ function playAbilityAnimation(ability) {
             tp.style.left = `${px}px`; tp.style.top = `${py}px`;
             tp.style.setProperty('--rise', `${-20 - Math.random() * 30}px`);
             document.body.appendChild(tp);
-            setTimeout(() => tp.remove(), 800);
-          }, 100 + i * 120);
+            setTimeout(() => tp.remove(), 500);
+          }, 80 + i * 80);
         }
       }
     });
@@ -768,9 +768,9 @@ function playAbilityAnimation(ability) {
           e.style.top = `${ty + (Math.random() - 0.5) * 20}px`;
           e.style.setProperty('--rise', `${-25 - Math.random() * 40}px`);
           e.style.setProperty('--drift', `${(Math.random() - 0.5) * 50}px`);
-          e.style.animationDelay = `${i * 60}ms`;
+          e.style.animationDelay = `${i * 40}ms`;
           document.body.appendChild(e);
-          setTimeout(() => e.remove(), 900);
+          setTimeout(() => e.remove(), 550);
         } else {
           // Dot particle (colored)
           const p = document.createElement('div');
@@ -780,7 +780,7 @@ function playAbilityAnimation(ability) {
           p.style.setProperty('--dist', `${18 + Math.random() * 28}px`);
           p.style.setProperty('--particle-color', color);
           document.body.appendChild(p);
-          setTimeout(() => p.remove(), 700);
+          setTimeout(() => p.remove(), 450);
         }
       }
     }, isStatus ? 0 : 250);
@@ -790,7 +790,7 @@ function playAbilityAnimation(ability) {
     if (c) {
       c.style.setProperty('--flash-color', color);
       c.classList.add('cell--ability-flash');
-      setTimeout(() => c.classList.remove('cell--ability-flash'), 1200);
+      setTimeout(() => c.classList.remove('cell--ability-flash'), 700);
     }
   });
 }
