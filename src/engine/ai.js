@@ -851,9 +851,36 @@ function minimaxSearch(board, aiColor, enPassantTarget, config) {
       if (!kingIsUnderThreat) {
         const filteredMoves = moves.filter(m => {
           const piece = board[m.fromRow][m.fromCol];
-          // Allow king captures (taking enemy pieces is fine)
-          if (piece && piece.role === 'TRUE_KING' && !m.move.isCapture) return false;
-          return true;
+          if (!piece || piece.role !== 'TRUE_KING') return true; // Non-king moves always allowed
+
+          if (!m.move.isCapture) return false; // No non-capture king moves
+
+          // King capture: only allow if the square is SAFE after capture
+          const simBoard = simulateMove(board, m.fromRow, m.fromCol, m.toRow, m.toCol, m.move);
+
+          // Check if any enemy can attack that square
+          const oppMoves = getAllMovesForColor(simBoard, oppColor, null);
+          for (const om of oppMoves) {
+            if (om.move.isCapture && om.toRow === m.toRow && om.toCol === m.toCol) {
+              return false; // Enemy can recapture — not safe!
+            }
+          }
+
+          // Check if any adjacent enemy has a damaging ability
+          const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+          for (const [dr, dc] of DIRS) {
+            const nr = m.toRow + dr, nc = m.toCol + dc;
+            if (nr < 0 || nr > 7 || nc < 0 || nc > 7) continue;
+            const adj = simBoard[nr][nc];
+            if (!adj || adj.color === aiColor || adj.statusEffect) continue;
+            const ability = ABILITIES[adj.pokemon];
+            if (ability && (ability.effect === 'damage' || ability.effect === 'drain') &&
+                (ability.targets === 'adjacent_enemies' || ability.targets === 'adjacent_all')) {
+              return false; // Adjacent enemy ability could hit king
+            }
+          }
+
+          return true; // Safe capture!
         });
         // Only apply filter if we still have moves left
         if (filteredMoves.length > 0) moves = filteredMoves;
