@@ -742,7 +742,7 @@ export function renderTitleScreen(onStart) {
         });
 
       } else if (action === 'elo') {
-        const amount = prompt(`Modify ELO for "${username}".\nEnter amount (e.g. 200 or -100):`);
+        const amount = prompt(`Set ELO for "${username}".\nEnter new ELO value (e.g. 1500):`);
         if (amount === null) return;
         adminFetch('/admin/elo', { username, amount: parseInt(amount) }).then(data => {
           if (data.success) showStatus(`${username}: ${data.oldRating} → ${data.newRating} ${data.rankEmoji} ${data.rank}`);

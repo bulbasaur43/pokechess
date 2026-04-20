@@ -560,16 +560,16 @@ function handleAdminModifyElo(req, res, body) {
   const target = body.username?.toLowerCase();
   const amount = parseInt(body.amount, 10);
   if (!target || !db.users[target]) return sendJSON(res, 404, { error: 'User not found' });
-  if (isNaN(amount)) return sendJSON(res, 400, { error: 'Invalid amount' });
+  if (isNaN(amount) || amount < 0) return sendJSON(res, 400, { error: 'Invalid ELO value' });
 
   const user = db.users[target];
   const oldRating = user.rating;
-  user.rating = Math.max(0, user.rating + amount);
+  user.rating = amount;
   if (user.rating > user.peak) user.peak = user.rating;
   saveDB(db);
 
   const rank = getServerRank(user.rating);
-  console.log(`📊 Admin modified ELO: ${user.displayName} ${oldRating} → ${user.rating} (${amount > 0 ? '+' : ''}${amount}) — ${rank.emoji} ${rank.title}`);
+  console.log(`📊 Admin set ELO: ${user.displayName} ${oldRating} → ${user.rating} — ${rank.emoji} ${rank.title}`);
   sendJSON(res, 200, { success: true, oldRating, newRating: user.rating, rank: rank.title, rankEmoji: rank.emoji });
 }
 
