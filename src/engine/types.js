@@ -117,6 +117,7 @@ export const POKEMON = {
   CHI_YU:       { name: 'Chi-Yu',       types: ['DARK','FIRE'],        team: 'scarlet', emoji: '🐟', img: SPRITE(1004), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
   INCINEROAR:   { name: 'Incineroar',   types: ['FIRE','DARK'],        team: 'violet',  emoji: '🐯', img: SPRITE(727),  desc: 'Heel Pokémon',          hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
   MAGCARGO:     { name: 'Magcargo',     types: ['FIRE','ROCK'],        team: 'scarlet', emoji: '🐌', img: SPRITE(219),  desc: 'Lava Pokémon',          hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
+  COMFEY:       { name: 'Comfey',       types: ['FAIRY'],              team: 'scarlet', emoji: '🌼', img: SPRITE(764),  desc: 'Posy Picker Pokémon',   hp: 10, maxHp: 10, damage: 1, damageTier: 'weak' },
 
   // ── Violet Team (Black) ──
   MIRAIDON:     { name: 'Miraidon',     types: ['ELECTRIC','DRAGON'],  team: 'violet',  emoji: '🐲', img: SPRITE(1008), desc: 'The Iron Serpent',      hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
@@ -141,6 +142,7 @@ export const POKEMON = {
   CHIEN_PAO:    { name: 'Chien-Pao',    types: ['DARK','ICE'],         team: 'violet',  emoji: '🐆', img: SPRITE(1002), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
   ZAPDOS:       { name: 'Zapdos',       types: ['ELECTRIC','FLYING'],  team: 'scarlet', emoji: '⚡', img: SPRITE(145),  desc: 'Electric Pokémon',      hp: 6,  maxHp: 6,  damage: 1, damageTier: 'weak' },
   BRAMBLEGHAST: { name: 'Brambleghast', types: ['GRASS','GHOST'],      team: 'violet',  emoji: '🌿', img: SPRITE(947),  desc: 'Tumbleweed Pokémon',    hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
+  AUDINO:       { name: 'Audino',       types: ['NORMAL','FAIRY'],     team: 'violet',  emoji: '👂', img: SPRITE(531),  desc: 'Hearing Pokémon',       hp: 10, maxHp: 10, damage: 1, damageTier: 'weak' },
 };
 
 // ─── Team Rosters ───────────────────────────────────────────────────
@@ -197,6 +199,7 @@ export const POKEMON_POOL = {
     { key: 'CHI_YU',       requiredElo: 1600 },
     { key: 'MAGCARGO',     requiredElo: 1750 },
     { key: 'ZAPDOS',       requiredElo: 1900 },
+    { key: 'COMFEY',       requiredElo: 1000 },
   ],
   violet: [
     { key: 'IRON_MOTH',    requiredElo: 0 },
@@ -218,6 +221,7 @@ export const POKEMON_POOL = {
     { key: 'CHIEN_PAO',    requiredElo: 1600 },
     { key: 'BRAMBLEGHAST', requiredElo: 1750 },
     { key: 'INCINEROAR',   requiredElo: 1900 },
+    { key: 'AUDINO',       requiredElo: 1000 },
   ],
 };
 
@@ -264,6 +268,7 @@ export const ABILITIES = {
   CHI_YU:       { name: 'Ruination',       effect: 'damage',  damage: 4,         targets: 'random_1',         emoji: '🔥', color: '#f08030' },
   INCINEROAR:   { name: 'Intimidate',      effect: 'intimidate', duration: 5,    targets: 'adjacent_enemies', emoji: '💪', color: '#705848' },
   MAGCARGO:     { name: 'Lava Trail',      effect: 'lava_trail', damage: 3, duration: 5, targets: 'self',  emoji: '🌋', color: '#f08030' },
+  COMFEY:       { name: 'Floral Healing',  effect: 'heal_allies', heal: 2,       targets: 'adjacent_allies',  emoji: '🌼', color: '#ee99ac' },
 
   // ── Violet Team ──
   IRON_MOTH:    { name: 'Fiery Dance',     effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '🔥', color: '#f08030' },
@@ -286,6 +291,7 @@ export const ABILITIES = {
   CHIEN_PAO:    { name: 'Sword of Ruin',   effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '❄️', color: '#64c8ff', bonusStatus: 'frozen', bonusTargets: 'random_1' },
   ZAPDOS:       { name: 'Static Storm',    effect: 'damage',  damage: 2,         targets: 'radius_2_enemies', emoji: '⚡', color: '#f8d030' },
   BRAMBLEGHAST: { name: 'Thorny Trap',     effect: 'counter', damage: 2,         targets: 'self',             emoji: '🌿', color: '#78c850' },
+  AUDINO:       { name: 'Heal Pulse',      effect: 'heal_allies', heal: 2,       targets: 'adjacent_allies',  emoji: '💖', color: '#ee99ac' },
 };
 
 // White = Scarlet, Black = Violet
