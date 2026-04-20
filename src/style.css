@@ -3800,6 +3800,157 @@ body {
   font-size: 0.65rem;
   opacity: 0.7;
 }
+/* ── Game Over Overlay ── */
+.gameover-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.gameover-overlay--show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gameover-panel {
+  background: rgba(20, 20, 40, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 40px 50px;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  transform: scale(0.8) translateY(20px);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.gameover-overlay--show .gameover-panel {
+  transform: scale(1) translateY(0);
+}
+
+.gameover-panel.gameover--win {
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.15);
+}
+
+.gameover-panel.gameover--loss {
+  border-color: rgba(220, 50, 50, 0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(220, 50, 50, 0.1);
+}
+
+.gameover-panel.gameover--draw {
+  border-color: rgba(150, 150, 180, 0.4);
+}
+
+.gameover-result {
+  margin-bottom: 24px;
+}
+
+.gameover-emoji {
+  font-size: 3.5rem;
+  display: block;
+  margin-bottom: 8px;
+  animation: gameoverBounce 0.6s ease-out;
+}
+
+.gameover-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.gameover--win .gameover-title { color: #ffd700; text-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+.gameover--loss .gameover-title { color: #e05050; text-shadow: 0 0 20px rgba(220, 50, 50, 0.3); }
+.gameover--draw .gameover-title { color: #a0a0c0; }
+
+.gameover-team {
+  margin: 6px 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.gameover-elo {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.gameover-elo__rank {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 8px;
+}
+
+.gameover-elo__rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.gameover-elo__old {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.gameover-elo__arrow {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 1rem;
+}
+
+.gameover-elo__new {
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.gameover-elo__change {
+  font-weight: 800;
+  font-size: 1.1rem;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.gameover-elo__change.elo-up {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.15);
+}
+
+.gameover-elo__change.elo-down {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.15);
+}
+
+.gameover-elo__stats {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 8px;
+}
+
+.gameover-btn {
+  margin-top: 0 !important;
+  display: inline-block !important;
+}
+
+@keyframes gameoverBounce {
+  0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+  50% { transform: scale(1.3) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); }
+}
 
 /* ── ELO Change Toast (after game ends) ── */
 .elo-toast {

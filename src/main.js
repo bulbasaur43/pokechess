@@ -12,7 +12,7 @@ import { getAIMove } from './engine/ai.js';
 import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect, isConnected } from './engine/online.js';
 import { reportGameResult, loadPlayerStats, getRankTitle } from './engine/elo.js';
 import { isLoggedIn, reportGameResultToServer } from './engine/auth.js';
-import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS } from './engine/types.js';
+import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS, COLOR_TO_TEAM } from './engine/types.js';
 
 let game = createGame();
 let clockInterval = null;
@@ -616,25 +616,68 @@ function showEloChangeToast(eloResult) {
   const changeText = change >= 0 ? `+${change}` : `${change}`;
   const changeClass = change >= 0 ? 'elo-up' : 'elo-down';
 
-  const toast = document.createElement('div');
-  toast.className = 'elo-toast';
-  toast.innerHTML = `
-    <div class="elo-toast__content">
-      <div class="elo-toast__rank">${rank.emoji} ${rank.title}</div>
-      <div class="elo-toast__rating">
-        <span class="elo-toast__old">${oldRating}</span>
-        <span class="elo-toast__arrow">→</span>
-        <span class="elo-toast__new">${newRating}</span>
-        <span class="elo-toast__change ${changeClass}">${changeText}</span>
+  // Determine winner info
+  const playerColor = gameMode === 'online' ? game.onlineColor : game.playerColor;
+  let resultText, resultEmoji, resultClass;
+  if (game.winner === 'draw') {
+    resultText = 'Draw';
+    resultEmoji = '🤝';
+    resultClass = 'gameover--draw';
+  } else if (game.winner === playerColor) {
+    resultText = 'Victory!';
+    resultEmoji = '👑';
+    resultClass = 'gameover--win';
+  } else {
+    resultText = 'Defeat';
+    resultEmoji = '💀';
+    resultClass = 'gameover--loss';
+  }
+
+  const winnerTeam = game.winner && game.winner !== 'draw'
+    ? TEAMS[COLOR_TO_TEAM[game.winner]]
+    : null;
+
+  // Remove existing overlay if any
+  document.querySelector('.gameover-overlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'gameover-overlay';
+  overlay.innerHTML = `
+    <div class="gameover-panel ${resultClass}">
+      <div class="gameover-result">
+        <span class="gameover-emoji">${resultEmoji}</span>
+        <h2 class="gameover-title">${resultText}</h2>
+        ${winnerTeam ? `<p class="gameover-team" style="color:${winnerTeam.color}">${winnerTeam.name} wins</p>` : ''}
       </div>
-      <div class="elo-toast__stats">
-        ${stats.wins}W / ${stats.losses}L / ${stats.draws}D
-        ${stats.streak > 1 ? ` 🔥 ${stats.streak} streak` : ''}
+      <div class="gameover-elo">
+        <div class="gameover-elo__rank">${rank.emoji} ${rank.title}</div>
+        <div class="gameover-elo__rating">
+          <span class="gameover-elo__old">${oldRating}</span>
+          <span class="gameover-elo__arrow">→</span>
+          <span class="gameover-elo__new">${newRating}</span>
+          <span class="gameover-elo__change ${changeClass}">${changeText}</span>
+        </div>
+        <div class="gameover-elo__stats">
+          ${stats.wins}W / ${stats.losses}L / ${stats.draws}D
+          ${stats.streak > 1 ? ` 🔥 ${stats.streak} streak` : ''}
+        </div>
       </div>
+      <button class="btn btn--start gameover-btn" id="gameover-new-game">
+        ⚔️ Play Again
+      </button>
     </div>
   `;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 5000);
+  document.body.appendChild(overlay);
+
+  // Animate in
+  requestAnimationFrame(() => overlay.classList.add('gameover-overlay--show'));
+
+  // Wire play again button
+  document.getElementById('gameover-new-game')?.addEventListener('click', () => {
+    overlay.classList.remove('gameover-overlay--show');
+    setTimeout(() => overlay.remove(), 300);
+    document.getElementById('btn-new-game')?.click();
+  });
 }
 
 // Boot
