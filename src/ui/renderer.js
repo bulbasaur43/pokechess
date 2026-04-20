@@ -203,12 +203,13 @@ function createPieceElement(piece) {
   el.style.setProperty('--piece-type-color', primaryColor);
   el.style.setProperty('--piece-team-color', team.color);
 
-  // Status effects (frozen / stunned)
+  // Status effects (frozen / stunned / poisoned / paralyzed)
   if (piece.statusEffect) {
     el.classList.add(`piece--${piece.statusEffect}`);
     const statusIcon = document.createElement('div');
     statusIcon.className = 'piece__status';
-    statusIcon.textContent = piece.statusEffect === 'frozen' ? '❄️' : '😵';
+    const iconMap = { frozen: '❄️', stunned: '😵', poisoned: '☠️', paralyzed: '⚡' };
+    statusIcon.textContent = iconMap[piece.statusEffect] || '❓';
     el.appendChild(statusIcon);
   }
 

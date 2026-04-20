@@ -21,19 +21,40 @@ export function getLegalMoves(board, row, col, enPassantTarget = null) {
 
   // Flying bishops: Roaring Moon and Iron Jugulis ALWAYS fly, regardless of role
   if (piece.pokemon === 'ROARING_MOON' || piece.pokemon === 'IRON_JUGULIS') {
-    return getFlyingBishopMoves(board, row, col, piece);
+    return applyParalysis(getFlyingBishopMoves(board, row, col, piece), piece);
   }
 
+  let moves;
   switch (piece.role) {
-    case 'PAWN':      return getPawnMoves(board, row, col, piece, enPassantTarget);
-    case 'ROOK':      return getSlidingMoves(board, row, col, piece, ROOK_DIRS);
-    case 'BISHOP':    return getFlyingBishopMoves(board, row, col, piece);
-    case 'QUEEN':     return getSlidingMoves(board, row, col, piece, [...ROOK_DIRS, ...BISHOP_DIRS]);
-    case 'KNIGHT':    return getKnightMoves(board, row, col, piece);
-    case 'KING':      return getKingMoves(board, row, col, piece);
-    case 'TRUE_KING': return getTrueKingMoves(board, row, col, piece);
-    default:          return [];
+    case 'PAWN':      moves = getPawnMoves(board, row, col, piece, enPassantTarget); break;
+    case 'ROOK':      moves = getSlidingMoves(board, row, col, piece, ROOK_DIRS); break;
+    case 'BISHOP':    moves = getFlyingBishopMoves(board, row, col, piece); break;
+    case 'QUEEN':     moves = getSlidingMoves(board, row, col, piece, [...ROOK_DIRS, ...BISHOP_DIRS]); break;
+    case 'KNIGHT':    moves = getKnightMoves(board, row, col, piece); break;
+    case 'KING':      moves = getKingMoves(board, row, col, piece); break;
+    case 'TRUE_KING': moves = getTrueKingMoves(board, row, col, piece); break;
+    default:          moves = []; break;
   }
+
+  return applyParalysis(moves, piece);
+}
+
+/**
+ * If piece is paralyzed, randomly remove half its moves (keep at least 1)
+ */
+function applyParalysis(moves, piece) {
+  if (!piece.statusEffect || piece.statusEffect !== 'paralyzed') return moves;
+  if (moves.length <= 1) return moves;
+
+  // Always keep capture moves, halve non-capture moves
+  const captures = moves.filter(m => m.isCapture);
+  let nonCaptures = moves.filter(m => !m.isCapture);
+
+  // Randomly remove half the non-capture moves
+  const keepCount = Math.max(1, Math.ceil(nonCaptures.length / 2));
+  nonCaptures = nonCaptures.sort(() => Math.random() - 0.5).slice(0, keepCount);
+
+  return [...captures, ...nonCaptures];
 }
 
 // ─── Pawn ───────────────────────────────────────────────────────────

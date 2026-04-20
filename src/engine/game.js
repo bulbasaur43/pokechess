@@ -503,6 +503,8 @@ function endTurn(game) {
   // Tick down lava trails (only once per full round, not every half-turn)
   if (newGame.currentPlayer === 'white') {
     newGame.lavaTrails = tickLavaTrails(newGame.lavaTrails);
+    // Tick poison & paralysis damage on all affected pieces (once per full round)
+    newGame.board = tickStatusDamage(newGame.board);
   }
 
   return newGame;
@@ -688,7 +690,8 @@ function clearStatusEffects(board, color) {
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
       const p = newBoard[r][c];
-      if (p && p.color === color && p.statusEffect) {
+      // Clear temporary status effects (frozen, stunned) but NOT permanent ones (poisoned, paralyzed)
+      if (p && p.color === color && p.statusEffect && p.statusEffect !== 'poisoned' && p.statusEffect !== 'paralyzed') {
         newBoard[r][c] = { ...p, statusEffect: null };
       }
     }
@@ -762,6 +765,45 @@ function applyCounterDamage(game, attackerRow, attackerCol, counterDmg, attacker
   }
 
   return newGame;
+}
+
+/**
+ * Tick status damage: poison (1 DMG/turn) and paralysis (1 DMG every 3 turns)
+ */
+function tickStatusDamage(board) {
+  const newBoard = cloneBoard(board);
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = newBoard[r][c];
+      if (!p) continue;
+
+      // Poison: 1 damage every full turn
+      if (p.statusEffect === 'poisoned') {
+        const newHp = p.hp - 1;
+        if (newHp <= 0) {
+          newBoard[r][c] = null;
+        } else {
+          newBoard[r][c] = { ...p, hp: newHp };
+        }
+      }
+
+      // Paralysis: 1 damage every 3 full turns
+      if (p.statusEffect === 'paralyzed') {
+        const tick = (p.paralyzeTick || 0) + 1;
+        if (tick >= 3) {
+          const newHp = p.hp - 1;
+          if (newHp <= 0) {
+            newBoard[r][c] = null;
+          } else {
+            newBoard[r][c] = { ...p, hp: newHp, paralyzeTick: 0 };
+          }
+        } else {
+          newBoard[r][c] = { ...p, paralyzeTick: tick };
+        }
+      }
+    }
+  }
+  return newBoard;
 }
 
 /**
