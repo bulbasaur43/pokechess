@@ -317,9 +317,9 @@ function scheduleAIMove() {
   if (!isAITurn()) return;
   aiThinking = true;
   renderAll();
-  const delay = game.aiDifficulty === 'easy' ? 500 :
-                game.aiDifficulty === 'medium' ? 800 :
-                game.aiDifficulty === 'hard' ? 1200 : 1500;
+  const delay = game.aiDifficulty === 'easy' ? 200 :
+                game.aiDifficulty === 'medium' ? 350 :
+                game.aiDifficulty === 'hard' ? 500 : 650;
   setTimeout(() => {
     aiThinking = false;
     document.querySelector('.ai-thinking')?.remove();
