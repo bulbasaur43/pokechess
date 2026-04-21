@@ -350,7 +350,8 @@ function performAIMove() {
       game = skipOptionalAttack(game);
       renderAll();
     }
-    if (isAITurn()) scheduleAIMove();
+    // Small delay to let the board render before next AI move
+    if (isAITurn()) setTimeout(() => scheduleAIMove(), 250);
   }
 }
 
