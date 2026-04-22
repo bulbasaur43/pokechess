@@ -96,7 +96,7 @@ const SPRITE = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/s
 export const POKEMON = {
   // ── Scarlet Team (White) — Default ──
   KORAIDON:     { name: 'Koraidon',     types: ['FIGHTING','DRAGON'],  team: 'scarlet', emoji: '🦎', img: SPRITE(1007), desc: 'The Winged King',       hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
-  SANDY_SHOCKS: { name: 'Sandy Shocks', types: ['ELECTRIC','GROUND'],  team: 'scarlet', emoji: '🧲', img: SPRITE(989),  desc: 'Ancient Magneton',      hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
+  SANDY_SHOCKS: { name: 'Sandy Shocks', types: ['ELECTRIC','GROUND'],  team: 'scarlet', emoji: '🧲', img: SPRITE(989),  desc: 'Ancient Magneton',      hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
   FLUTTER_MANE: { name: 'Flutter Mane', types: ['GHOST','FAIRY'],      team: 'scarlet', emoji: '👻', img: SPRITE(987),  desc: 'Ancient Misdreavus',    hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   RAGING_BOLT:  { name: 'Raging Bolt',  types: ['ELECTRIC','DRAGON'],  team: 'scarlet', emoji: '🦕', img: SPRITE(1021), desc: 'Ancient Raikou',        hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
   ROARING_MOON: { name: 'Roaring Moon', types: ['DRAGON','DARK'],      team: 'scarlet', emoji: '🌙', img: SPRITE(1005), desc: 'Ancient Salamence',     hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
@@ -243,11 +243,8 @@ export const KING_POOL = {
 // For 'drain': deals damage AND heals self. Negative heal = self-damage (Gengar Curse)
 
 export const ABILITIES = {
-  // ── Legendary Kings ──
-  KORAIDON:     { name: 'Orichalcum Pulse', effect: 'damage',  damage: 3,          targets: 'adjacent_enemies', emoji: '☀️', color: '#E3350D' },
-  MIRAIDON:     { name: 'Hadron Engine',    effect: 'damage',  damage: 3,          targets: 'adjacent_enemies', emoji: '⚡', color: '#6D28D9' },
-
   // ── Scarlet Team ──
+  KORAIDON:     { name: 'Orichalcum Pulse', effect: 'heal',    heal: 2,           targets: 'self',             emoji: '☀️', color: '#e3350d' },
   SANDY_SHOCKS: { name: 'Electromagnet',   effect: 'status',  status: 'stunned', targets: 'random_1',         emoji: '🧲', color: '#f8d030' },
   FLUTTER_MANE: { name: 'Perish Song',     effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '💀', color: '#705898' },
   RAGING_BOLT:  { name: 'Thunderclap',     effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '⚡', color: '#f8d030' },
@@ -271,7 +268,8 @@ export const ABILITIES = {
   COMFEY:       { name: 'Floral Healing',  effect: 'heal_allies', heal: 2,       targets: 'adjacent_allies',  emoji: '🌼', color: '#ee99ac' },
 
   // ── Violet Team ──
-  IRON_MOTH:    { name: 'Fiery Dance',     effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '🔥', color: '#f08030' },
+  MIRAIDON:     { name: 'Hadron Engine',   effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '⚡', color: '#6d28d9' },
+  IRON_MOTH:    { name: 'Fiery Dance',     effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '🔥', color: '#f08030' },
   IRON_CROWN:   { name: 'Tachyon Cutter',  effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '🔮', color: '#f85888' },
   IRON_BOULDER: { name: 'Mighty Cleave',   effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '⚔️', color: '#b8a038' },
   IRON_JUGULIS: { name: 'Dark Pulse',      effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '🌑', color: '#705848' },
