@@ -272,17 +272,22 @@ function renderGameView() {
   renderAll();
 }
 
+let renderRAF = null;
 function renderAll() {
-  if (!game.board) return;
-  renderBoard(game, { onCellClick: handleCellClick });
-  renderHUD(game, { onNewGame: handleNewGame });
-  if (game.pendingOptionalAttack && canPlayerAct()) showOptionalAttackPrompt();
-  if (aiThinking) showAIThinking();
-  // Report ELO when game ends
-  if (game.phase === PHASES.GAME_OVER && !eloReported) {
-    eloReported = true;
-    handleEloUpdate();
-  }
+  if (renderRAF) return; // already scheduled
+  renderRAF = requestAnimationFrame(() => {
+    renderRAF = null;
+    if (!game.board) return;
+    renderBoard(game, { onCellClick: handleCellClick });
+    renderHUD(game, { onNewGame: handleNewGame });
+    if (game.pendingOptionalAttack && canPlayerAct()) showOptionalAttackPrompt();
+    if (aiThinking) showAIThinking();
+    // Report ELO when game ends
+    if (game.phase === PHASES.GAME_OVER && !eloReported) {
+      eloReported = true;
+      handleEloUpdate();
+    }
+  });
 }
 
 // ─── Battle inline ──────────────────────────────────────────────────
@@ -317,9 +322,9 @@ function scheduleAIMove() {
   if (!isAITurn()) return;
   aiThinking = true;
   renderAll();
-  const delay = game.aiDifficulty === 'easy' ? 200 :
-                game.aiDifficulty === 'medium' ? 350 :
-                game.aiDifficulty === 'hard' ? 500 : 650;
+  const delay = game.aiDifficulty === 'easy' ? 300 :
+                game.aiDifficulty === 'medium' ? 450 :
+                game.aiDifficulty === 'hard' ? 600 : 750;
   setTimeout(() => {
     aiThinking = false;
     document.querySelector('.ai-thinking')?.remove();
@@ -350,8 +355,8 @@ function performAIMove() {
       game = skipOptionalAttack(game);
       renderAll();
     }
-    // Small delay to let the board render before next AI move
-    if (isAITurn()) setTimeout(() => scheduleAIMove(), 250);
+    // Delay to let the board render before next AI move
+    if (isAITurn()) setTimeout(() => scheduleAIMove(), 350);
   }
 }
 

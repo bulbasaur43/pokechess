@@ -13,7 +13,9 @@ import { getBattlePreview } from '../engine/battle.js';
 export function renderBoard(game, callbacks) {
   const container = document.getElementById('board-container');
   if (!container) return;
-  container.innerHTML = '';
+  // Remove old board but preserve animation overlays
+  const oldBoard = container.querySelector('.chess-board');
+  if (oldBoard) oldBoard.remove();
 
   const boardEl = document.createElement('div');
   boardEl.className = 'chess-board';
@@ -129,7 +131,7 @@ export function renderBoard(game, callbacks) {
     }
   }
 
-  container.appendChild(boardEl);
+  container.prepend(boardEl);
 }
 
 /**
