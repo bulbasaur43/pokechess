@@ -1,11 +1,17 @@
 /**
  * Board Renderer for PokéChess — HP-Based Combat
  * Renders the 8×8 board with Pokémon pieces, HP bars, type badges, and damage tooltips
+ * Uses in-place cell updates to avoid full DOM rebuilds and animation glitches
  */
 
 import { ROLES } from '../engine/board.js';
 import { TYPES, POKEMON, TEAMS, COLOR_TO_TEAM } from '../engine/types.js';
 import { getBattlePreview } from '../engine/battle.js';
+
+// Persistent board grid — built once, updated in-place
+let _cells = null; // Map<"row,col", HTMLElement>
+let _boardEl = null;
+let _lastViewColor = null;
 
 /**
  * Render the board to the DOM
@@ -13,40 +19,69 @@ import { getBattlePreview } from '../engine/battle.js';
 export function renderBoard(game, callbacks) {
   const container = document.getElementById('board-container');
   if (!container) return;
-  // Remove old board but preserve animation overlays
-  const oldBoard = container.querySelector('.chess-board');
-  if (oldBoard) oldBoard.remove();
 
-  const boardEl = document.createElement('div');
-  boardEl.className = 'chess-board';
-  boardEl.id = 'chess-board';
-
-  const files = ['a','b','c','d','e','f','g','h'];
   const viewColor = game.onlineColor ?? game.playerColor ?? 'white';
   const flipped = viewColor === 'black';
+  const files = ['a','b','c','d','e','f','g','h'];
 
-  for (let ri = 0; ri < 8; ri++) {
-    for (let ci = 0; ci < 8; ci++) {
-      const row = flipped ? (7 - ri) : ri;
-      const col = flipped ? (7 - ci) : ci;
-      const cell = document.createElement('div');
+  // Build grid skeleton once (or when perspective flips)
+  if (!_boardEl || !_boardEl.parentNode || _lastViewColor !== viewColor) {
+    const oldBoard = container.querySelector('.chess-board');
+    if (oldBoard) oldBoard.remove();
+
+    _cells = new Map();
+    _boardEl = document.createElement('div');
+    _boardEl.className = 'chess-board';
+    _boardEl.id = 'chess-board';
+
+    for (let ri = 0; ri < 8; ri++) {
+      for (let ci = 0; ci < 8; ci++) {
+        const row = flipped ? (7 - ri) : ri;
+        const col = flipped ? (7 - ci) : ci;
+        const cell = document.createElement('div');
+        const isLight = (row + col) % 2 === 0;
+        cell.className = `cell ${isLight ? 'cell--light' : 'cell--dark'}`;
+        cell.dataset.row = row;
+        cell.dataset.col = col;
+
+        if (ci === 0) {
+          const rl = document.createElement('span');
+          rl.className = 'cell__coord cell__coord--rank';
+          rl.textContent = 8 - row;
+          cell.appendChild(rl);
+        }
+        if (ri === 7) {
+          const fl = document.createElement('span');
+          fl.className = 'cell__coord cell__coord--file';
+          fl.textContent = files[col];
+          cell.appendChild(fl);
+        }
+
+        _cells.set(`${row},${col}`, cell);
+        _boardEl.appendChild(cell);
+      }
+    }
+
+    container.prepend(_boardEl);
+    _lastViewColor = viewColor;
+  }
+
+  // Update each cell in-place (no DOM destroy/rebuild)
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const cell = _cells.get(`${row},${col}`);
+      if (!cell) continue;
+
+      // Reset dynamic classes
       const isLight = (row + col) % 2 === 0;
       cell.className = `cell ${isLight ? 'cell--light' : 'cell--dark'}`;
-      cell.dataset.row = row;
-      cell.dataset.col = col;
 
-      // Coords
-      if (ci === 0) {
-        const rl = document.createElement('span');
-        rl.className = 'cell__coord cell__coord--rank';
-        rl.textContent = 8 - row;
-        cell.appendChild(rl);
-      }
-      if (ri === 7) {
-        const fl = document.createElement('span');
-        fl.className = 'cell__coord cell__coord--file';
-        fl.textContent = files[col];
-        cell.appendChild(fl);
+      // Remove dynamic children (pieces, dots, tooltips, lava) but keep coords
+      for (let i = cell.children.length - 1; i >= 0; i--) {
+        const child = cell.children[i];
+        if (!child.classList.contains('cell__coord')) {
+          child.remove();
+        }
       }
 
       // Selected
@@ -87,10 +122,8 @@ export function renderBoard(game, callbacks) {
         const lava = game.lavaTrails.find(t => t.row === row && t.col === col);
         if (lava) {
           cell.classList.add('cell--lava-trail');
-          // Lava pool container with bubbles
           const lavaPool = document.createElement('div');
           lavaPool.className = 'cell__lava-pool';
-          // Bubble particles
           for (let b = 0; b < 4; b++) {
             const bubble = document.createElement('div');
             bubble.className = 'cell__lava-bubble';
@@ -122,16 +155,12 @@ export function renderBoard(game, callbacks) {
         }
       }
 
-      // Click handler
-      cell.addEventListener('click', () => {
+      // Update click handler via data attribute
+      cell.onclick = () => {
         callbacks?.onCellClick?.(row, col, !!legalMove, legalMove);
-      });
-
-      boardEl.appendChild(cell);
+      };
     }
   }
-
-  container.prepend(boardEl);
 }
 
 /**
