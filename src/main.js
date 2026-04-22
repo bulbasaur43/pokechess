@@ -13,7 +13,6 @@ import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect,
 import { reportGameResult, loadPlayerStats, getRankTitle } from './engine/elo.js';
 import { isLoggedIn, reportGameResultToServer } from './engine/auth.js';
 import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS, COLOR_TO_TEAM } from './engine/types.js';
-import { createMusicControls } from './ui/music.js';
 
 let game = createGame();
 let clockInterval = null;
@@ -44,7 +43,6 @@ function withRandomReplay(values, fn) {
 }
 
 function init() {
-  createMusicControls();
   renderTitleScreen((clockPreset, options) => {
     gameMode = options.mode || 'ai';
 
