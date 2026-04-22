@@ -244,7 +244,7 @@ export const KING_POOL = {
 
 export const ABILITIES = {
   // ── Scarlet Team ──
-  KORAIDON:     { name: 'Orichalcum Pulse', effect: 'heal',    heal: 2,           targets: 'self',             emoji: '☀️', color: '#e3350d' },
+  KORAIDON:     { name: 'Orichalcum Pulse', effect: 'damage',  damage: 3,         targets: 'adjacent_enemies', emoji: '☀️', color: '#e3350d' },
   SANDY_SHOCKS: { name: 'Electromagnet',   effect: 'status',  status: 'stunned', targets: 'random_1',         emoji: '🧲', color: '#f8d030' },
   FLUTTER_MANE: { name: 'Perish Song',     effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '💀', color: '#705898' },
   RAGING_BOLT:  { name: 'Thunderclap',     effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '⚡', color: '#f8d030' },
@@ -268,7 +268,7 @@ export const ABILITIES = {
   COMFEY:       { name: 'Floral Healing',  effect: 'heal_allies', heal: 2,       targets: 'adjacent_allies',  emoji: '🌼', color: '#ee99ac' },
 
   // ── Violet Team ──
-  MIRAIDON:     { name: 'Hadron Engine',   effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '⚡', color: '#6d28d9' },
+  MIRAIDON:     { name: 'Hadron Engine',   effect: 'damage',  damage: 3,         targets: 'adjacent_enemies', emoji: '⚡', color: '#6d28d9' },
   IRON_MOTH:    { name: 'Fiery Dance',     effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '🔥', color: '#f08030' },
   IRON_CROWN:   { name: 'Tachyon Cutter',  effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '🔮', color: '#f85888' },
   IRON_BOULDER: { name: 'Mighty Cleave',   effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '⚔️', color: '#b8a038' },
@@ -279,7 +279,7 @@ export const ABILITIES = {
   IRON_THORNS:  { name: 'Wild Charge',     effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '⚡', color: '#f8d030' },
   IRON_VALIANT: { name: 'Spirit Break',    effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '✨', color: '#ee99ac' },
   IRON_LEAVES:  { name: 'Psyblade',        effect: 'damage',  damage: 1,         targets: 'adjacent_enemies', emoji: '🍃', color: '#78c850' },
-  PIKACHU:      { name: 'Thunder Shock',   effect: 'damage',  damage: 3,         targets: 'adjacent_enemies', emoji: '⚡', color: '#ffdc32', bonusStatus: 'paralyzed', bonusTargets: 'random_1' },
+  PIKACHU:      { name: 'Thunder Shock',   effect: 'damage',  damage: 4,         targets: 'adjacent_enemies', emoji: '⚡', color: '#ffdc32', bonusStatus: 'paralyzed', bonusTargets: 'random_1' },
   GENGAR:       { name: 'Curse',           effect: 'drain',   damage: 2, heal:-1, targets: 'random_1',        emoji: '👻', color: '#705898' },
   METAGROSS:    { name: 'Meteor Mash',     effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '☄️', color: '#b8b8d0' },
   LUCARIO:      { name: 'Aura Sphere',     effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '💙', color: '#6890f0' },

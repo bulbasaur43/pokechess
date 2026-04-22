@@ -787,10 +787,10 @@ function tickStatusDamage(board) {
         }
       }
 
-      // Paralysis: 1 damage every 3 full turns
+      // Paralysis: 1 damage every 2 full turns
       if (p.statusEffect === 'paralyzed') {
         const tick = (p.paralyzeTick || 0) + 1;
-        if (tick >= 3) {
+        if (tick >= 2) {
           const newHp = p.hp - 1;
           if (newHp <= 0) {
             newBoard[r][c] = null;
