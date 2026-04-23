@@ -24,8 +24,8 @@ export function renderBoard(game, callbacks) {
   const flipped = viewColor === 'black';
   const files = ['a','b','c','d','e','f','g','h'];
 
-  // Build grid skeleton once (or when perspective flips)
-  if (!_boardEl || !_boardEl.parentNode || _lastViewColor !== viewColor) {
+  // Build grid skeleton once (or when perspective flips or board was detached)
+  if (!_boardEl || !document.contains(_boardEl) || _lastViewColor !== viewColor) {
     const oldBoard = container.querySelector('.chess-board');
     if (oldBoard) oldBoard.remove();
 

@@ -561,7 +561,9 @@ function handleNewGame() {
 
   if (clockInterval) clearInterval(clockInterval);
   aiThinking = false;
+  eloReported = false;
   document.querySelector('.ai-thinking')?.remove();
+  document.querySelector('.gameover-overlay')?.remove();
   if (gameMode === 'online') { resign(); disconnect(); }
   game = createGame();
   init();
