@@ -72,16 +72,20 @@ export function renderBoard(game, callbacks) {
       const cell = _cells.get(`${row},${col}`);
       if (!cell) continue;
 
-      // Reset dynamic classes
+      // Reset dynamic classes but preserve active animation classes
       const isLight = (row + col) % 2 === 0;
-      cell.className = `cell ${isLight ? 'cell--light' : 'cell--dark'}`;
+      const keepClasses = [];
+      if (cell.classList.contains('cell--flash-hit')) keepClasses.push('cell--flash-hit');
+      if (cell.classList.contains('cell--flash-kill')) keepClasses.push('cell--flash-kill');
+      if (cell.classList.contains('cell--flash-crit')) keepClasses.push('cell--flash-crit');
+      cell.className = `cell ${isLight ? 'cell--light' : 'cell--dark'} ${keepClasses.join(' ')}`.trim();
 
-      // Remove dynamic children (pieces, dots, tooltips, lava) but keep coords
+      // Remove dynamic children (pieces, dots, tooltips, lava) but keep coords and active animations
       for (let i = cell.children.length - 1; i >= 0; i--) {
         const child = cell.children[i];
-        if (!child.classList.contains('cell__coord')) {
-          child.remove();
-        }
+        if (child.classList.contains('cell__coord')) continue;
+        if (child.classList.contains('damage-number')) continue; // preserve floating damage
+        child.remove();
       }
 
       // Selected
