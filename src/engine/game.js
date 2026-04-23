@@ -108,8 +108,8 @@ export function selectPiece(game, row, col) {
     return { ...game, selectedPiece: null, legalMoves: [], statusMessage: null };
   }
 
-  // Frozen or stunned pieces cannot move
-  if (piece.statusEffect) {
+  // Frozen or stunned pieces cannot move (poisoned/paralyzed CAN move)
+  if (piece.statusEffect === 'frozen' || piece.statusEffect === 'stunned') {
     return {
       ...game,
       selectedPiece: null,

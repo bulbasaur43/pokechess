@@ -64,7 +64,7 @@ function buildThreatMap(board, attackerColor) {
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
       const piece = board[r][c];
-      if (!piece || piece.color !== attackerColor || piece.statusEffect) continue;
+      if (!piece || piece.color !== attackerColor || piece.statusEffect === 'frozen' || piece.statusEffect === 'stunned') continue;
 
       const moves = getLegalMoves(board, r, c, null);
       for (const m of moves) {
@@ -86,7 +86,7 @@ function buildAttackCountMap(board, attackerColor) {
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
       const piece = board[r][c];
-      if (!piece || piece.color !== attackerColor || piece.statusEffect) continue;
+      if (!piece || piece.color !== attackerColor || piece.statusEffect === 'frozen' || piece.statusEffect === 'stunned') continue;
 
       const moves = getLegalMoves(board, r, c, null);
       for (const m of moves) {
@@ -346,6 +346,30 @@ function evaluateBoard(board, aiColor, config) {
     if (defenders <= 1) score -= 2 * kingSafety * woundedMult;
     if (defenders === 0) score -= 5 * kingSafety * woundedMult; // No defenders = disaster
 
+    // Value healing abilities near our wounded king
+    if (kingHpPercent < 1) {
+      const DIRS8 = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+      for (const [dr, dc] of DIRS8) {
+        const nr = aiKingPos.r + dr, nc = aiKingPos.c + dc;
+        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+          const adj = board[nr][nc];
+          if (adj && adj.color === aiColor) {
+            const ab = ABILITIES[adj.pokemon];
+            if (ab && (ab.effect === 'heal' || ab.effect === 'heal_allies' || ab.effect === 'drain')) {
+              const healAmt = ab.heal || 0;
+              // More valuable when king is more wounded
+              score += healAmt * (1 - kingHpPercent) * 3 * kingSafety;
+            }
+          }
+        }
+      }
+      // King's own healing ability is very valuable when wounded
+      const kingAbility = ABILITIES[aiKingPos.piece.pokemon];
+      if (kingAbility && (kingAbility.effect === 'heal' || kingAbility.effect === 'drain')) {
+        score += (kingAbility.heal || 0) * (1 - kingHpPercent) * 4 * kingSafety;
+      }
+    }
+
     if (isEndgame) {
       const edgeDist = Math.min(aiKingPos.r, 7 - aiKingPos.r, aiKingPos.c, 7 - aiKingPos.c);
       if (edgeDist <= 1) score -= 1 * kingSafety;
@@ -380,7 +404,7 @@ function getAllMovesForColor(board, color, enPassantTarget) {
     for (let c = 0; c < 8; c++) {
       const piece = board[r][c];
       if (!piece || piece.color !== color) continue;
-      if (piece.statusEffect) continue;
+      if (piece.statusEffect === 'frozen' || piece.statusEffect === 'stunned') continue;
       const pieceMoves = getLegalMoves(board, r, c, enPassantTarget);
       for (const move of pieceMoves) {
         moves.push({ fromRow: r, fromCol: c, toRow: move.row, toCol: move.col, move });

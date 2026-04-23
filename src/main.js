@@ -330,9 +330,21 @@ function scheduleAIMove() {
 function performAIMove() {
   if (!isAITurn()) return;
   const aiMove = getAIMove(game.board, game.aiColor, game.aiDifficulty, game.enPassantTarget);
-  if (!aiMove) return;
+  if (!aiMove) {
+    // No valid moves — pass turn so game doesn't freeze
+    console.warn('[AI] No valid moves found, passing turn');
+    game = { ...game, currentPlayer: game.currentPlayer === 'white' ? 'black' : 'white' };
+    renderAll();
+    return;
+  }
 
   game = selectPiece(game, aiMove.fromRow, aiMove.fromCol);
+  // Safety: if selectPiece didn't select (e.g. stunned piece), skip
+  if (!game.selectedPiece) {
+    console.warn('[AI] selectPiece failed, retrying in 300ms');
+    setTimeout(() => scheduleAIMove(), 300);
+    return;
+  }
   const { game: newGame, battleResult } = executeMove(game, aiMove.toRow, aiMove.toCol);
   game = newGame;
 
