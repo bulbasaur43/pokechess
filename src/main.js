@@ -272,22 +272,17 @@ function renderGameView() {
   renderAll();
 }
 
-let renderRAF = null;
 function renderAll() {
-  if (renderRAF) return; // already scheduled
-  renderRAF = requestAnimationFrame(() => {
-    renderRAF = null;
-    if (!game.board) return;
-    renderBoard(game, { onCellClick: handleCellClick });
-    renderHUD(game, { onNewGame: handleNewGame });
-    if (game.pendingOptionalAttack && canPlayerAct()) showOptionalAttackPrompt();
-    if (aiThinking) showAIThinking();
-    // Report ELO when game ends
-    if (game.phase === PHASES.GAME_OVER && !eloReported) {
-      eloReported = true;
-      handleEloUpdate();
-    }
-  });
+  if (!game.board) return;
+  renderBoard(game, { onCellClick: handleCellClick });
+  renderHUD(game, { onNewGame: handleNewGame });
+  if (game.pendingOptionalAttack && canPlayerAct()) showOptionalAttackPrompt();
+  if (aiThinking) showAIThinking();
+  // Report ELO when game ends
+  if (game.phase === PHASES.GAME_OVER && !eloReported) {
+    eloReported = true;
+    handleEloUpdate();
+  }
 }
 
 // ─── Battle inline ──────────────────────────────────────────────────
