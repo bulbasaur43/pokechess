@@ -693,6 +693,7 @@ export function renderTitleScreen(onStart) {
             <div class="admin-user-actions">
               <button class="admin-action-btn admin-action-btn--team" data-user="${u.username}" data-action="team" title="View Team">${u.savedTeam ? '👀 Team' : '—'}</button>
               <button class="admin-action-btn admin-action-btn--elo" data-user="${u.username}" data-action="elo" title="Modify ELO">📊 ELO</button>
+              <button class="admin-action-btn admin-action-btn--coins" data-user="${u.username}" data-action="gift-coins" title="Gift PokéCoins">🪙 Coins</button>
               <button class="admin-action-btn admin-action-btn--reset" data-user="${u.username}" data-action="reset" title="Reset ELO">🔄 Reset</button>
               <button class="admin-action-btn admin-action-btn--ban" data-user="${u.username}" data-action="${isBanned ? 'unban' : 'ban'}" title="${isBanned ? 'Unban' : 'Ban'}">${isBanned ? '✅ Unban' : '🔨 Ban'}</button>
               <button class="admin-action-btn admin-action-btn--delete" data-user="${u.username}" data-action="delete" title="Delete">🗑️</button>
@@ -770,6 +771,15 @@ export function renderTitleScreen(onStart) {
         adminFetch('/admin/unban', { username }).then(data => {
           showStatus(data.message || data.error, !!data.error);
           if (data.success) refreshUsers();
+        });
+
+      } else if (action === 'gift-coins') {
+        const amount = prompt(`Gift PokéCoins to "${username}".\nEnter number of coins:`);
+        if (amount === null || !parseInt(amount)) return;
+        const coins = parseInt(amount);
+        adminFetch('/admin/gift-coins', { username, coins }).then(data => {
+          if (data.ok) showStatus(`🪙 Gifted ${coins} coins to ${username} (balance: ${data.newBalance})`);
+          else showStatus(data.error || 'Failed', true);
         });
 
       } else if (action === 'team') {

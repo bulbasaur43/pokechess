@@ -876,13 +876,12 @@ function handleShopSync(req, res, body) {
 
 // Admin: gift coins to any player
 function handleAdminGiftCoins(req, res, body) {
-  const auth = getAuthUser(req);
-  if (!auth || auth.username !== 'admin') return sendJSON(res, 403, { error: 'Admin only' });
+  if (!verifyAdmin(body)) return sendJSON(res, 403, { error: 'Invalid admin password' });
 
   const { username, coins } = body || {};
   if (!username || !coins || coins <= 0) return sendJSON(res, 400, { error: 'Username and coin amount required' });
 
-  const target = db.users[username];
+  const target = db.users[username.toLowerCase()];
   if (!target) return sendJSON(res, 404, { error: 'User not found' });
 
   if (!target.shop) target.shop = { coins: 0 };
