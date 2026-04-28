@@ -697,7 +697,7 @@ export function renderTitleScreen(onStart) {
           <div class="admin-user-card ${isBanned ? 'admin-user-card--banned' : ''}">
             <div class="admin-user-info">
               <span class="admin-user-name">${u.rankEmoji || ''} ${u.username}</span>
-              <span class="admin-user-stats">${u.rank || ''} — ⭐ ${u.rating} | ${u.gamesPlayed} games | W${u.wins}/L${u.losses}</span>
+              <span class="admin-user-stats">${u.rank || ''} — ⭐ ${u.rating} | ${u.gamesPlayed} games | W${u.wins}/L${u.losses} | 🪙 ${u.coins}</span>
               ${banLabel}
             </div>
             <div class="admin-user-actions">

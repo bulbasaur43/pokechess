@@ -555,6 +555,7 @@ function handleAdminListUsers(req, res, body) {
       rank: rank.title,
       rankEmoji: rank.emoji,
       savedTeam: u.savedTeam || null,
+      coins: u.shop?.coins || 0,
     };
   });
 
