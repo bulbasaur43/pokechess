@@ -351,19 +351,28 @@ function performAIMove() {
   if (battleResult) {
     renderAll();
     handleBattleInline(battleResult, aiMove.toRow, aiMove.toCol, () => {
-      if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 300);
-      if (isAITurn()) scheduleAIMove();
+      if (game.lastAbility) {
+        setTimeout(() => playAbilityAnimation(game.lastAbility), 300);
+        // Wait for ability animation to finish before next move
+        if (isAITurn()) setTimeout(() => scheduleAIMove(), 1100);
+      } else {
+        if (isAITurn()) scheduleAIMove();
+      }
     });
   } else {
     renderAll();
-    if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 300);
+    if (game.lastAbility) {
+      setTimeout(() => playAbilityAnimation(game.lastAbility), 300);
+      // Wait for ability animation to finish before next move
+      if (isAITurn()) setTimeout(() => scheduleAIMove(), 1100);
+    } else {
+      if (isAITurn()) setTimeout(() => scheduleAIMove(), 350);
+    }
     if (game.statusMessage) showStatusToast(game.statusMessage, 'promoted');
     if (game.pendingOptionalAttack && game.currentPlayer === game.aiColor) {
       game = skipOptionalAttack(game);
       renderAll();
     }
-    // Delay to let the board render before next AI move
-    if (isAITurn()) setTimeout(() => scheduleAIMove(), 350);
   }
 }
 
@@ -424,14 +433,22 @@ function handleCellClick(row, col, isLegalMove, moveData) {
     if (battleResult) {
       renderAll();
       handleBattleInline(battleResult, row, col, () => {
-        if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 300);
-        if (isAITurn()) scheduleAIMove();
+        if (game.lastAbility) {
+          setTimeout(() => playAbilityAnimation(game.lastAbility), 300);
+          if (isAITurn()) setTimeout(() => scheduleAIMove(), 1100);
+        } else {
+          if (isAITurn()) scheduleAIMove();
+        }
       });
     } else {
       renderAll();
-      if (game.lastAbility) setTimeout(() => playAbilityAnimation(game.lastAbility), 300);
+      if (game.lastAbility) {
+        setTimeout(() => playAbilityAnimation(game.lastAbility), 300);
+        if (isAITurn()) setTimeout(() => scheduleAIMove(), 1100);
+      } else {
+        if (isAITurn()) scheduleAIMove();
+      }
       if (game.statusMessage) showStatusToast(game.statusMessage, 'promoted');
-      if (isAITurn()) scheduleAIMove();
     }
     return;
   }
