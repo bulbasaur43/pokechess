@@ -14,6 +14,10 @@ let _cells = null; // Map<"row,col", HTMLElement>
 let _boardEl = null;
 let _lastViewColor = null;
 
+// Rainbow trail state (cosmetic only)
+let _rainbowTrails = []; // { row, col, age }
+let _lastBoard = null;  // snapshot to detect moves
+
 /**
  * Render the board to the DOM
  */
@@ -66,6 +70,32 @@ export function renderBoard(game, callbacks) {
     container.prepend(_boardEl);
     _lastViewColor = viewColor;
   }
+
+  // ── Rainbow trail detection ──
+  if (getEquippedCosmetic() === 'RAINBOW' && _lastBoard) {
+    const playerColor = game.onlineColor ?? game.playerColor ?? 'white';
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const prev = _lastBoard[r]?.[c];
+        const curr = game.board[r][c];
+        // A player piece left this cell
+        if (prev && prev.color === playerColor && (!curr || curr !== prev)) {
+          // Don't add duplicate
+          if (!_rainbowTrails.some(t => t.row === r && t.col === c)) {
+            _rainbowTrails.push({ row: r, col: c, age: 0 });
+          }
+        }
+      }
+    }
+    // Age all trails and remove old ones
+    _rainbowTrails = _rainbowTrails
+      .map(t => ({ ...t, age: t.age + 1 }))
+      .filter(t => t.age <= 5);
+  } else if (getEquippedCosmetic() !== 'RAINBOW') {
+    _rainbowTrails = [];
+  }
+  // Snapshot board for next comparison
+  _lastBoard = game.board.map(row => row.map(cell => cell));
 
   // Update each cell in-place (no DOM destroy/rebuild)
   for (let row = 0; row < 8; row++) {
@@ -134,6 +164,15 @@ export function renderBoard(game, callbacks) {
             lavaPool.appendChild(bubble);
           }
           cell.appendChild(lavaPool);
+        }
+      }
+
+      // Rainbow trail overlay (cosmetic — only when RAINBOW equipped)
+      if (getEquippedCosmetic() === 'RAINBOW') {
+        const trail = _rainbowTrails.find(t => t.row === row && t.col === col);
+        if (trail) {
+          cell.classList.add('cell--rainbow-trail');
+          cell.style.setProperty('--rainbow-age', trail.age);
         }
       }
 
