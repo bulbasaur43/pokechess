@@ -592,23 +592,28 @@ function renderInventory() {
   }
   container.appendChild(grid);
 }
-function renderPokemonShop() {
+async function renderPokemonShop() {
   const container = document.getElementById('shop-pokemon');
   if (!container) return;
   container.innerHTML = '';
 
-  // Collect all ELO-locked Pokémon from both teams
+  // Get player's current ELO to filter out already-unlocked Pokémon
+  const { loadPlayerStats } = await import('../engine/elo.js');
+  const stats = loadPlayerStats();
+  const playerElo = stats?.rating || 600;
+
+  // Collect only ELO-locked Pokémon the player can't access yet
   const allPokemon = [];
   for (const teamKey of ['scarlet', 'violet']) {
     const pool = POKEMON_POOL[teamKey] || [];
     for (const entry of pool) {
-      if (entry.requiredElo > 0) {
+      if (entry.requiredElo > 0 && playerElo < entry.requiredElo) {
         allPokemon.push({ ...entry, team: teamKey });
       }
     }
     const kings = KING_POOL[teamKey] || [];
     for (const entry of kings) {
-      if (entry.requiredElo > 0) {
+      if (entry.requiredElo > 0 && playerElo < entry.requiredElo) {
         allPokemon.push({ ...entry, team: teamKey, isKing: true });
       }
     }
@@ -618,7 +623,7 @@ function renderPokemonShop() {
   allPokemon.sort((a, b) => a.requiredElo - b.requiredElo);
 
   if (allPokemon.length === 0) {
-    container.innerHTML = '<div class="shop-inv-empty">No Pokémon available</div>';
+    container.innerHTML = '<div class="shop-inv-empty">You\'ve unlocked all Pokémon! 🎉</div>';
     return;
   }
 
