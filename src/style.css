@@ -1505,7 +1505,8 @@ body {
   text-shadow: 0 2px 4px rgba(0,0,0,0.7), 0 0 8px rgba(255,0,0,0.4);
   z-index: 100;
   pointer-events: none;
-  animation: damageFloat 1.1s ease-out forwards;
+  opacity: 0;
+  animation: damageFloat 1.1s ease-out;
 }
 
 .damage-number--crit {
@@ -1528,7 +1529,8 @@ body {
   box-shadow: 0 0 6px hsl(var(--hue, 30), 100%, 50%);
   pointer-events: none;
   z-index: 10000;
-  animation: attackParticleBurst 0.5s ease-out forwards;
+  opacity: 0;
+  animation: attackParticleBurst 0.5s ease-out;
 }
 
 .attack-particle--kill {
@@ -1561,8 +1563,9 @@ body {
   border-radius: 2px;
   pointer-events: none;
   z-index: 10001;
+  opacity: 0;
   transform: translate(-50%, -50%) rotate(-30deg);
-  animation: slashSwipe 0.35s ease-out forwards;
+  animation: slashSwipe 0.35s ease-out;
 }
 
 .attack-slash--kill {
