@@ -249,7 +249,7 @@ function createPieceElement(piece, playerColor) {
     const cosmetic = COSMETICS[cosmeticId];
     if (cosmetic) {
       if (cosmeticId === 'SPARKLE') {
-        // Special: multiple sparkle particles around the piece
+        // Multiple sparkle particles
         for (let i = 0; i < 5; i++) {
           const spark = document.createElement('span');
           spark.className = 'piece__sparkle';
@@ -259,6 +259,30 @@ function createPieceElement(piece, playerColor) {
           spark.style.setProperty('--sd', `${0.5 + Math.random() * 1.5}s`);
           spark.style.setProperty('--sdelay', `${Math.random() * 2}s`);
           spriteWrap.appendChild(spark);
+        }
+      } else if (cosmeticId === 'FLAME_AURA') {
+        // Flame glow aura + fire particles
+        spriteWrap.classList.add('piece__aura--flame');
+        for (let i = 0; i < 4; i++) {
+          const flame = document.createElement('span');
+          flame.className = 'piece__flame-particle';
+          flame.textContent = '🔥';
+          flame.style.setProperty('--fx', `${10 + Math.random() * 80}%`);
+          flame.style.setProperty('--fd', `${0.6 + Math.random() * 1}s`);
+          flame.style.setProperty('--fdelay', `${Math.random() * 1.5}s`);
+          spriteWrap.appendChild(flame);
+        }
+      } else if (cosmeticId === 'ICE_AURA') {
+        // Ice glow aura + frost particles
+        spriteWrap.classList.add('piece__aura--ice');
+        for (let i = 0; i < 4; i++) {
+          const frost = document.createElement('span');
+          frost.className = 'piece__frost-particle';
+          frost.textContent = '❄️';
+          frost.style.setProperty('--ix', `${10 + Math.random() * 80}%`);
+          frost.style.setProperty('--id', `${0.8 + Math.random() * 1.2}s`);
+          frost.style.setProperty('--idelay', `${Math.random() * 2}s`);
+          spriteWrap.appendChild(frost);
         }
       } else if (cosmetic.img) {
         const img = document.createElement('img');
