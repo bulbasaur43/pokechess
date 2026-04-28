@@ -248,7 +248,19 @@ function createPieceElement(piece, playerColor) {
   if (cosmeticId) {
     const cosmetic = COSMETICS[cosmeticId];
     if (cosmetic) {
-      if (cosmetic.img) {
+      if (cosmeticId === 'SPARKLE') {
+        // Special: multiple sparkle particles around the piece
+        for (let i = 0; i < 5; i++) {
+          const spark = document.createElement('span');
+          spark.className = 'piece__sparkle';
+          spark.textContent = '✨';
+          spark.style.setProperty('--sx', `${10 + Math.random() * 80}%`);
+          spark.style.setProperty('--sy', `${10 + Math.random() * 80}%`);
+          spark.style.setProperty('--sd', `${0.5 + Math.random() * 1.5}s`);
+          spark.style.setProperty('--sdelay', `${Math.random() * 2}s`);
+          spriteWrap.appendChild(spark);
+        }
+      } else if (cosmetic.img) {
         const img = document.createElement('img');
         img.className = `piece__cosmetic piece__cosmetic--${cosmetic.position} piece__cosmetic--img`;
         img.src = cosmetic.img;

@@ -193,6 +193,38 @@ let _ownedCosmetics = [];   // cosmetic IDs owned
 let _equippedCosmetic = ''; // currently active cosmetic ID
 const STATE_KEY = 'pokechess_shop';
 
+// Pre-process cosmetic images: strip black backgrounds → transparent PNGs
+(function initCosmeticImages() {
+  for (const c of Object.values(COSMETICS)) {
+    if (!c.img) continue;
+    const origSrc = c.img;
+    const imgEl = new Image();
+    imgEl.crossOrigin = 'anonymous';
+    imgEl.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = imgEl.naturalWidth;
+      canvas.height = imgEl.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(imgEl, 0, 0);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = data.data;
+      for (let i = 0; i < d.length; i += 4) {
+        // Remove near-black pixels (threshold 50)
+        if (d[i] < 50 && d[i+1] < 50 && d[i+2] < 50) {
+          d[i+3] = 0;
+        }
+        // Remove near-white pixels (for Link's hat bg, threshold 220)
+        if (d[i] > 220 && d[i+1] > 220 && d[i+2] > 220) {
+          d[i+3] = 0;
+        }
+      }
+      ctx.putImageData(data, 0, 0);
+      c.img = canvas.toDataURL('image/png');
+    };
+    imgEl.src = origSrc;
+  }
+})();
+
 function loadState() {
   try {
     const cached = localStorage.getItem(STATE_KEY);

@@ -5110,7 +5110,6 @@ body {
 .piece__cosmetic--img {
   image-rendering: pixelated;
   object-fit: contain;
-  mix-blend-mode: screen;
 }
 
 /* TOP — Hats/ears: sit on top of the head, overlapping into sprite */
@@ -5191,6 +5190,25 @@ body {
 @keyframes cosmeticFloat {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-3px); }
+}
+
+/* Sparkle particles */
+.piece__sparkle {
+  position: absolute;
+  left: var(--sx, 50%);
+  top: var(--sy, 50%);
+  font-size: 0.55rem;
+  pointer-events: none;
+  z-index: 7;
+  animation: sparkleAnim var(--sd, 1s) ease-in-out var(--sdelay, 0s) infinite;
+}
+
+@keyframes sparkleAnim {
+  0% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  25% { opacity: 1; transform: scale(1.2) rotate(90deg); }
+  50% { opacity: 0.6; transform: scale(0.8) rotate(180deg); }
+  75% { opacity: 1; transform: scale(1.1) rotate(270deg); }
+  100% { opacity: 0; transform: scale(0.3) rotate(360deg); }
 }
 
 /* Shop preview image */
