@@ -13,7 +13,7 @@ import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect,
 import { reportGameResult, loadPlayerStats, getRankTitle } from './engine/elo.js';
 import { isLoggedIn, reportGameResultToServer } from './engine/auth.js';
 import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS, COLOR_TO_TEAM } from './engine/types.js';
-import { openShop, closeShop, consumeItem, incrementBattleCount, SHOP_ITEMS } from './ui/shop.js';
+import { openShop, closeShop, consumeItem, incrementBattleCount, awardDailyCoins, SHOP_ITEMS } from './ui/shop.js';
 
 let game = createGame();
 let clockInterval = null;
@@ -725,6 +725,12 @@ function handleEloUpdate() {
   } else {
     const eloResult = reportGameResult(result, gameMode, { aiDifficulty: game.aiDifficulty });
     setTimeout(() => showEloChangeToast(eloResult), 800);
+  }
+
+  // Daily coin reward
+  const earned = awardDailyCoins();
+  if (earned) {
+    setTimeout(() => showStatusToast(`🪙 +${earned} PokéCoin${earned > 1 ? 's' : ''} earned! (daily reward)`, 'heal'), 1500);
   }
 }
 

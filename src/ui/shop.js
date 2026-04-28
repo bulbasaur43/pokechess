@@ -166,7 +166,8 @@ export const SHOP_ITEMS = {
 let _coins = 0;
 let _inventory = {};
 let _battleCount = 0;
-let _unlockedPokemon = []; // Pokémon keys purchased in shop
+let _unlockedPokemon = [];
+let _lastDailyReward = ''; // ISO date string e.g. '2026-04-27'
 const STATE_KEY = 'pokechess_shop';
 
 function loadState() {
@@ -178,8 +179,9 @@ function loadState() {
       _inventory = data.inventory || {};
       _battleCount = data.battleCount || 0;
       _unlockedPokemon = data.unlockedPokemon || [];
+      _lastDailyReward = data.lastDailyReward || '';
     }
-  } catch { _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = []; }
+  } catch { _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = []; _lastDailyReward = ''; }
 }
 
 function saveState() {
@@ -188,6 +190,7 @@ function saveState() {
     inventory: _inventory,
     battleCount: _battleCount,
     unlockedPokemon: _unlockedPokemon,
+    lastDailyReward: _lastDailyReward,
   }));
 }
 
@@ -223,6 +226,23 @@ export function getUnlockedPokemon() { return [..._unlockedPokemon]; }
 // ─── Public API ─────────────────────────────────────────────────────
 
 export function getCoins() { return _coins; }
+
+/** Call after completing a game — awards 1-3 coins once per day */
+export function awardDailyCoins() {
+  const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+  if (_lastDailyReward === today) return null; // already claimed today
+  const earned = Math.floor(Math.random() * 3) + 1; // 1-3
+  _coins += earned;
+  _lastDailyReward = today;
+  saveState();
+  syncToServer();
+  return earned;
+}
+
+export function canEarnDaily() {
+  const today = new Date().toISOString().slice(0, 10);
+  return _lastDailyReward !== today;
+}
 
 export function getItemUses(itemId) {
   const entry = _inventory[itemId];
@@ -426,14 +446,17 @@ export function openShop(onItemUse) {
   panel.innerHTML = `
     <button class="shop-close" id="shop-close">✕</button>
     <h2 class="shop-title">🛒 PokéShop</h2>
-    <div class="shop-coins-display" id="shop-coins">
-      <span class="shop-coins-icon">🪙</span>
-      <span class="shop-coins-amount">${_coins}</span>
-      <span class="shop-coins-label">PokéCoins</span>
+
+    <div class="shop-coming-soon">
+      <span class="shop-coming-soon__icon">🚧</span>
+      <div class="shop-coming-soon__text">
+        <strong>Coming Soon!</strong>
+        <p>Purchasing will be available in a future update. Browse what's coming below!</p>
+      </div>
     </div>
 
     <div class="shop-section">
-      <h3 class="shop-section-title">💰 Buy PokéCoins</h3>
+      <h3 class="shop-section-title">💰 PokéCoin Packs <span class="shop-section-hint">Coming soon</span></h3>
       <div class="shop-packs" id="shop-packs"></div>
     </div>
 
@@ -446,8 +469,6 @@ export function openShop(onItemUse) {
       <h3 class="shop-section-title">🐾 Pokémon <span class="shop-section-hint">Unlock without ELO requirement</span></h3>
       <div class="shop-pokemon" id="shop-pokemon"></div>
     </div>
-
-    <div class="shop-inventory" id="shop-inventory"></div>
   `;
 
   overlay.appendChild(panel);
@@ -483,29 +504,14 @@ function renderCoinPacks() {
 
   for (const pack of COIN_PACKS) {
     const card = document.createElement('button');
-    card.className = 'shop-pack';
+    card.className = 'shop-pack shop-pack--disabled';
+    card.disabled = true;
+    card.title = 'Coming soon!';
     card.innerHTML = `
       <div class="shop-pack__coins">🪙 ${pack.coins}</div>
       <div class="shop-pack__price">${pack.priceLabel}</div>
       ${pack.bonus ? `<div class="shop-pack__bonus">${pack.bonus}</div>` : ''}
     `;
-    card.addEventListener('click', async () => {
-      card.disabled = true;
-      const orig = card.innerHTML;
-      card.innerHTML = '<div class="shop-pack__coins">...</div>';
-
-      const result = await buyCoins(pack.id);
-      if (result.success) {
-        card.innerHTML = '<div class="shop-pack__coins">✓</div>';
-        card.classList.add('shop-pack--success');
-        showShopToast(`🪙 +${pack.coins} PokéCoins!`, 'success');
-        updateCoinsDisplay();
-        setTimeout(() => { card.disabled = false; card.innerHTML = orig; card.classList.remove('shop-pack--success'); renderShopItems(); }, 1500);
-      } else {
-        showShopToast(result.error || 'Failed', 'error');
-        setTimeout(() => { card.disabled = false; card.innerHTML = orig; }, 1500);
-      }
-    });
     container.appendChild(card);
   }
 }
@@ -520,34 +526,16 @@ function renderShopItems() {
     card.className = 'shop-card';
     card.style.setProperty('--item-color', item.color);
 
-    const entry = _inventory[item.id];
-    const uses = entry ? entry.uses : 0;
-    const ownedBadge = uses > 0 ? `<span class="shop-card__owned">${uses} uses</span>` : '';
-    const canAfford = _coins >= item.coinCost;
-
     card.innerHTML = `
       <div class="shop-card__icon">${item.emoji}</div>
       <div class="shop-card__info">
-        <div class="shop-card__name">${item.name} ${ownedBadge}</div>
+        <div class="shop-card__name">${item.name}</div>
         <div class="shop-card__desc">${item.description}</div>
       </div>
-      <button class="shop-card__buy ${!canAfford ? 'shop-card__buy--disabled' : ''}" data-item="${item.id}" ${!canAfford ? 'title="Not enough coins"' : ''}>
+      <div class="shop-card__buy shop-card__buy--disabled" title="Coming soon">
         <span class="shop-card__price">🪙 ${item.coinCost}</span>
-      </button>
+      </div>
     `;
-
-    const buyBtn = card.querySelector('.shop-card__buy');
-    buyBtn.addEventListener('click', () => {
-      const result = buyItemWithCoins(item.id);
-      if (result.success) {
-        showShopToast(`${item.emoji} ${item.name} +10 uses!`, 'success');
-        updateCoinsDisplay();
-        renderShopItems();
-        renderInventory();
-      } else {
-        showShopToast(result.error, 'error');
-      }
-    });
 
     container.appendChild(card);
   }
@@ -632,36 +620,16 @@ function renderPokemonShop() {
     if (!pkmn) continue;
 
     const cost = getPokemonCoinCost(entry.requiredElo);
-    const owned = isPokemonUnlocked(entry.key);
-    const canAfford = _coins >= cost;
 
-    const card = document.createElement('button');
-    card.className = `shop-pkmn-card ${owned ? 'shop-pkmn-card--owned' : ''} ${!canAfford && !owned ? 'shop-pkmn-card--locked' : ''}`;
+    const card = document.createElement('div');
+    card.className = 'shop-pkmn-card shop-pkmn-card--locked';
+    card.title = `${pkmn.name} — 🪙 ${cost} coins (Coming soon!)`;
     card.innerHTML = `
       <img class="shop-pkmn-img" src="${pkmn.img || ''}" alt="${pkmn.name}" />
       <div class="shop-pkmn-name">${pkmn.name}</div>
       <div class="shop-pkmn-stats">❤️${pkmn.hp} ⚔️${pkmn.damage}</div>
-      ${owned
-        ? '<div class="shop-pkmn-badge">✓ Owned</div>'
-        : `<div class="shop-pkmn-cost">🪙 ${cost}</div>`
-      }
+      <div class="shop-pkmn-cost">🪙 ${cost}</div>
     `;
-    card.title = owned ? `${pkmn.name} — Unlocked!` : `Unlock ${pkmn.name} for ${cost} coins (normally requires ${entry.requiredElo} ELO)`;
-    card.disabled = owned;
-
-    if (!owned) {
-      card.addEventListener('click', () => {
-        if (!canAfford) {
-          showShopToast(`Need ${cost} coins (you have ${_coins})`, 'error');
-          return;
-        }
-        if (unlockPokemon(entry.key, cost)) {
-          showShopToast(`🐾 ${pkmn.name} unlocked!`, 'success');
-          updateCoinsDisplay();
-          renderPokemonShop();
-        }
-      });
-    }
 
     grid.appendChild(card);
   }

@@ -4445,6 +4445,42 @@ body {
   margin: 0 0 24px 0;
 }
 
+/* ── Coming Soon Banner ── */
+.shop-coming-soon {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(245, 158, 11, 0.04));
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 14px;
+}
+.shop-coming-soon__icon {
+  font-size: 2rem;
+  animation: shopBounce 2s ease-in-out infinite;
+}
+@keyframes shopBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.shop-coming-soon__text strong {
+  color: #fbbf24;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+}
+.shop-coming-soon__text p {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  margin: 4px 0 0 0;
+}
+
+.shop-pack--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.3);
+}
+
 /* ── Item Cards ── */
 .shop-items {
   display: flex;
