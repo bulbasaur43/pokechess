@@ -879,15 +879,20 @@ function handleAdminGiftCoins(req, res, body) {
   if (!verifyAdmin(body)) return sendJSON(res, 403, { error: 'Invalid admin password' });
 
   const { username, coins } = body || {};
-  if (!username || !coins || coins <= 0) return sendJSON(res, 400, { error: 'Username and coin amount required' });
+  if (!username || coins == null || isNaN(coins)) return sendJSON(res, 400, { error: 'Username and coin amount required' });
 
   const target = db.users[username.toLowerCase()];
   if (!target) return sendJSON(res, 404, { error: 'User not found' });
 
   if (!target.shop) target.shop = { coins: 0 };
-  target.shop.coins = (target.shop.coins || 0) + coins;
+  if (coins === 0) {
+    target.shop.coins = 0; // Reset
+  } else {
+    target.shop.coins = Math.max(0, (target.shop.coins || 0) + coins);
+  }
   saveDB(db);
-  console.log(`🎁 Admin gifted ${coins} coins to ${username} (total: ${target.shop.coins})`);
+  const verb = coins > 0 ? 'gifted' : coins < 0 ? 'removed' : 'reset';
+  console.log(`🪙 Admin ${verb} ${Math.abs(coins)} coins for ${username} (balance: ${target.shop.coins})`);
   sendJSON(res, 200, { ok: true, newBalance: target.shop.coins });
 }
 

@@ -784,11 +784,15 @@ export function renderTitleScreen(onStart) {
         });
 
       } else if (action === 'gift-coins') {
-        const amount = prompt(`Gift PokéCoins to "${username}".\nEnter number of coins:`);
-        if (amount === null || !parseInt(amount)) return;
+        const amount = prompt(`Manage PokéCoins for "${username}".\n\nEnter coins to add (positive) or remove (negative).\nEnter 0 to reset balance to zero.\n\nExamples: 50, -20, 0`);
+        if (amount === null) return;
         const coins = parseInt(amount);
+        if (isNaN(coins)) return;
         adminFetch('/admin/gift-coins', { username, coins }).then(data => {
-          if (data.ok) showStatus(`🪙 Gifted ${coins} coins to ${username} (balance: ${data.newBalance})`);
+          if (data.ok) {
+            const verb = coins > 0 ? `+${coins} gifted` : coins < 0 ? `${coins} removed` : 'reset to 0';
+            showStatus(`🪙 ${username}: ${verb} (balance: ${data.newBalance})`);
+          }
           else showStatus(data.error || 'Failed', true);
         });
 
