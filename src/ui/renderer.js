@@ -9,6 +9,60 @@ import { TYPES, POKEMON, TEAMS, COLOR_TO_TEAM } from '../engine/types.js';
 import { getBattlePreview } from '../engine/battle.js';
 import { getEquippedCosmetic, COSMETICS } from './shop.js';
 
+// ── Per-Pokémon head positions (from sprite anatomy analysis) ──
+// headTop: % from top to face center, headLeft: % horizontal head center, headScale: size multiplier
+const POKEMON_HEAD_MAP = {
+  // Scarlet Paradox
+  KORAIDON:     { headTop: 12, headLeft: 50, headScale: 1.1 },  // tall bipedal, head at very top
+  SANDY_SHOCKS: { headTop: 25, headLeft: 50, headScale: 0.9 },  // floating, round head center-top
+  FLUTTER_MANE: { headTop: 18, headLeft: 48, headScale: 1.0 },  // ghostly, face in upper area
+  RAGING_BOLT:  { headTop: 10, headLeft: 50, headScale: 1.0 },  // very tall neck, tiny head at top
+  ROARING_MOON: { headTop: 15, headLeft: 45, headScale: 1.1 },  // dragon, head top-left
+  SCREAM_TAIL:  { headTop: 22, headLeft: 50, headScale: 1.2 },  // round jigglypuff, big face
+  GREAT_TUSK:   { headTop: 18, headLeft: 55, headScale: 1.1 },  // elephant, head center-right
+  BRUTE_BONNET: { headTop: 15, headLeft: 50, headScale: 1.2 },  // mushroom, cap is head area
+  SLITHER_WING: { headTop: 15, headLeft: 50, headScale: 1.0 },  // bug, head at top center
+  WALKING_WAKE: { headTop: 12, headLeft: 45, headScale: 1.0 },  // suicune, head top-left
+  GOUGING_FIRE: { headTop: 12, headLeft: 48, headScale: 1.0 },  // entei, head at top
+  // Scarlet Classics
+  BULBASAUR:    { headTop: 30, headLeft: 55, headScale: 1.0 },  // short quadruped, face center
+  CHARIZARD:    { headTop: 10, headLeft: 50, headScale: 0.9 },  // tall dragon, small head at top
+  DRAGONITE:    { headTop: 12, headLeft: 50, headScale: 1.0 },  // tall bipedal, head at top
+  GARCHOMP:     { headTop: 10, headLeft: 50, headScale: 1.0 },  // tall shark dragon
+  BLAZIKEN:     { headTop: 8,  headLeft: 50, headScale: 0.9 },  // tall fighter, small head
+  SCEPTILE:     { headTop: 10, headLeft: 48, headScale: 1.0 },  // tall lizard
+  GHOLDENGO:    { headTop: 12, headLeft: 50, headScale: 1.0 },  // humanoid ghost
+  CHI_YU:       { headTop: 20, headLeft: 50, headScale: 1.1 },  // small fish, big face
+  INCINEROAR:   { headTop: 10, headLeft: 50, headScale: 1.0 },  // tall bipedal wrestler
+  MAGCARGO:     { headTop: 22, headLeft: 50, headScale: 1.0 },  // snail, head in middle
+  COMFEY:       { headTop: 25, headLeft: 50, headScale: 0.8 },  // tiny flower ring
+  // Violet Paradox
+  MIRAIDON:     { headTop: 10, headLeft: 50, headScale: 1.0 },  // tall mech dragon
+  IRON_MOTH:    { headTop: 20, headLeft: 50, headScale: 1.1 },  // moth, center face
+  IRON_CROWN:   { headTop: 10, headLeft: 50, headScale: 1.0 },  // tall mech deer
+  IRON_BOULDER: { headTop: 12, headLeft: 50, headScale: 1.0 },  // mech bull
+  IRON_JUGULIS: { headTop: 12, headLeft: 50, headScale: 1.0 },  // 3-headed flyer
+  IRON_BUNDLE:  { headTop: 15, headLeft: 50, headScale: 1.1 },  // mech penguin
+  IRON_TREADS:  { headTop: 18, headLeft: 55, headScale: 1.0 },  // mech elephant
+  IRON_HANDS:   { headTop: 10, headLeft: 50, headScale: 1.1 },  // big mech fighter
+  IRON_THORNS:  { headTop: 10, headLeft: 50, headScale: 1.0 },  // mech tyranitar
+  IRON_VALIANT: { headTop: 8,  headLeft: 50, headScale: 0.9 },  // slim mech gallade
+  IRON_LEAVES:  { headTop: 10, headLeft: 50, headScale: 1.0 },  // mech virizion
+  // Violet Classics
+  PIKACHU:      { headTop: 18, headLeft: 50, headScale: 1.2 },  // short, big head
+  GENGAR:       { headTop: 15, headLeft: 50, headScale: 1.3 },  // round ghost, huge face
+  METAGROSS:    { headTop: 20, headLeft: 50, headScale: 1.2 },  // flat mech spider, face fills center
+  LUCARIO:      { headTop: 10, headLeft: 50, headScale: 1.0 },  // bipedal, head at top
+  GARDEVOIR:    { headTop: 8,  headLeft: 50, headScale: 0.9 },  // tall fairy, small head
+  SYLVEON:      { headTop: 15, headLeft: 50, headScale: 1.0 },  // quad fairy
+  DRAGAPULT:    { headTop: 12, headLeft: 45, headScale: 1.0 },  // long dragon
+  CHIEN_PAO:    { headTop: 15, headLeft: 50, headScale: 1.0 },  // mech leopard
+  ZAPDOS:       { headTop: 10, headLeft: 50, headScale: 0.9 },  // tall bird
+  BRAMBLEGHAST: { headTop: 20, headLeft: 50, headScale: 1.1 },  // tumbleweed
+  AUDINO:       { headTop: 15, headLeft: 50, headScale: 1.2 },  // round, big head
+};
+const DEFAULT_HEAD = { headTop: 15, headLeft: 50, headScale: 1.0 };
+
 // Persistent board grid — built once, updated in-place
 let _cells = null; // Map<"row,col", HTMLElement>
 let _boardEl = null;
@@ -248,8 +302,10 @@ function createPieceElement(piece, playerColor) {
   if (cosmeticId) {
     const cosmetic = COSMETICS[cosmeticId];
     if (cosmetic) {
+      // Get per-Pokémon head data for positioning
+      const headData = (piece.pokemon && POKEMON_HEAD_MAP[piece.pokemon]) || DEFAULT_HEAD;
+
       if (cosmeticId === 'SPARKLE') {
-        // Multiple sparkle particles
         for (let i = 0; i < 5; i++) {
           const spark = document.createElement('span');
           spark.className = 'piece__sparkle';
@@ -261,7 +317,6 @@ function createPieceElement(piece, playerColor) {
           spriteWrap.appendChild(spark);
         }
       } else if (cosmeticId === 'FLAME_AURA') {
-        // Flame glow aura + fire particles
         spriteWrap.classList.add('piece__aura--flame');
         for (let i = 0; i < 4; i++) {
           const flame = document.createElement('span');
@@ -273,7 +328,6 @@ function createPieceElement(piece, playerColor) {
           spriteWrap.appendChild(flame);
         }
       } else if (cosmeticId === 'ICE_AURA') {
-        // Ice glow aura + frost particles
         spriteWrap.classList.add('piece__aura--ice');
         for (let i = 0; i < 4; i++) {
           const frost = document.createElement('span');
@@ -289,11 +343,40 @@ function createPieceElement(piece, playerColor) {
         img.className = `piece__cosmetic piece__cosmetic--${cosmetic.position} piece__cosmetic--img`;
         img.src = cosmetic.img;
         img.draggable = false;
+        // Dynamic per-Pokémon positioning
+        const baseSize = cosmetic.position === 'middle' ? 55 : cosmetic.position === 'top' ? 60 : 40;
+        const size = Math.round(baseSize * headData.headScale);
+        img.style.width = `${size}%`;
+        if (cosmetic.position === 'top') {
+          img.style.top = `${headData.headTop - 12}%`;
+          img.style.left = `${headData.headLeft}%`;
+          img.style.transform = 'translateX(-50%)';
+        } else if (cosmetic.position === 'middle') {
+          img.style.top = `${headData.headTop}%`;
+          img.style.left = `${headData.headLeft}%`;
+          img.style.transform = 'translate(-50%, -15%)';
+        } else if (cosmetic.position === 'aura') {
+          img.style.bottom = '5%';
+          img.style.right = '-8px';
+          img.style.top = 'auto';
+          img.style.left = 'auto';
+          img.style.transform = 'none';
+        }
         spriteWrap.appendChild(img);
       } else {
         const overlay = document.createElement('span');
         overlay.className = `piece__cosmetic piece__cosmetic--${cosmetic.position}`;
         overlay.textContent = cosmetic.overlay;
+        // Dynamic positioning for emoji cosmetics too
+        if (cosmetic.position === 'top') {
+          overlay.style.top = `${headData.headTop - 10}%`;
+          overlay.style.left = `${headData.headLeft}%`;
+          overlay.style.transform = 'translateX(-50%)';
+        } else if (cosmetic.position === 'middle') {
+          overlay.style.top = `${headData.headTop}%`;
+          overlay.style.left = `${headData.headLeft}%`;
+          overlay.style.transform = 'translate(-50%, -15%)';
+        }
         spriteWrap.appendChild(overlay);
       }
     }
