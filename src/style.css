@@ -5089,7 +5089,7 @@ body {
   height: auto;
   max-height: 90%;
   z-index: 6;
-  opacity: 0.85;
+  opacity: 1;
 }
 
 /* BOTTOM — feet level, slightly behind */
