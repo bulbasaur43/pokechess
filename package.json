@@ -10,6 +10,7 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "stripe": "^22.1.0",
     "vite": "^6.0.0",
     "ws": "^8.20.0"
   },

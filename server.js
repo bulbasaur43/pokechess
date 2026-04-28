@@ -11,6 +11,20 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { randomBytes, createHash } from 'crypto';
 import { join, extname } from 'path';
 import { fileURLToPath } from 'url';
+import Stripe from 'stripe';
+
+const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY;
+const STRIPE_PK = process.env.STRIPE_PUBLISHABLE_KEY;
+const stripe = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
+
+// ─── Shop Items (server-side source of truth) ───────────────────────
+const SHOP_ITEMS = {
+  MAX_POTION:  { id: 'MAX_POTION',  name: 'Max Potion',   price: 99,  stackable: true },
+  RARE_CANDY:  { id: 'RARE_CANDY',  name: 'Rare Candy',   price: 299, stackable: true },
+  FOCUS_SASH:  { id: 'FOCUS_SASH',  name: 'Focus Sash',   price: 199, stackable: true },
+  TEAM_REROLL: { id: 'TEAM_REROLL', name: 'Team Reroll',  price: 49,  stackable: true },
+  SHINY_CHARM: { id: 'SHINY_CHARM', name: 'Shiny Charm',  price: 99,  stackable: false },
+};
 
 const PORT = process.env.PORT || 3001;
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -230,6 +244,14 @@ function routeRequest(req, res, body) {
     handleAdminUnban(req, res, body);
   } else if (req.method === 'GET' && url === '/api/online') {
     handleOnlineCount(req, res);
+  } else if (req.method === 'POST' && url === '/api/shop/buy-coins') {
+    handleShopBuyCoins(req, res, body);
+  } else if (req.method === 'GET' && url === '/api/shop/sync') {
+    handleShopGet(req, res);
+  } else if (req.method === 'POST' && url === '/api/shop/sync') {
+    handleShopSync(req, res, body);
+  } else if (req.method === 'POST' && url === '/api/admin/gift-coins') {
+    handleAdminGiftCoins(req, res, body);
   } else {
     sendJSON(res, 404, { error: 'Not found' });
   }
@@ -787,6 +809,89 @@ setInterval(() => {
   });
 }, 30000);
 
+// ─── Shop Handlers (PokéCoins system) ───────────────────────────────
+
+const COIN_PACKS = {
+  pack_100:  { coins: 100,  price: 99 },
+  pack_500:  { coins: 500,  price: 399 },
+  pack_1200: { coins: 1200, price: 699 },
+};
+
+async function handleShopBuyCoins(req, res, body) {
+  const auth = getAuthUser(req);
+  if (!auth) return sendJSON(res, 401, { error: 'Not logged in' });
+
+  const { packId } = body || {};
+  const pack = COIN_PACKS[packId];
+  if (!pack) return sendJSON(res, 400, { error: 'Unknown coin pack' });
+
+  if (!stripe) {
+    // Test mode: grant coins for free
+    console.log(`🪙 [TEST] Granting ${pack.coins} coins to ${auth.username}`);
+    if (!auth.user.shop) auth.user.shop = { coins: 0 };
+    auth.user.shop.coins = (auth.user.shop.coins || 0) + pack.coins;
+    saveDB(db);
+    return sendJSON(res, 200, { granted: true, coins: auth.user.shop.coins });
+  }
+
+  // Real Stripe PaymentIntent
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: pack.price,
+      currency: 'usd',
+      metadata: { username: auth.username, packId, coins: pack.coins },
+      payment_method_types: ['card'],
+    });
+    sendJSON(res, 200, { clientSecret: paymentIntent.client_secret });
+  } catch (e) {
+    console.error('Stripe error:', e.message);
+    sendJSON(res, 500, { error: 'Payment system error' });
+  }
+}
+
+function handleShopGet(req, res) {
+  const auth = getAuthUser(req);
+  if (!auth) return sendJSON(res, 401, { error: 'Not logged in' });
+  const shop = auth.user.shop || {};
+  sendJSON(res, 200, {
+    coins: shop.coins || 0,
+    inventory: shop.inventory || {},
+    battleCount: shop.battleCount || 0,
+    unlockedPokemon: shop.unlockedPokemon || [],
+  });
+}
+
+function handleShopSync(req, res, body) {
+  const auth = getAuthUser(req);
+  if (!auth) return sendJSON(res, 401, { error: 'Not logged in' });
+
+  if (!auth.user.shop) auth.user.shop = {};
+  if (body.coins != null) auth.user.shop.coins = Math.max(0, parseInt(body.coins) || 0);
+  if (body.inventory) auth.user.shop.inventory = body.inventory;
+  if (body.battleCount != null) auth.user.shop.battleCount = parseInt(body.battleCount) || 0;
+  if (body.unlockedPokemon) auth.user.shop.unlockedPokemon = body.unlockedPokemon;
+  saveDB(db);
+  sendJSON(res, 200, { ok: true });
+}
+
+// Admin: gift coins to any player
+function handleAdminGiftCoins(req, res, body) {
+  const auth = getAuthUser(req);
+  if (!auth || auth.username !== 'admin') return sendJSON(res, 403, { error: 'Admin only' });
+
+  const { username, coins } = body || {};
+  if (!username || !coins || coins <= 0) return sendJSON(res, 400, { error: 'Username and coin amount required' });
+
+  const target = db.users[username];
+  if (!target) return sendJSON(res, 404, { error: 'User not found' });
+
+  if (!target.shop) target.shop = { coins: 0 };
+  target.shop.coins = (target.shop.coins || 0) + coins;
+  saveDB(db);
+  console.log(`🎁 Admin gifted ${coins} coins to ${username} (total: ${target.shop.coins})`);
+  sendJSON(res, 200, { ok: true, newBalance: target.shop.coins });
+}
+
 // Start — load from Redis first, then listen
 initDB().then(() => {
   httpServer.listen(PORT, () => {
@@ -795,6 +900,8 @@ initDB().then(() => {
     console.log(`   WS:  ws://localhost:${PORT}`);
     if (UPSTASH_URL && UPSTASH_TOKEN) console.log('   📦 Redis: connected');
     else console.log('   📦 Redis: not configured (using local file only)');
+    if (stripe) console.log('   💳 Stripe: enabled');
+    else console.log('   💳 Stripe: test mode (coins granted free)');
   });
 });
 

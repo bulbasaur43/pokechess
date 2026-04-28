@@ -139,6 +139,13 @@ export function renderHUD(game, callbacks) {
   newBtn.addEventListener('click', () => callbacks?.onNewGame?.());
   controls.appendChild(newBtn);
 
+  const shopBtn = document.createElement('button');
+  shopBtn.className = 'btn btn--secondary';
+  shopBtn.id = 'btn-shop';
+  shopBtn.textContent = '🛒 Shop';
+  shopBtn.addEventListener('click', () => callbacks?.onOpenShop?.());
+  controls.appendChild(shopBtn);
+
   const chartBtn = document.createElement('button');
   chartBtn.className = 'btn btn--secondary';
   chartBtn.id = 'btn-type-chart';

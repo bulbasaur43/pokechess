@@ -7,6 +7,7 @@ import { TEAMS, POKEMON, POKEMON_POOL, KING_POOL, BACK_RANK_ROLES, ABILITIES } f
 import { AI_DIFFICULTIES } from '../engine/ai.js';
 import { loadPlayerStats, getRankTitle, getWinRate } from '../engine/elo.js';
 import { isLoggedIn, getUsername, login, signup, logout, refreshProfile, getLeaderboard, saveTeam, loadTeam } from '../engine/auth.js';
+import { isPokemonUnlocked } from './shop.js';
 
 export function renderTitleScreen(onStart) {
   const app = document.getElementById('app');
@@ -355,7 +356,7 @@ export function renderTitleScreen(onStart) {
     pool.forEach(entry => {
       const pkmn = POKEMON[entry.key];
       if (!pkmn) return;
-      const unlocked = playerElo >= entry.requiredElo;
+      const unlocked = playerElo >= entry.requiredElo || isPokemonUnlocked(entry.key);
       const isCurrent = entry.key === currentKey;
       const ability = ABILITIES[entry.key];
       const abilityLabel = ability ? `${ability.emoji} ${ability.name}` : '';

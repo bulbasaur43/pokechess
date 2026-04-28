@@ -13,6 +13,7 @@ import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect,
 import { reportGameResult, loadPlayerStats, getRankTitle } from './engine/elo.js';
 import { isLoggedIn, reportGameResultToServer } from './engine/auth.js';
 import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS, COLOR_TO_TEAM } from './engine/types.js';
+import { openShop, closeShop, consumeItem, incrementBattleCount, SHOP_ITEMS } from './ui/shop.js';
 
 let game = createGame();
 let clockInterval = null;
@@ -21,6 +22,7 @@ let gameMode = 'ai'; // 'ai' | 'online' | 'local'
 let eloReported = false; // Track if we've already reported ELO for this game
 let processingMove = false; // Block input during opponent's move animation
 let opponentMoveQueue = []; // Queue for incoming opponent moves
+let activeItem = null; // Currently selected item to use
 
 // Capture all Math.random() calls during move execution for online sync
 function withRandomCapture(fn) {
@@ -275,7 +277,7 @@ function renderGameView() {
 function renderAll() {
   if (!game.board) return;
   renderBoard(game, { onCellClick: handleCellClick });
-  renderHUD(game, { onNewGame: handleNewGame });
+  renderHUD(game, { onNewGame: handleNewGame, onOpenShop: handleOpenShop });
   if (game.pendingOptionalAttack && canPlayerAct()) showOptionalAttackPrompt();
   if (aiThinking) showAIThinking();
   // Report ELO when game ends
@@ -379,6 +381,11 @@ function performAIMove() {
 // ─── Player input ───────────────────────────────────────────────────
 
 function handleCellClick(row, col, isLegalMove, moveData) {
+  // Item usage mode: apply item to cell
+  if (activeItem) {
+    applyItemToCell(activeItem, row, col);
+    return;
+  }
   if (!canPlayerAct()) return;
   if (game.pendingPromotion) return;
 
@@ -577,6 +584,85 @@ function generateAITeam(teamKey, difficulty) {
   }
 
   return result;
+}
+
+// ─── Shop ───────────────────────────────────────────────────────────
+
+function handleOpenShop() {
+  openShop(handleItemUse);
+}
+
+function handleItemUse(itemId) {
+  if (game.phase !== PHASES.PLAY) return;
+  // Set active item — next cell click will apply it
+  activeItem = itemId;
+  showStatusToast(`${SHOP_ITEMS[itemId]?.emoji} Select a target...`, 'item');
+}
+
+function applyItemToCell(itemId, row, col) {
+  const piece = game.board[row][col];
+  const playerColor = gameMode === 'online' ? game.onlineColor : (gameMode === 'ai' ? game.playerColor : game.currentPlayer);
+
+  switch (itemId) {
+    case 'MAX_POTION': {
+      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      if (piece.hp >= piece.maxHp) { showStatusToast('Already at full HP!', 'error'); return false; }
+      game.board[row][col] = { ...piece, hp: piece.maxHp };
+      showStatusToast(`🧪 ${POKEMON[piece.pokemon]?.name || 'Piece'} healed to full!`, 'heal');
+      break;
+    }
+    case 'X_ATTACK': {
+      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      game.board[row][col] = { ...piece, damage: piece.damage + 1 };
+      showStatusToast(`⚔️ ${POKEMON[piece.pokemon]?.name || 'Piece'} +1 damage!`, 'buff');
+      break;
+    }
+    case 'X_DEFENSE': {
+      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      game.board[row][col] = { ...piece, maxHp: piece.maxHp + 2, hp: piece.hp + 2 };
+      showStatusToast(`🔰 ${POKEMON[piece.pokemon]?.name || 'Piece'} +2 HP!`, 'buff');
+      break;
+    }
+    case 'FOCUS_SASH': {
+      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      game.board[row][col] = { ...piece, focusSash: true };
+      showStatusToast(`🛡️ ${POKEMON[piece.pokemon]?.name || 'Piece'} protected by Focus Sash!`, 'buff');
+      break;
+    }
+    case 'LEFTOVERS': {
+      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      game.board[row][col] = { ...piece, leftovers: true };
+      showStatusToast(`🍎 ${POKEMON[piece.pokemon]?.name || 'Piece'} got Leftovers!`, 'heal');
+      break;
+    }
+    case 'SMOKE_BALL': {
+      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      game.board[row][col] = { ...piece, smokeBall: 5 };
+      showStatusToast(`💨 ${POKEMON[piece.pokemon]?.name || 'Piece'} immune to abilities for 5 turns!`, 'buff');
+      break;
+    }
+    case 'DESTINY_BOND': {
+      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      game.board[row][col] = { ...piece, destinyBond: true };
+      showStatusToast(`💀 ${POKEMON[piece.pokemon]?.name || 'Piece'} bound by destiny!`, 'status');
+      break;
+    }
+    case 'QUICK_CLAW': {
+      // Grants an extra turn after the next move
+      game.quickClaw = playerColor;
+      showStatusToast(`⚡ Quick Claw active — your next move grants an extra turn!`, 'buff');
+      break;
+    }
+    default:
+      showStatusToast('Item not yet implemented', 'error');
+      return false;
+  }
+
+  consumeItem(itemId);
+  incrementBattleCount();
+  activeItem = null;
+  renderAll();
+  return true;
 }
 
 function handleNewGame() {
