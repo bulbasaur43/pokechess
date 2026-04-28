@@ -173,7 +173,7 @@ export const COSMETICS = {
   SPARKLE:     { id: 'SPARKLE',     name: 'Sparkle',       emoji: '✨', overlay: '✨', coinCost: 12, position: 'aura',   color: '#fcd34d' },
   RAINBOW:     { id: 'RAINBOW',     name: 'Rainbow Trail', emoji: '🌈', overlay: '🌈', coinCost: 25, position: 'bottom', color: '#a78bfa' },
   // Premium Gaming Cosmetics — actual pixel art images
-  MAJORAS_MASK:  { id: 'MAJORAS_MASK',  name: "Majora's Mask",  emoji: '🎭', overlay: '🎭', img: '/assets/cosmetics/majoras_mask.png', coinCost: 75, position: 'top',    color: '#7c3aed' },
+  MAJORAS_MASK:  { id: 'MAJORAS_MASK',  name: "Majora's Mask",  emoji: '🎭', overlay: '🎭', img: '/assets/cosmetics/majoras_mask.png', coinCost: 75, position: 'middle', color: '#7c3aed' },
   LINKS_HAT:     { id: 'LINKS_HAT',     name: "Link's Hat",     emoji: '🧝', overlay: '🧝', img: '/assets/cosmetics/links_hat.png',   coinCost: 75, position: 'top',    color: '#22c55e' },
   MARIOS_HAT:    { id: 'MARIOS_HAT',    name: "Mario's Hat",    emoji: '🍄', overlay: '🍄', img: '/assets/cosmetics/marios_hat.png',  coinCost: 75, position: 'top',    color: '#ef4444' },
   PIKACHU_EARS:  { id: 'PIKACHU_EARS',  name: 'Pikachu Ears',   emoji: '⚡', overlay: '⚡', img: '/assets/cosmetics/pikachu_ears.png', coinCost: 75, position: 'top',    color: '#facc15' },

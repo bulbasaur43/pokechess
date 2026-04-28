@@ -10,6 +10,8 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@napi-rs/canvas": "^0.1.100",
+    "sharp": "^0.34.5",
     "stripe": "^22.1.0",
     "vite": "^6.0.0",
     "ws": "^8.20.0"

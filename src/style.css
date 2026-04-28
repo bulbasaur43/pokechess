@@ -5052,7 +5052,6 @@ body {
 .piece__cosmetic--img {
   image-rendering: pixelated;
   object-fit: contain;
-  mix-blend-mode: screen;
 }
 
 /* TOP — Hats/masks/ears: overlap top of Pokémon head */
@@ -5073,7 +5072,7 @@ body {
   z-index: 6;
 }
 
-/* MIDDLE — Sunglasses/face items: sit on the face */
+/* MIDDLE — Face masks/overlays: sit right on the face */
 .piece__cosmetic--middle {
   top: 25%;
   left: 50%;
@@ -5081,6 +5080,16 @@ body {
   font-size: 1.1rem;
   opacity: 0.9;
   z-index: 6;
+}
+.piece__cosmetic--middle.piece__cosmetic--img {
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  height: auto;
+  max-height: 75%;
+  z-index: 6;
+  opacity: 0.88;
 }
 
 /* BOTTOM — feet level, slightly behind */
@@ -5137,7 +5146,6 @@ body {
   image-rendering: pixelated;
   margin-bottom: 4px;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
-  mix-blend-mode: screen;
 }
 
 /* Coins display in shop header */

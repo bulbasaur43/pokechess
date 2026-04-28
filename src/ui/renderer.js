@@ -205,12 +205,29 @@ function createPieceElement(piece) {
     const cosmetic = COSMETICS[cosmeticId];
     if (cosmetic) {
       if (cosmetic.img) {
-        const img = document.createElement('img');
-        img.className = `piece__cosmetic piece__cosmetic--${cosmetic.position} piece__cosmetic--img`;
-        img.src = cosmetic.img;
-        img.alt = cosmetic.name;
-        img.draggable = false;
-        el.appendChild(img);
+        // Use canvas to strip black background and render transparent
+        const canvas = document.createElement('canvas');
+        canvas.className = `piece__cosmetic piece__cosmetic--${cosmetic.position} piece__cosmetic--img`;
+        canvas.style.pointerEvents = 'none';
+        el.appendChild(canvas);
+        const imgEl = new Image();
+        imgEl.crossOrigin = 'anonymous';
+        imgEl.onload = () => {
+          canvas.width = imgEl.naturalWidth;
+          canvas.height = imgEl.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(imgEl, 0, 0);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const d = imageData.data;
+          for (let i = 0; i < d.length; i += 4) {
+            // Make near-black pixels transparent
+            if (d[i] < 45 && d[i+1] < 45 && d[i+2] < 45) {
+              d[i+3] = 0;
+            }
+          }
+          ctx.putImageData(imageData, 0, 0);
+        };
+        imgEl.src = cosmetic.img;
       } else {
         const overlay = document.createElement('span');
         overlay.className = `piece__cosmetic piece__cosmetic--${cosmetic.position}`;
