@@ -179,7 +179,8 @@ export function renderBoard(game, callbacks) {
       // Piece
       const piece = game.board[row][col];
       if (piece) {
-        const pieceEl = createPieceElement(piece);
+        const playerColor = game.onlineColor ?? game.playerColor ?? 'white';
+        const pieceEl = createPieceElement(piece, playerColor);
         cell.appendChild(pieceEl);
 
         // Battle tooltip on capture targets
@@ -205,7 +206,7 @@ export function renderBoard(game, callbacks) {
 /**
  * Create a piece element with Pokémon identity and HP bar
  */
-function createPieceElement(piece) {
+function createPieceElement(piece, playerColor) {
   const el = document.createElement('div');
   el.className = `piece piece--${piece.color}`;
   if (piece.role === 'TRUE_KING') el.classList.add('piece--true-king');
@@ -241,8 +242,9 @@ function createPieceElement(piece) {
     spriteWrap.appendChild(symbol);
   }
 
-  // Cosmetic overlay (only on player pieces)
-  const cosmeticId = getEquippedCosmetic();
+  // Cosmetic overlay — only on the PLAYER's pieces
+  const isPlayerPiece = piece.color === playerColor;
+  const cosmeticId = isPlayerPiece ? getEquippedCosmetic() : null;
   if (cosmeticId) {
     const cosmetic = COSMETICS[cosmeticId];
     if (cosmetic) {
