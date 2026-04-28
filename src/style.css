@@ -5110,6 +5110,7 @@ body {
 .piece__cosmetic--img {
   image-rendering: pixelated;
   object-fit: contain;
+  mix-blend-mode: screen;
 }
 
 /* TOP — Hats/ears: sit on top of the head, overlapping into sprite */

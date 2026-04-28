@@ -270,9 +270,6 @@ function createPieceElement(piece, playerColor) {
   el.dataset.role = piece.role;
 
   const team = TEAMS[COLOR_TO_TEAM[piece.color]];
-  // Sprite wrapper — cosmetics are positioned relative to this
-  const spriteWrap = document.createElement('div');
-  spriteWrap.className = 'piece__sprite-wrap';
 
   // Main visual — show image for any Pokémon that has one
   const pkmn = piece.pokemon ? POKEMON[piece.pokemon] : null;
@@ -283,17 +280,17 @@ function createPieceElement(piece, playerColor) {
     img.src = pkmn.img;
     img.alt = pkmn.name;
     img.draggable = false;
-    spriteWrap.appendChild(img);
+    el.appendChild(img);
   } else if (pkmn) {
     const symbol = document.createElement('span');
     symbol.className = 'piece__emoji';
     symbol.textContent = pkmn.emoji;
-    spriteWrap.appendChild(symbol);
+    el.appendChild(symbol);
   } else {
     const symbol = document.createElement('span');
     symbol.className = 'piece__emoji piece__emoji--pawn';
     symbol.textContent = team.pawnEmoji;
-    spriteWrap.appendChild(symbol);
+    el.appendChild(symbol);
   }
 
   // Cosmetic overlay — only on the PLAYER's pieces
@@ -314,10 +311,10 @@ function createPieceElement(piece, playerColor) {
           spark.style.setProperty('--sy', `${10 + Math.random() * 80}%`);
           spark.style.setProperty('--sd', `${0.5 + Math.random() * 1.5}s`);
           spark.style.setProperty('--sdelay', `${Math.random() * 2}s`);
-          spriteWrap.appendChild(spark);
+          el.appendChild(spark);
         }
       } else if (cosmeticId === 'FLAME_AURA') {
-        spriteWrap.classList.add('piece__aura--flame');
+        el.classList.add('piece__aura--flame');
         for (let i = 0; i < 4; i++) {
           const flame = document.createElement('span');
           flame.className = 'piece__flame-particle';
@@ -325,10 +322,10 @@ function createPieceElement(piece, playerColor) {
           flame.style.setProperty('--fx', `${10 + Math.random() * 80}%`);
           flame.style.setProperty('--fd', `${0.6 + Math.random() * 1}s`);
           flame.style.setProperty('--fdelay', `${Math.random() * 1.5}s`);
-          spriteWrap.appendChild(flame);
+          el.appendChild(flame);
         }
       } else if (cosmeticId === 'ICE_AURA') {
-        spriteWrap.classList.add('piece__aura--ice');
+        el.classList.add('piece__aura--ice');
         for (let i = 0; i < 4; i++) {
           const frost = document.createElement('span');
           frost.className = 'piece__frost-particle';
@@ -336,14 +333,14 @@ function createPieceElement(piece, playerColor) {
           frost.style.setProperty('--ix', `${10 + Math.random() * 80}%`);
           frost.style.setProperty('--id', `${0.8 + Math.random() * 1.2}s`);
           frost.style.setProperty('--idelay', `${Math.random() * 2}s`);
-          spriteWrap.appendChild(frost);
+          el.appendChild(frost);
         }
       } else if (cosmetic.img) {
         const img = document.createElement('img');
         img.className = `piece__cosmetic piece__cosmetic--${cosmetic.position} piece__cosmetic--img`;
         img.src = cosmetic.img;
         img.draggable = false;
-        // Dynamic per-Pokémon positioning
+        // Dynamic per-Pokémon positioning via inline styles
         const baseSize = cosmetic.position === 'middle' ? 55 : cosmetic.position === 'top' ? 60 : 40;
         const size = Math.round(baseSize * headData.headScale);
         img.style.width = `${size}%`;
@@ -360,14 +357,12 @@ function createPieceElement(piece, playerColor) {
           img.style.right = '-8px';
           img.style.top = 'auto';
           img.style.left = 'auto';
-          img.style.transform = 'none';
         }
-        spriteWrap.appendChild(img);
+        el.appendChild(img);
       } else {
         const overlay = document.createElement('span');
         overlay.className = `piece__cosmetic piece__cosmetic--${cosmetic.position}`;
         overlay.textContent = cosmetic.overlay;
-        // Dynamic positioning for emoji cosmetics too
         if (cosmetic.position === 'top') {
           overlay.style.top = `${headData.headTop - 10}%`;
           overlay.style.left = `${headData.headLeft}%`;
@@ -377,12 +372,10 @@ function createPieceElement(piece, playerColor) {
           overlay.style.left = `${headData.headLeft}%`;
           overlay.style.transform = 'translate(-50%, -15%)';
         }
-        spriteWrap.appendChild(overlay);
+        el.appendChild(overlay);
       }
     }
   }
-
-  el.appendChild(spriteWrap);
 
   // HP Bar
   const hpBar = document.createElement('div');
