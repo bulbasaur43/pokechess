@@ -5082,14 +5082,14 @@ body {
   z-index: 6;
 }
 .piece__cosmetic--middle.piece__cosmetic--img {
-  top: 5%;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  width: 85%;
+  transform: translate(-50%, -50%);
+  width: 100%;
   height: auto;
-  max-height: 75%;
+  max-height: 90%;
   z-index: 6;
-  opacity: 0.88;
+  opacity: 0.85;
 }
 
 /* BOTTOM — feet level, slightly behind */
