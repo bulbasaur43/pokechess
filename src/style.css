@@ -5037,6 +5037,10 @@ body {
 }
 
 /* ── Piece Cosmetic Overlays ── */
+.piece {
+  overflow: visible !important;
+}
+
 .piece__cosmetic {
   position: absolute;
   pointer-events: none;
@@ -5051,59 +5055,67 @@ body {
   mix-blend-mode: screen;
 }
 
-/* Hats / ears / masks — sit ON the Pokémon's head, overlapping the sprite */
+/* TOP — Hats/masks/ears: overlap top of Pokémon head */
 .piece__cosmetic--top {
-  top: -2px;
+  top: -4px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 1rem;
+  font-size: 1.1rem;
+  z-index: 6;
 }
 .piece__cosmetic--top.piece__cosmetic--img {
-  top: -12px;
+  top: -6px;
   left: 50%;
   transform: translateX(-50%);
-  width: 34px;
-  height: 34px;
+  width: 80%;
+  height: auto;
+  max-height: 60%;
+  z-index: 6;
 }
 
-/* Sunglasses / face items — right on the face, upper-middle of sprite */
+/* MIDDLE — Sunglasses/face items: sit on the face */
 .piece__cosmetic--middle {
-  top: 30%;
+  top: 25%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 1rem;
+  transform: translate(-50%, -20%);
+  font-size: 1.1rem;
   opacity: 0.9;
+  z-index: 6;
 }
 
-/* Bottom items — at the Pokémon's feet */
+/* BOTTOM — feet level, slightly behind */
 .piece__cosmetic--bottom {
-  bottom: 8px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
+  z-index: 2;
 }
 .piece__cosmetic--bottom.piece__cosmetic--img {
-  bottom: 2px;
+  bottom: 6px;
   left: 50%;
   transform: translateX(-50%);
-  width: 22px;
-  height: 22px;
+  width: 50%;
+  height: auto;
+  z-index: 2;
 }
 
-/* Aura emoji — surrounds the Pokémon with a pulsing effect */
+/* AURA — emoji wraps around the piece */
 .piece__cosmetic--aura {
-  top: 0;
-  right: -2px;
-  font-size: 0.7rem;
+  top: -2px;
+  right: -4px;
+  font-size: 0.8rem;
+  z-index: 6;
   animation: cosmeticPulse 2s ease-in-out infinite;
 }
-/* Image auras — held at the side like a weapon/shield */
+/* Image auras — wielded at the side like a weapon */
 .piece__cosmetic--aura.piece__cosmetic--img {
   top: auto;
-  right: -10px;
-  bottom: 4px;
-  width: 28px;
-  height: 28px;
+  right: -12px;
+  bottom: 0;
+  width: 65%;
+  height: auto;
+  z-index: 6;
   animation: cosmeticFloat 2.5s ease-in-out infinite;
 }
 
