@@ -7,7 +7,7 @@ import { TEAMS, POKEMON, POKEMON_POOL, KING_POOL, BACK_RANK_ROLES, ABILITIES } f
 import { AI_DIFFICULTIES } from '../engine/ai.js';
 import { loadPlayerStats, getRankTitle, getWinRate } from '../engine/elo.js';
 import { isLoggedIn, getUsername, login, signup, logout, refreshProfile, getLeaderboard, saveTeam, loadTeam } from '../engine/auth.js';
-import { isPokemonUnlocked } from './shop.js';
+import { isPokemonUnlocked, openShop, getCoins } from './shop.js';
 
 export function renderTitleScreen(onStart) {
   const app = document.getElementById('app');
@@ -168,8 +168,11 @@ export function renderTitleScreen(onStart) {
         </ul>
       </div>
 
-      <!-- Admin Panel -->
-      <button class="btn btn--admin" id="btn-admin">🔒 Admin</button>
+      <!-- Shop & Admin -->
+      <div class="title-bottom-btns">
+        <button class="btn btn--shop-title" id="btn-shop-title">🛒 Shop <span class="shop-coin-badge">🪙 <span id="title-coin-count">0</span></span></button>
+        <button class="btn btn--admin" id="btn-admin">🔒 Admin</button>
+      </div>
       <div class="admin-overlay" id="admin-overlay"></div>
     </div>
   `;
@@ -556,6 +559,13 @@ export function renderTitleScreen(onStart) {
       overlay.innerHTML = '';
     });
   }
+
+  // ── Shop on Title Screen ──
+  const coinCountEl = document.getElementById('title-coin-count');
+  if (coinCountEl) coinCountEl.textContent = getCoins();
+  document.getElementById('btn-shop-title')?.addEventListener('click', () => {
+    openShop(null); // no item-use callback on title screen
+  });
 
   // ── Admin Panel ──
   document.getElementById('btn-admin')?.addEventListener('click', showAdminPanel);

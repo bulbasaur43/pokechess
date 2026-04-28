@@ -7,6 +7,7 @@ import { TYPES, POKEMON, TEAMS, COLOR_TO_TEAM, TYPE_KEYS, getEffectiveness } fro
 import { ROLES } from '../engine/board.js';
 import { PHASES } from '../engine/game.js';
 import { loadPlayerStats, getRankTitle, getWinRate } from '../engine/elo.js';
+import { getInventory, isItemReady, getCooldownRemaining, SHOP_ITEMS, getCoins } from './shop.js';
 
 export function renderHUD(game, callbacks) {
   const hud = document.getElementById('hud');
@@ -154,6 +155,35 @@ export function renderHUD(game, callbacks) {
   controls.appendChild(chartBtn);
 
   hud.appendChild(controls);
+
+  // ── Item Bar (in-game inventory) ──
+  const inv = getInventory();
+  const ownedItems = Object.entries(inv).filter(([_, v]) => v && v.uses > 0);
+  if (ownedItems.length > 0) {
+    const itemBar = document.createElement('div');
+    itemBar.className = 'item-bar';
+    for (const [itemId, entry] of ownedItems) {
+      const item = SHOP_ITEMS[itemId];
+      if (!item) continue;
+      const ready = isItemReady(itemId);
+      const cd = getCooldownRemaining(itemId);
+      const btn = document.createElement('button');
+      btn.className = `item-bar__btn ${!ready ? 'item-bar__btn--cooldown' : ''}`;
+      btn.disabled = !ready;
+      btn.title = ready ? `Use ${item.name}: ${item.useDescription}` : `Cooldown: ${cd} battle(s)`;
+      btn.innerHTML = `
+        <span class="item-bar__emoji">${item.emoji}</span>
+        <span class="item-bar__qty">${entry.uses}</span>
+        ${cd > 0 ? `<span class="item-bar__cd">⏳${cd}</span>` : ''}
+      `;
+      btn.addEventListener('click', () => {
+        if (ready) callbacks?.onUseItem?.(itemId);
+      });
+      itemBar.appendChild(btn);
+    }
+    hud.appendChild(itemBar);
+  }
+
   renderTypeChartOverlay();
 }
 

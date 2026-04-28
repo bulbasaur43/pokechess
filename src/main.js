@@ -277,7 +277,7 @@ function renderGameView() {
 function renderAll() {
   if (!game.board) return;
   renderBoard(game, { onCellClick: handleCellClick });
-  renderHUD(game, { onNewGame: handleNewGame, onOpenShop: handleOpenShop });
+  renderHUD(game, { onNewGame: handleNewGame, onOpenShop: handleOpenShop, onUseItem: handleItemUse });
   if (game.pendingOptionalAttack && canPlayerAct()) showOptionalAttackPrompt();
   if (aiThinking) showAIThinking();
   // Report ELO when game ends
