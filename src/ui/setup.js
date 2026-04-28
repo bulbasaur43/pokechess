@@ -7,7 +7,7 @@ import { TEAMS, POKEMON, POKEMON_POOL, KING_POOL, BACK_RANK_ROLES, ABILITIES } f
 import { AI_DIFFICULTIES } from '../engine/ai.js';
 import { loadPlayerStats, getRankTitle, getWinRate } from '../engine/elo.js';
 import { isLoggedIn, getUsername, login, signup, logout, refreshProfile, getLeaderboard, saveTeam, loadTeam } from '../engine/auth.js';
-import { isPokemonUnlocked, openShop, getCoins } from './shop.js';
+import { isPokemonUnlocked, openShop, getCoins, initShop } from './shop.js';
 
 export function renderTitleScreen(onStart) {
   const app = document.getElementById('app');
@@ -563,6 +563,10 @@ export function renderTitleScreen(onStart) {
   // ── Shop on Title Screen ──
   const coinCountEl = document.getElementById('title-coin-count');
   if (coinCountEl) coinCountEl.textContent = getCoins();
+  // Sync from server to pick up admin changes, then update display
+  initShop().then(() => {
+    if (coinCountEl) coinCountEl.textContent = getCoins();
+  });
   document.getElementById('btn-shop-title')?.addEventListener('click', () => {
     openShop(null); // no item-use callback on title screen
   });

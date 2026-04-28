@@ -162,6 +162,7 @@ export const SHOP_ITEMS = {
 };
 
 // ─── State ──────────────────────────────────────────────────────────
+// Load immediately so getCoins() works before shop is opened
 
 let _coins = 0;
 let _inventory = {};
@@ -192,6 +193,15 @@ function saveState() {
     unlockedPokemon: _unlockedPokemon,
     lastDailyReward: _lastDailyReward,
   }));
+}
+
+// Load from localStorage immediately at module init
+loadState();
+
+/** Call on app start to sync from server (picks up admin coin changes) */
+export async function initShop() {
+  loadState();
+  await loadFromServer();
 }
 
 // ─── Pokémon Purchase ───────────────────────────────────────────────
