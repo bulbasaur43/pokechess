@@ -161,6 +161,26 @@ export const SHOP_ITEMS = {
   },
 };
 
+// ─── Cosmetics ──────────────────────────────────────────────────────
+
+export const COSMETICS = {
+  PARTY_HAT:   { id: 'PARTY_HAT',   name: 'Party Hat',     emoji: '🎉', overlay: '🥳', coinCost: 5,  position: 'top',    color: '#f472b6' },
+  CROWN:       { id: 'CROWN',       name: 'Crown',         emoji: '👑', overlay: '👑', coinCost: 15, position: 'top',    color: '#fbbf24' },
+  SUNGLASSES:  { id: 'SUNGLASSES',  name: 'Sunglasses',    emoji: '🕶️', overlay: '🕶️', coinCost: 10, position: 'middle', color: '#1e293b' },
+  BOW:         { id: 'BOW',         name: 'Bow',           emoji: '🎀', overlay: '🎀', coinCost: 5,  position: 'top',    color: '#fb7185' },
+  FLAME_AURA:  { id: 'FLAME_AURA',  name: 'Flame Aura',   emoji: '🔥', overlay: '🔥', coinCost: 20, position: 'aura',   color: '#ef4444' },
+  ICE_AURA:    { id: 'ICE_AURA',    name: 'Ice Aura',     emoji: '❄️', overlay: '❄️', coinCost: 20, position: 'aura',   color: '#38bdf8' },
+  SPARKLE:     { id: 'SPARKLE',     name: 'Sparkle',       emoji: '✨', overlay: '✨', coinCost: 12, position: 'aura',   color: '#fcd34d' },
+  RAINBOW:     { id: 'RAINBOW',     name: 'Rainbow Trail', emoji: '🌈', overlay: '🌈', coinCost: 25, position: 'bottom', color: '#a78bfa' },
+  // Premium Gaming Cosmetics — actual pixel art images
+  MAJORAS_MASK:  { id: 'MAJORAS_MASK',  name: "Majora's Mask",  emoji: '🎭', overlay: '🎭', img: '/assets/cosmetics/majoras_mask.png', coinCost: 75, position: 'top',    color: '#7c3aed' },
+  LINKS_HAT:     { id: 'LINKS_HAT',     name: "Link's Hat",     emoji: '🧝', overlay: '🧝', img: '/assets/cosmetics/links_hat.png',   coinCost: 75, position: 'top',    color: '#22c55e' },
+  MARIOS_HAT:    { id: 'MARIOS_HAT',    name: "Mario's Hat",    emoji: '🍄', overlay: '🍄', img: '/assets/cosmetics/marios_hat.png',  coinCost: 75, position: 'top',    color: '#ef4444' },
+  PIKACHU_EARS:  { id: 'PIKACHU_EARS',  name: 'Pikachu Ears',   emoji: '⚡', overlay: '⚡', img: '/assets/cosmetics/pikachu_ears.png', coinCost: 75, position: 'top',    color: '#facc15' },
+  MASTER_SWORD:  { id: 'MASTER_SWORD',  name: 'Master Sword',   emoji: '⚔️', overlay: '⚔️', img: '/assets/cosmetics/master_sword.png', coinCost: 75, position: 'aura',   color: '#60a5fa' },
+  POKEBALL:      { id: 'POKEBALL',      name: 'Poké Ball',      emoji: '🔴', overlay: '🔴', img: '/assets/cosmetics/pokeball.png',    coinCost: 75, position: 'bottom', color: '#dc2626' },
+};
+
 // ─── State ──────────────────────────────────────────────────────────
 // Load immediately so getCoins() works before shop is opened
 
@@ -168,7 +188,9 @@ let _coins = 0;
 let _inventory = {};
 let _battleCount = 0;
 let _unlockedPokemon = [];
-let _lastDailyReward = ''; // ISO date string e.g. '2026-04-27'
+let _lastDailyReward = '';
+let _ownedCosmetics = [];   // cosmetic IDs owned
+let _equippedCosmetic = ''; // currently active cosmetic ID
 const STATE_KEY = 'pokechess_shop';
 
 function loadState() {
@@ -181,8 +203,10 @@ function loadState() {
       _battleCount = data.battleCount || 0;
       _unlockedPokemon = data.unlockedPokemon || [];
       _lastDailyReward = data.lastDailyReward || '';
+      _ownedCosmetics = data.ownedCosmetics || [];
+      _equippedCosmetic = data.equippedCosmetic || '';
     }
-  } catch { _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = []; _lastDailyReward = ''; }
+  } catch { _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = []; _lastDailyReward = ''; _ownedCosmetics = []; _equippedCosmetic = ''; }
 }
 
 function saveState() {
@@ -192,6 +216,8 @@ function saveState() {
     battleCount: _battleCount,
     unlockedPokemon: _unlockedPokemon,
     lastDailyReward: _lastDailyReward,
+    ownedCosmetics: _ownedCosmetics,
+    equippedCosmetic: _equippedCosmetic,
   }));
 }
 
@@ -204,7 +230,29 @@ export async function initShop() {
   await loadFromServer();
 }
 
-// ─── Pokémon Purchase ───────────────────────────────────────────────
+// ─── Cosmetic API ───────────────────────────────────────────────────
+
+export function buyCosmetic(cosmeticId) {
+  const c = COSMETICS[cosmeticId];
+  if (!c) return false;
+  if (_ownedCosmetics.includes(cosmeticId)) return false;
+  if (_coins < c.coinCost) return false;
+  _coins -= c.coinCost;
+  _ownedCosmetics.push(cosmeticId);
+  saveState();
+  syncToServer();
+  return true;
+}
+
+export function equipCosmetic(cosmeticId) {
+  if (cosmeticId && !_ownedCosmetics.includes(cosmeticId)) return;
+  _equippedCosmetic = cosmeticId || '';
+  saveState();
+  syncToServer();
+}
+
+export function getEquippedCosmetic() { return _equippedCosmetic; }
+export function getOwnedCosmetics() { return [..._ownedCosmetics]; }
 
 /** Coin cost scales with ELO requirement */
 export function getPokemonCoinCost(requiredElo) {
@@ -456,12 +504,22 @@ export function openShop(onItemUse) {
   panel.innerHTML = `
     <button class="shop-close" id="shop-close">✕</button>
     <h2 class="shop-title">🛒 PokéShop</h2>
+    <div class="shop-coins-display" id="shop-coins">
+      <span class="shop-coins-icon">🪙</span>
+      <span class="shop-coins-amount">${_coins}</span>
+      <span class="shop-coins-label">PokéCoins</span>
+    </div>
+
+    <div class="shop-section">
+      <h3 class="shop-section-title">🎨 Cosmetics <span class="shop-section-hint">Customize your Pokémon!</span></h3>
+      <div class="shop-cosmetics" id="shop-cosmetics"></div>
+    </div>
 
     <div class="shop-coming-soon">
       <span class="shop-coming-soon__icon">🚧</span>
       <div class="shop-coming-soon__text">
-        <strong>Coming Soon!</strong>
-        <p>Purchasing will be available in a future update. Browse what's coming below!</p>
+        <strong>More coming soon!</strong>
+        <p>Items, coin packs, and Pokémon unlocks in a future update.</p>
       </div>
     </div>
 
@@ -485,6 +543,7 @@ export function openShop(onItemUse) {
   document.body.appendChild(overlay);
   requestAnimationFrame(() => overlay.classList.add('shop-overlay--show'));
 
+  renderCosmetics();
   renderCoinPacks();
   renderShopItems();
   renderPokemonShop();
@@ -505,6 +564,58 @@ export function closeShop() {
 function updateCoinsDisplay() {
   const el = document.querySelector('.shop-coins-amount');
   if (el) el.textContent = _coins;
+  const titleEl = document.getElementById('title-coin-count');
+  if (titleEl) titleEl.textContent = _coins;
+}
+
+function renderCosmetics() {
+  const container = document.getElementById('shop-cosmetics');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const grid = document.createElement('div');
+  grid.className = 'shop-cosmetic-grid';
+
+  for (const c of Object.values(COSMETICS)) {
+    const owned = _ownedCosmetics.includes(c.id);
+    const equipped = _equippedCosmetic === c.id;
+    const canAfford = _coins >= c.coinCost;
+
+    const card = document.createElement('button');
+    card.className = `shop-cosmetic-card ${owned ? 'shop-cosmetic-card--owned' : ''} ${equipped ? 'shop-cosmetic-card--equipped' : ''}`;
+    card.style.setProperty('--cosmetic-color', c.color);
+    const preview = c.img
+      ? `<img class="shop-cosmetic-preview-img" src="${c.img}" alt="${c.name}" />`
+      : `<div class="shop-cosmetic-preview">${c.overlay}</div>`;
+    card.innerHTML = `
+      ${preview}
+      <div class="shop-cosmetic-name">${c.name}</div>
+      ${owned
+        ? `<div class="shop-cosmetic-action">${equipped ? '✓ Equipped' : 'Equip'}</div>`
+        : `<div class="shop-cosmetic-price ${!canAfford ? 'shop-cosmetic-price--cant' : ''}">🪙 ${c.coinCost}</div>`
+      }
+    `;
+
+    card.addEventListener('click', () => {
+      if (owned) {
+        equipCosmetic(equipped ? '' : c.id);
+        renderCosmetics();
+      } else if (canAfford) {
+        if (buyCosmetic(c.id)) {
+          equipCosmetic(c.id);
+          showShopToast(`🎨 ${c.name} purchased & equipped!`, 'success');
+          updateCoinsDisplay();
+          renderCosmetics();
+        }
+      } else {
+        showShopToast(`Need ${c.coinCost} coins (you have ${_coins})`, 'error');
+      }
+    });
+
+    grid.appendChild(card);
+  }
+
+  container.appendChild(grid);
 }
 
 function renderCoinPacks() {

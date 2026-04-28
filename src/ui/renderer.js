@@ -7,6 +7,7 @@
 import { ROLES } from '../engine/board.js';
 import { TYPES, POKEMON, TEAMS, COLOR_TO_TEAM } from '../engine/types.js';
 import { getBattlePreview } from '../engine/battle.js';
+import { getEquippedCosmetic, COSMETICS } from './shop.js';
 
 // Persistent board grid — built once, updated in-place
 let _cells = null; // Map<"row,col", HTMLElement>
@@ -196,6 +197,27 @@ function createPieceElement(piece) {
     symbol.className = 'piece__emoji piece__emoji--pawn';
     symbol.textContent = team.pawnEmoji;
     el.appendChild(symbol);
+  }
+
+  // Cosmetic overlay (only on player pieces)
+  const cosmeticId = getEquippedCosmetic();
+  if (cosmeticId) {
+    const cosmetic = COSMETICS[cosmeticId];
+    if (cosmetic) {
+      if (cosmetic.img) {
+        const img = document.createElement('img');
+        img.className = `piece__cosmetic piece__cosmetic--${cosmetic.position} piece__cosmetic--img`;
+        img.src = cosmetic.img;
+        img.alt = cosmetic.name;
+        img.draggable = false;
+        el.appendChild(img);
+      } else {
+        const overlay = document.createElement('span');
+        overlay.className = `piece__cosmetic piece__cosmetic--${cosmetic.position}`;
+        overlay.textContent = cosmetic.overlay;
+        el.appendChild(overlay);
+      }
+    }
   }
 
   // HP Bar

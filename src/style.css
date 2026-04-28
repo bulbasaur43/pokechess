@@ -4971,3 +4971,173 @@ body {
   font-size: 0.65rem;
   color: #fbbf24;
 }
+
+/* ── Cosmetic Shop Grid ── */
+.shop-cosmetic-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.shop-cosmetic-card {
+  width: 80px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  color: #e5e5e5;
+  font-family: var(--font-main);
+  position: relative;
+}
+.shop-cosmetic-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--cosmetic-color, rgba(139, 92, 246, 0.4));
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--cosmetic-color, #8b5cf6) 30%, transparent);
+}
+
+.shop-cosmetic-card--owned {
+  border-color: rgba(74, 222, 128, 0.25);
+}
+.shop-cosmetic-card--equipped {
+  border-color: var(--cosmetic-color, rgba(139, 92, 246, 0.6)) !important;
+  background: color-mix(in srgb, var(--cosmetic-color, #8b5cf6) 10%, transparent) !important;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--cosmetic-color, #8b5cf6) 20%, transparent);
+}
+
+.shop-cosmetic-preview {
+  font-size: 1.8rem;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+.shop-cosmetic-name {
+  font-size: 0.6rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.shop-cosmetic-price {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fbbf24;
+  margin-top: 4px;
+}
+.shop-cosmetic-price--cant {
+  color: rgba(251, 191, 36, 0.35);
+}
+.shop-cosmetic-action {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #86efac;
+  margin-top: 4px;
+}
+
+/* ── Piece Cosmetic Overlays ── */
+.piece__cosmetic {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+  line-height: 1;
+}
+
+.piece__cosmetic--img {
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+
+.piece__cosmetic--top {
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+}
+.piece__cosmetic--top.piece__cosmetic--img {
+  top: -10px;
+  width: 20px;
+  height: 20px;
+}
+
+.piece__cosmetic--middle {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+
+.piece__cosmetic--bottom {
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+}
+.piece__cosmetic--bottom.piece__cosmetic--img {
+  bottom: 2px;
+  width: 14px;
+  height: 14px;
+}
+
+.piece__cosmetic--aura {
+  top: -4px;
+  right: -4px;
+  font-size: 0.55rem;
+  animation: cosmeticPulse 2s ease-in-out infinite;
+}
+/* Image auras sit at the side like the piece is holding it */
+.piece__cosmetic--aura.piece__cosmetic--img {
+  top: auto;
+  right: -8px;
+  bottom: 4px;
+  width: 18px;
+  height: 18px;
+  animation: cosmeticFloat 2.5s ease-in-out infinite;
+}
+
+@keyframes cosmeticPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes cosmeticFloat {
+  0%, 100% { transform: translateY(0) rotate(-10deg); }
+  50% { transform: translateY(-3px) rotate(-10deg); }
+}
+
+/* Shop preview image */
+.shop-cosmetic-preview-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+/* Coins display in shop header */
+.shop-coins-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.15);
+  border-radius: 10px;
+}
+.shop-coins-icon { font-size: 1.2rem; }
+.shop-coins-amount {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #fbbf24;
+  font-family: var(--font-heading);
+}
+.shop-coins-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
