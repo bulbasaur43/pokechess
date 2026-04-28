@@ -5055,7 +5055,7 @@ body {
   );
   background-size: 300% 300%;
   animation: rainbowShimmer 2s ease-in-out infinite;
-  opacity: calc(1 - var(--rainbow-age, 0) * 0.18);
+  opacity: calc(1 - var(--rainbow-age, 0) * 0.09);
   z-index: 1;
   pointer-events: none;
   border-radius: 2px;
@@ -5067,7 +5067,7 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 0.6rem;
-  opacity: calc(0.7 - var(--rainbow-age, 0) * 0.14);
+  opacity: calc(0.7 - var(--rainbow-age, 0) * 0.07);
   z-index: 2;
   pointer-events: none;
   animation: rainbowSparkle 1.5s ease-in-out infinite;
@@ -5080,8 +5080,8 @@ body {
 }
 
 @keyframes rainbowSparkle {
-  0%, 100% { transform: translate(-50%, -50%) scale(0.8); opacity: calc(0.5 - var(--rainbow-age, 0) * 0.1); }
-  50% { transform: translate(-50%, -50%) scale(1.2); opacity: calc(0.8 - var(--rainbow-age, 0) * 0.14); }
+  0%, 100% { transform: translate(-50%, -50%) scale(0.8); opacity: calc(0.5 - var(--rainbow-age, 0) * 0.05); }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: calc(0.8 - var(--rainbow-age, 0) * 0.07); }
 }
 
 /* ── Piece Cosmetic Overlays ── */

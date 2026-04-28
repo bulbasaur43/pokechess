@@ -90,7 +90,7 @@ export function renderBoard(game, callbacks) {
     // Age all trails and remove old ones
     _rainbowTrails = _rainbowTrails
       .map(t => ({ ...t, age: t.age + 1 }))
-      .filter(t => t.age <= 5);
+      .filter(t => t.age <= 10);
   } else if (getEquippedCosmetic() !== 'RAINBOW') {
     _rainbowTrails = [];
   }
