@@ -215,6 +215,9 @@ function createPieceElement(piece) {
   el.dataset.role = piece.role;
 
   const team = TEAMS[COLOR_TO_TEAM[piece.color]];
+  // Sprite wrapper — cosmetics are positioned relative to this
+  const spriteWrap = document.createElement('div');
+  spriteWrap.className = 'piece__sprite-wrap';
 
   // Main visual — show image for any Pokémon that has one
   const pkmn = piece.pokemon ? POKEMON[piece.pokemon] : null;
@@ -225,17 +228,17 @@ function createPieceElement(piece) {
     img.src = pkmn.img;
     img.alt = pkmn.name;
     img.draggable = false;
-    el.appendChild(img);
+    spriteWrap.appendChild(img);
   } else if (pkmn) {
     const symbol = document.createElement('span');
     symbol.className = 'piece__emoji';
     symbol.textContent = pkmn.emoji;
-    el.appendChild(symbol);
+    spriteWrap.appendChild(symbol);
   } else {
     const symbol = document.createElement('span');
     symbol.className = 'piece__emoji piece__emoji--pawn';
     symbol.textContent = team.pawnEmoji;
-    el.appendChild(symbol);
+    spriteWrap.appendChild(symbol);
   }
 
   // Cosmetic overlay (only on player pieces)
@@ -248,15 +251,17 @@ function createPieceElement(piece) {
         img.className = `piece__cosmetic piece__cosmetic--${cosmetic.position} piece__cosmetic--img`;
         img.src = cosmetic.img;
         img.draggable = false;
-        el.appendChild(img);
+        spriteWrap.appendChild(img);
       } else {
         const overlay = document.createElement('span');
         overlay.className = `piece__cosmetic piece__cosmetic--${cosmetic.position}`;
         overlay.textContent = cosmetic.overlay;
-        el.appendChild(overlay);
+        spriteWrap.appendChild(overlay);
       }
     }
   }
+
+  el.appendChild(spriteWrap);
 
   // HP Bar
   const hpBar = document.createElement('div');

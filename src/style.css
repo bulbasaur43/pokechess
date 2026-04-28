@@ -5089,10 +5089,20 @@ body {
   overflow: visible !important;
 }
 
+.piece__sprite-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
 .piece__cosmetic {
   position: absolute;
   pointer-events: none;
-  z-index: 5;
+  z-index: 6;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
   line-height: 1;
 }
@@ -5103,62 +5113,58 @@ body {
   mix-blend-mode: screen;
 }
 
-/* TOP — Hats/masks/ears: overlap top of Pokémon head */
+/* TOP — Hats/ears: sit on top of the head, overlapping into sprite */
 .piece__cosmetic--top {
-  top: -4px;
+  top: -6px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 1.1rem;
   z-index: 6;
 }
 .piece__cosmetic--top.piece__cosmetic--img {
-  top: -6px;
+  top: -4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 80%;
+  width: 60%;
   height: auto;
-  max-height: 60%;
   z-index: 6;
 }
 
-/* MIDDLE — Face masks/overlays: sit right on the face */
+/* MIDDLE — Face masks: overlay upper face area of sprite */
 .piece__cosmetic--middle {
-  top: 25%;
+  top: 15%;
   left: 50%;
-  transform: translate(-50%, -20%);
+  transform: translate(-50%, 0);
   font-size: 1.1rem;
-  opacity: 0.9;
   z-index: 6;
 }
 .piece__cosmetic--middle.piece__cosmetic--img {
-  top: 10%;
+  top: 8%;
   left: 50%;
   transform: translateX(-50%);
   width: 55%;
   height: auto;
-  max-height: 50%;
   z-index: 6;
-  opacity: 1;
 }
 
-/* BOTTOM — feet level, slightly behind */
+/* BOTTOM — at the Pokémon's feet */
 .piece__cosmetic--bottom {
-  bottom: 10px;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.85rem;
   z-index: 2;
 }
 .piece__cosmetic--bottom.piece__cosmetic--img {
-  bottom: 6px;
+  bottom: -2px;
   left: 50%;
   transform: translateX(-50%);
-  width: 50%;
+  width: 40%;
   height: auto;
   z-index: 2;
 }
 
-/* AURA — emoji wraps around the piece */
+/* AURA — emoji pulsing near the piece */
 .piece__cosmetic--aura {
   top: -2px;
   right: -4px;
