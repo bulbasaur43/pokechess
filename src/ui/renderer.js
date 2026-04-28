@@ -9,43 +9,10 @@ import { TYPES, POKEMON, TEAMS, COLOR_TO_TEAM } from '../engine/types.js';
 import { getBattlePreview } from '../engine/battle.js';
 import { getEquippedCosmetic, COSMETICS } from './shop.js';
 
-// ── Cosmetic image cache (processed once, reused forever) ──
-const _cosmeticCache = {};  // id → data URL with transparent bg
-const _cosmeticLoading = {}; // id → boolean
-
-function _prepareCosmeticImage(id, src) {
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    const c = document.createElement('canvas');
-    c.width = img.naturalWidth;
-    c.height = img.naturalHeight;
-    const ctx = c.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    const data = ctx.getImageData(0, 0, c.width, c.height);
-    const d = data.data;
-    for (let i = 0; i < d.length; i += 4) {
-      if (d[i] < 45 && d[i+1] < 45 && d[i+2] < 45) d[i+3] = 0;
-    }
-    ctx.putImageData(data, 0, 0);
-    _cosmeticCache[id] = c.toDataURL('image/png');
-    _cosmeticLoading[id] = false;
-  };
-  img.onerror = () => { _cosmeticLoading[id] = false; };
-  img.src = src;
-}
-
 // Persistent board grid — built once, updated in-place
 let _cells = null; // Map<"row,col", HTMLElement>
 let _boardEl = null;
 let _lastViewColor = null;
-
-// Eagerly pre-load the currently equipped cosmetic
-{
-  const id = getEquippedCosmetic();
-  const c = id ? COSMETICS[id] : null;
-  if (c?.img) { _cosmeticLoading[id] = true; _prepareCosmeticImage(id, c.img); }
-}
 
 /**
  * Render the board to the DOM
@@ -238,19 +205,11 @@ function createPieceElement(piece) {
     const cosmetic = COSMETICS[cosmeticId];
     if (cosmetic) {
       if (cosmetic.img) {
-        const cached = _cosmeticCache[cosmeticId];
-        if (cached) {
-          // Use pre-processed transparent image
-          const img = document.createElement('img');
-          img.className = `piece__cosmetic piece__cosmetic--${cosmetic.position} piece__cosmetic--img`;
-          img.src = cached;
-          img.draggable = false;
-          el.appendChild(img);
-        } else if (!_cosmeticLoading[cosmeticId]) {
-          // Process image once and cache it
-          _cosmeticLoading[cosmeticId] = true;
-          _prepareCosmeticImage(cosmeticId, cosmetic.img);
-        }
+        const img = document.createElement('img');
+        img.className = `piece__cosmetic piece__cosmetic--${cosmetic.position} piece__cosmetic--img`;
+        img.src = cosmetic.img;
+        img.draggable = false;
+        el.appendChild(img);
       } else {
         const overlay = document.createElement('span');
         overlay.className = `piece__cosmetic piece__cosmetic--${cosmetic.position}`;

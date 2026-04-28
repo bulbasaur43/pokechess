@@ -5052,6 +5052,7 @@ body {
 .piece__cosmetic--img {
   image-rendering: pixelated;
   object-fit: contain;
+  mix-blend-mode: screen;
 }
 
 /* TOP — Hats/masks/ears: overlap top of Pokémon head */
@@ -5117,15 +5118,15 @@ body {
   z-index: 6;
   animation: cosmeticPulse 2s ease-in-out infinite;
 }
-/* Image auras — wielded at the side like a weapon */
+/* Image auras — small icon at the side */
 .piece__cosmetic--aura.piece__cosmetic--img {
   top: auto;
-  right: -12px;
-  bottom: 0;
-  width: 65%;
+  right: -6px;
+  bottom: 2px;
+  width: 40%;
   height: auto;
   z-index: 6;
-  animation: cosmeticFloat 2.5s ease-in-out infinite;
+  animation: cosmeticFloat 3s ease-in-out infinite;
 }
 
 @keyframes cosmeticPulse {
@@ -5134,8 +5135,8 @@ body {
 }
 
 @keyframes cosmeticFloat {
-  0%, 100% { transform: translateY(0) rotate(-8deg); }
-  50% { transform: translateY(-4px) rotate(-8deg); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 
 /* Shop preview image */
