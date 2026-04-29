@@ -193,7 +193,7 @@ let _ownedCosmetics = [];   // cosmetic IDs owned
 let _equippedCosmetic = ''; // currently active cosmetic ID
 const STATE_KEY = 'pokechess_shop';
 
-// Pre-process cosmetic images: strip black backgrounds → transparent PNGs
+// Pre-process cosmetic images: strip black/white backgrounds → transparent PNGs
 (function initCosmeticImages() {
   for (const c of Object.values(COSMETICS)) {
     if (!c.img) continue;
@@ -209,13 +209,21 @@ const STATE_KEY = 'pokechess_shop';
       const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const d = data.data;
       for (let i = 0; i < d.length; i += 4) {
-        // Remove near-black pixels (threshold 50)
-        if (d[i] < 50 && d[i+1] < 50 && d[i+2] < 50) {
+        const r = d[i], g = d[i+1], b = d[i+2];
+        // Remove near-black pixels (tight threshold 30)
+        if (r < 30 && g < 30 && b < 30) {
           d[i+3] = 0;
         }
-        // Remove near-white pixels (for Link's hat bg, threshold 220)
-        if (d[i] > 220 && d[i+1] > 220 && d[i+2] > 220) {
+        // Remove near-white pixels (tight threshold 240)
+        else if (r > 240 && g > 240 && b > 240) {
           d[i+3] = 0;
+        }
+        // Soften edges near thresholds for smoother blending
+        else if (r < 45 && g < 45 && b < 45) {
+          d[i+3] = Math.min(d[i+3], Math.round(((r + g + b) / 3 - 30) / 15 * 255));
+        }
+        else if (r > 225 && g > 225 && b > 225) {
+          d[i+3] = Math.min(d[i+3], Math.round((240 - (r + g + b) / 3) / 15 * 255));
         }
       }
       ctx.putImageData(data, 0, 0);

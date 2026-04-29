@@ -522,7 +522,13 @@ function getPublicProfile(user) {
 
 // ─── Admin API ──────────────────────────────────────────────────────
 
-const ADMIN_PASSWORD = 'megabulbasaur';
+// Admin password from env var — never hardcoded in source
+// Set ADMIN_PASSWORD env var on your server. Hashed check prevents inspect discovery.
+const ADMIN_PASSWORD_HASH = (() => {
+  const pw = process.env.ADMIN_PASSWORD || '';
+  if (!pw) return null;
+  return createHash('sha256').update(pw).digest('hex');
+})();
 
 function getServerRank(rating) {
   if (rating >= 2000) return { title: 'Champion',  emoji: '👑' };
@@ -535,7 +541,11 @@ function getServerRank(rating) {
 }
 
 function verifyAdmin(body) {
-  return body?.adminPassword === ADMIN_PASSWORD;
+  if (!ADMIN_PASSWORD_HASH) return false; // No password configured
+  const attempt = body?.adminPassword;
+  if (!attempt) return false;
+  const attemptHash = createHash('sha256').update(attempt).digest('hex');
+  return attemptHash === ADMIN_PASSWORD_HASH;
 }
 
 function handleAdminListUsers(req, res, body) {

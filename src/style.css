@@ -1438,17 +1438,17 @@ body {
 }
 
 .piece__img {
-  width: 88%;
-  height: 88%;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  object-position: center;
+  object-position: center bottom;
   pointer-events: none;
   transition: transform 0.4s ease;
 }
 
 .piece__img--legendary {
-  width: 92%;
-  height: 92%;
+  width: 100%;
+  height: 100%;
 }
 
 /* ── HP Bar ── */
@@ -5091,11 +5091,9 @@ body {
 
 .piece__sprite-wrap {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
+  width: 88%;
+  height: 88%;
+  flex-shrink: 0;
   overflow: visible;
 }
 
@@ -5110,58 +5108,57 @@ body {
 .piece__cosmetic--img {
   image-rendering: pixelated;
   object-fit: contain;
-  mix-blend-mode: screen;
+  /* Normal blend so image cosmetics render properly on any background */
+  mix-blend-mode: normal;
 }
 
-/* TOP — Hats/ears: sit on top of the head, overlapping into sprite */
+/* TOP — Hats/ears: fallback positions (JS overrides per-Pokémon) */
 .piece__cosmetic--top {
-  top: -6px;
+  top: -8%;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 1.2rem;
-  z-index: 6;
+  font-size: 1.1rem;
 }
 .piece__cosmetic--top.piece__cosmetic--img {
-  top: -8px;
+  top: -8%;
   left: 50%;
   transform: translateX(-50%);
-  width: 70%;
+  width: 55%;
   height: auto;
-  z-index: 6;
 }
 
-/* MIDDLE — Face masks: overlay upper face area of sprite */
+/* MIDDLE — Face masks */
 .piece__cosmetic--middle {
-  top: 10%;
+  top: 12%;
   left: 50%;
-  transform: translate(-50%, 0);
-  font-size: 1.2rem;
-  z-index: 6;
+  transform: translate(-50%, -25%);
+  font-size: 1.1rem;
 }
 .piece__cosmetic--middle.piece__cosmetic--img {
-  top: 5%;
+  top: 12%;
   left: 50%;
-  transform: translateX(-50%);
-  width: 65%;
+  transform: translate(-50%, -25%);
+  width: 50%;
   height: auto;
-  z-index: 6;
 }
 
 /* BOTTOM — at the Pokémon's feet */
 .piece__cosmetic--bottom {
-  bottom: 0;
+  bottom: 2%;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.9rem;
   z-index: 2;
+  top: auto;
 }
 .piece__cosmetic--bottom.piece__cosmetic--img {
-  bottom: -2px;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 45%;
+  width: 35%;
   height: auto;
   z-index: 2;
+  top: auto;
 }
 
 /* AURA — emoji pulsing near the piece */
@@ -5175,9 +5172,9 @@ body {
 /* Image auras — icon at the side */
 .piece__cosmetic--aura.piece__cosmetic--img {
   top: auto;
-  right: -8px;
-  bottom: 0;
-  width: 50%;
+  right: -12%;
+  bottom: 10%;
+  width: 40%;
   height: auto;
   z-index: 6;
   animation: cosmeticFloat 3s ease-in-out infinite;
