@@ -413,7 +413,7 @@ export function skipOptionalAttack(game) {
 /**
  * Apply pawn promotion: +4 HP, +2 damage, full heal, role → QUEEN
  */
-function applyPromotion(game, row, col) {
+export function applyPromotion(game, row, col) {
   const newBoard = cloneBoard(game.board);
   const piece = newBoard[row][col];
   if (!piece) return game;
@@ -492,9 +492,16 @@ function executeCastle(game, kingRow, kingCol, castleType) {
 function endTurn(game) {
   const newGame = { ...game };
 
-  newGame.currentPlayer = game.currentPlayer === 'white' ? 'black' : 'white';
-  if (newGame.currentPlayer === 'white') {
-    newGame.turnCount = game.turnCount + 1;
+  // Quick Claw: skip turn swap (extra turn), then consume
+  if (newGame.quickClaw && newGame.quickClaw === game.currentPlayer) {
+    newGame.quickClaw = null;
+    newGame.statusMessage = '⚡ Quick Claw! Extra turn!';
+    // Don't swap turns — same player goes again
+  } else {
+    newGame.currentPlayer = game.currentPlayer === 'white' ? 'black' : 'white';
+    if (newGame.currentPlayer === 'white') {
+      newGame.turnCount = game.turnCount + 1;
+    }
   }
 
   // Clear status effects from pieces of the player who is NOW taking their turn

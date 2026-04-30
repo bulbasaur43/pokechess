@@ -4,7 +4,7 @@
  */
 
 import './style.css';
-import { createGame, startGame, selectPiece, deselectPiece, executeMove, executeOptionalAttack, skipOptionalAttack, tickClock, PHASES } from './engine/game.js';
+import { createGame, startGame, selectPiece, deselectPiece, executeMove, executeOptionalAttack, skipOptionalAttack, tickClock, applyPromotion, PHASES } from './engine/game.js';
 import { renderBoard, animateCell, showDamageNumber, playAttackEffect } from './ui/renderer.js';
 import { renderTitleScreen } from './ui/setup.js';
 import { renderHUD } from './ui/hud.js';
@@ -678,8 +678,10 @@ function applyItemToCell(itemId, row, col) {
     }
     case 'RARE_CANDY': {
       if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly pawn!');
-      if (piece.role !== 'KING') return cancelItem('Can only promote pawns!');
-      return cancelItem('Pawn promotion item coming soon!');
+      if (!piece.isPawn) return cancelItem('Can only promote pawns!');
+      game = applyPromotion(game, row, col);
+      showStatusToast(`⚡ ${POKEMON[piece.pokemon]?.name || 'Pawn'} promoted with Rare Candy!`, 'buff');
+      break;
     }
     case 'REVIVE': {
       return cancelItem('Use Revive from captured pieces list!');
