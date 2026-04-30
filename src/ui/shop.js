@@ -76,7 +76,7 @@ export const SHOP_ITEMS = {
   RARE_CANDY: {
     id: 'RARE_CANDY',
     name: 'Rare Candy',
-    emoji: '⚡',
+    emoji: '🍬',
     coinCost: 150,
     description: 'Instantly promote any pawn',
     useDescription: 'Click a friendly pawn to evolve it',
