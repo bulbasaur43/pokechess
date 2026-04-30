@@ -596,53 +596,61 @@ function handleItemUse(itemId) {
   if (game.phase !== PHASES.PLAY) return;
   // Set active item — next cell click will apply it
   activeItem = itemId;
-  showStatusToast(`${SHOP_ITEMS[itemId]?.emoji} Select a target...`, 'item');
+  showStatusToast(`${SHOP_ITEMS[itemId]?.emoji} Select a target... (ESC to cancel)`, 'item');
 }
 
 function applyItemToCell(itemId, row, col) {
   const piece = game.board[row][col];
   const playerColor = gameMode === 'online' ? game.onlineColor : (gameMode === 'ai' ? game.playerColor : game.currentPlayer);
 
+  // Helper: cancel targeting on bad click
+  function cancelItem(msg) {
+    showStatusToast(msg, 'error');
+    activeItem = null;
+    renderAll();
+    return false;
+  }
+
   switch (itemId) {
     case 'MAX_POTION': {
-      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
-      if (piece.hp >= piece.maxHp) { showStatusToast('Already at full HP!', 'error'); return false; }
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
+      if (piece.hp >= piece.maxHp) return cancelItem('Already at full HP!');
       game.board[row][col] = { ...piece, hp: piece.maxHp };
       showStatusToast(`🧪 ${POKEMON[piece.pokemon]?.name || 'Piece'} healed to full!`, 'heal');
       break;
     }
     case 'X_ATTACK': {
-      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
       game.board[row][col] = { ...piece, damage: piece.damage + 1 };
       showStatusToast(`⚔️ ${POKEMON[piece.pokemon]?.name || 'Piece'} +1 damage!`, 'buff');
       break;
     }
     case 'X_DEFENSE': {
-      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
       game.board[row][col] = { ...piece, maxHp: piece.maxHp + 2, hp: piece.hp + 2 };
       showStatusToast(`🔰 ${POKEMON[piece.pokemon]?.name || 'Piece'} +2 HP!`, 'buff');
       break;
     }
     case 'FOCUS_SASH': {
-      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
       game.board[row][col] = { ...piece, focusSash: true };
       showStatusToast(`🛡️ ${POKEMON[piece.pokemon]?.name || 'Piece'} protected by Focus Sash!`, 'buff');
       break;
     }
     case 'LEFTOVERS': {
-      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
       game.board[row][col] = { ...piece, leftovers: true };
       showStatusToast(`🍎 ${POKEMON[piece.pokemon]?.name || 'Piece'} got Leftovers!`, 'heal');
       break;
     }
     case 'SMOKE_BALL': {
-      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
       game.board[row][col] = { ...piece, smokeBall: 5 };
       showStatusToast(`💨 ${POKEMON[piece.pokemon]?.name || 'Piece'} immune to abilities for 5 turns!`, 'buff');
       break;
     }
     case 'DESTINY_BOND': {
-      if (!piece || piece.color !== playerColor) { showStatusToast('Select a friendly piece!', 'error'); return false; }
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
       game.board[row][col] = { ...piece, destinyBond: true };
       showStatusToast(`💀 ${POKEMON[piece.pokemon]?.name || 'Piece'} bound by destiny!`, 'status');
       break;
@@ -653,13 +661,28 @@ function applyItemToCell(itemId, row, col) {
       showStatusToast(`⚡ Quick Claw active — your next move grants an extra turn!`, 'buff');
       break;
     }
+    case 'SHINY_CHARM': {
+      // Cosmetic — auto-applied, no targeting needed
+      showStatusToast(`👑 Shiny Charm active for 10 games!`, 'buff');
+      break;
+    }
+    case 'TEAM_REROLL': {
+      return cancelItem('Use Team Reroll during team select!');
+    }
+    case 'RARE_CANDY': {
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly pawn!');
+      if (piece.role !== 'KING') return cancelItem('Can only promote pawns!');
+      // TODO: implement pawn promotion via item
+      return cancelItem('Pawn promotion item coming soon!');
+    }
+    case 'REVIVE': {
+      return cancelItem('Use Revive from captured pieces list!');
+    }
     default:
-      showStatusToast('Item not yet implemented', 'error');
-      return false;
+      return cancelItem('Item not yet implemented');
   }
 
   consumeItem(itemId);
-  incrementBattleCount();
   activeItem = null;
   renderAll();
   return true;
@@ -806,6 +829,23 @@ function showEloChangeToast(eloResult) {
 
 // Boot
 document.addEventListener('DOMContentLoaded', init);
+
+// Cancel item targeting with ESC or right-click
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && activeItem) {
+    activeItem = null;
+    showStatusToast('Item cancelled', 'error');
+    renderAll();
+  }
+});
+document.addEventListener('contextmenu', (e) => {
+  if (activeItem) {
+    e.preventDefault();
+    activeItem = null;
+    showStatusToast('Item cancelled', 'error');
+    renderAll();
+  }
+});
 
 // ─── Ability Animations (generic, color-driven) ─────────────────────
 

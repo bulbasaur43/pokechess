@@ -71,7 +71,7 @@ export const SHOP_ITEMS = {
     useDescription: 'Click a friendly piece to heal it',
     color: '#4ade80',
     usesPerPurchase: 10,
-    cooldownBattles: 3,
+    cooldownBattles: 0,
   },
   RARE_CANDY: {
     id: 'RARE_CANDY',
@@ -82,7 +82,7 @@ export const SHOP_ITEMS = {
     useDescription: 'Click a friendly pawn to evolve it',
     color: '#facc15',
     usesPerPurchase: 10,
-    cooldownBattles: 3,
+    cooldownBattles: 0,
   },
   FOCUS_SASH: {
     id: 'FOCUS_SASH',
@@ -93,7 +93,7 @@ export const SHOP_ITEMS = {
     useDescription: 'Click a piece to protect it',
     color: '#60a5fa',
     usesPerPurchase: 10,
-    cooldownBattles: 3,
+    cooldownBattles: 0,
   },
   TEAM_REROLL: {
     id: 'TEAM_REROLL',
@@ -104,7 +104,7 @@ export const SHOP_ITEMS = {
     useDescription: 'Used during team select',
     color: '#a78bfa',
     usesPerPurchase: 10,
-    cooldownBattles: 3,
+    cooldownBattles: 0,
   },
   SHINY_CHARM: {
     id: 'SHINY_CHARM',
@@ -126,7 +126,7 @@ export const SHOP_ITEMS = {
     useDescription: 'Click a piece to power up',
     color: '#ef4444',
     usesPerPurchase: 10,
-    cooldownBattles: 3,
+    cooldownBattles: 0,
   },
   X_DEFENSE: {
     id: 'X_DEFENSE',
@@ -137,7 +137,7 @@ export const SHOP_ITEMS = {
     useDescription: 'Click a piece to toughen up',
     color: '#3b82f6',
     usesPerPurchase: 10,
-    cooldownBattles: 3,
+    cooldownBattles: 0,
   },
   REVIVE: {
     id: 'REVIVE',
@@ -148,7 +148,7 @@ export const SHOP_ITEMS = {
     useDescription: 'Select from captured list',
     color: '#c084fc',
     usesPerPurchase: 10,
-    cooldownBattles: 3,
+    cooldownBattles: 0,
   },
   QUICK_CLAW: {
     id: 'QUICK_CLAW',
@@ -159,7 +159,7 @@ export const SHOP_ITEMS = {
     useDescription: 'Activates after your next move',
     color: '#fcd34d',
     usesPerPurchase: 10,
-    cooldownBattles: 3,
+    cooldownBattles: 0,
   },
   LEFTOVERS: {
     id: 'LEFTOVERS',
@@ -597,7 +597,7 @@ export function openShop(onItemUse) {
     </div>
 
     <div class="shop-section">
-      <h3 class="shop-section-title">🎒 Items <span class="shop-section-hint">10 uses per purchase • 3 battle cooldown</span></h3>
+      <h3 class="shop-section-title">🎒 Items <span class="shop-section-hint">10 uses per purchase</span></h3>
       <div class="shop-items" id="shop-items"></div>
     </div>
 
