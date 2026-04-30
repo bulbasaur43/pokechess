@@ -4,3 +4,7 @@ data/
 *.log
 .DS_Store
 .env
+# Dev testing files
+.gemini/composite_out/
+.gemini/sprite_cache/
+.gemini/composite_test.mjs

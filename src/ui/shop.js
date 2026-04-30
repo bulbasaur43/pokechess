@@ -11,6 +11,41 @@
 import { isLoggedIn, getProfile } from '../engine/auth.js';
 import { POKEMON, POKEMON_POOL, KING_POOL } from '../engine/types.js';
 
+// ─── Pokémon Packs ──────────────────────────────────────────────────
+// Each pack costs 50 coins and contains 1 random Pokémon.
+// Rarer Pokémon have lower drop weights.
+
+const PACK_COST = 50;
+
+/** Map requiredElo → rarity tier & drop weight */
+function getPackWeight(requiredElo) {
+  if (requiredElo <= 0)    return { tier: 'starter',   weight: 0 }; // starters can't drop
+  if (requiredElo <= 700)  return { tier: 'common',    weight: 50 };
+  if (requiredElo <= 1000) return { tier: 'uncommon',  weight: 25 };
+  if (requiredElo <= 1300) return { tier: 'rare',      weight: 10 };
+  if (requiredElo <= 1600) return { tier: 'epic',      weight: 5 };
+  if (requiredElo <= 1900) return { tier: 'legendary', weight: 2 };
+  return                            { tier: 'mythic',   weight: 1 };
+}
+
+const TIER_COLORS = {
+  common:    '#9ca3af',
+  uncommon:  '#22c55e',
+  rare:      '#3b82f6',
+  epic:      '#a855f7',
+  legendary: '#f59e0b',
+  mythic:    '#ef4444',
+};
+
+const TIER_LABELS = {
+  common:    '★',
+  uncommon:  '★★',
+  rare:      '★★★',
+  epic:      '★★★★',
+  legendary: '★★★★★',
+  mythic:    '★★★★★★',
+};
+
 const isDev = window.location.port === '5173' || window.location.port === '5174';
 const API_BASE = isDev
   ? `http://${window.location.hostname}:3001/api`
@@ -193,10 +228,13 @@ let _ownedCosmetics = [];   // cosmetic IDs owned
 let _equippedCosmetic = ''; // currently active cosmetic ID
 const STATE_KEY = 'pokechess_shop';
 
-// Pre-process cosmetic images: strip black/white backgrounds → transparent PNGs
+// Pre-process cosmetic images that need background removal.
+// Only MASTER_SWORD has a dark background — all others already have transparency.
+const NEEDS_BG_REMOVAL = new Set(['MASTER_SWORD']);
+
 (function initCosmeticImages() {
-  for (const c of Object.values(COSMETICS)) {
-    if (!c.img) continue;
+  for (const [key, c] of Object.entries(COSMETICS)) {
+    if (!c.img || !NEEDS_BG_REMOVAL.has(key)) continue;
     const origSrc = c.img;
     const imgEl = new Image();
     imgEl.crossOrigin = 'anonymous';
@@ -210,20 +248,13 @@ const STATE_KEY = 'pokechess_shop';
       const d = data.data;
       for (let i = 0; i < d.length; i += 4) {
         const r = d[i], g = d[i+1], b = d[i+2];
-        // Remove near-black pixels (tight threshold 30)
-        if (r < 30 && g < 30 && b < 30) {
+        // Remove near-black pixels only (the sword's dark background)
+        if (r < 35 && g < 35 && b < 35) {
           d[i+3] = 0;
         }
-        // Remove near-white pixels (tight threshold 240)
-        else if (r > 240 && g > 240 && b > 240) {
-          d[i+3] = 0;
-        }
-        // Soften edges near thresholds for smoother blending
-        else if (r < 45 && g < 45 && b < 45) {
-          d[i+3] = Math.min(d[i+3], Math.round(((r + g + b) / 3 - 30) / 15 * 255));
-        }
-        else if (r > 225 && g > 225 && b > 225) {
-          d[i+3] = Math.min(d[i+3], Math.round((240 - (r + g + b) / 3) / 15 * 255));
+        // Soften dark edges
+        else if (r < 55 && g < 55 && b < 55) {
+          d[i+3] = Math.min(d[i+3], Math.round(((r + g + b) / 3 - 35) / 20 * 255));
         }
       }
       ctx.putImageData(data, 0, 0);
@@ -551,16 +582,13 @@ export function openShop(onItemUse) {
     </div>
 
     <div class="shop-section">
-      <h3 class="shop-section-title">🎨 Cosmetics <span class="shop-section-hint">Customize your Pokémon!</span></h3>
-      <div class="shop-cosmetics" id="shop-cosmetics"></div>
+      <h3 class="shop-section-title">📦 Pokémon Packs <span class="shop-section-hint">🪙 ${PACK_COST} each — unlock random Pokémon!</span></h3>
+      <div class="shop-packs-pokemon" id="shop-packs-pokemon"></div>
     </div>
 
-    <div class="shop-coming-soon">
-      <span class="shop-coming-soon__icon">🚧</span>
-      <div class="shop-coming-soon__text">
-        <strong>More coming soon!</strong>
-        <p>Items, coin packs, and Pokémon unlocks in a future update.</p>
-      </div>
+    <div class="shop-section">
+      <h3 class="shop-section-title">🎨 Cosmetics <span class="shop-section-hint">Customize your Pokémon!</span></h3>
+      <div class="shop-cosmetics" id="shop-cosmetics"></div>
     </div>
 
     <div class="shop-section">
@@ -583,6 +611,7 @@ export function openShop(onItemUse) {
   document.body.appendChild(overlay);
   requestAnimationFrame(() => overlay.classList.add('shop-overlay--show'));
 
+  renderPokemonPacks();
   renderCosmetics();
   renderCoinPacks();
   renderShopItems();
@@ -801,6 +830,166 @@ async function renderPokemonShop() {
   }
 
   container.appendChild(grid);
+}
+
+// ─── Pokémon Pack System ────────────────────────────────────────────
+
+function buildPackPool() {
+  const pool = [];
+  for (const teamKey of ['scarlet', 'violet']) {
+    const entries = [...(POKEMON_POOL[teamKey] || []), ...(KING_POOL[teamKey] || [])];
+    for (const entry of entries) {
+      const { tier, weight } = getPackWeight(entry.requiredElo);
+      if (weight <= 0) continue; // skip starters
+      const pkmn = POKEMON[entry.key];
+      if (!pkmn) continue;
+      pool.push({ key: entry.key, team: teamKey, tier, weight, pkmn });
+    }
+  }
+  return pool;
+}
+
+function rollPack() {
+  const pool = buildPackPool();
+  if (pool.length === 0) return null;
+  const totalWeight = pool.reduce((sum, p) => sum + p.weight, 0);
+  let roll = Math.random() * totalWeight;
+  for (const entry of pool) {
+    roll -= entry.weight;
+    if (roll <= 0) return entry;
+  }
+  return pool[pool.length - 1];
+}
+
+export function buyPokemonPack() {
+  if (_coins < PACK_COST) return { error: `Need ${PACK_COST} coins (you have ${_coins})` };
+  const result = rollPack();
+  if (!result) return { error: 'No Pokémon available' };
+  _coins -= PACK_COST;
+  const isDuplicate = _unlockedPokemon.includes(result.key);
+  if (isDuplicate) {
+    // Refund half cost for duplicates
+    const refund = Math.floor(PACK_COST / 2);
+    _coins += refund;
+  } else {
+    _unlockedPokemon.push(result.key);
+  }
+  saveState();
+  syncToServer();
+  return { success: true, result, isDuplicate };
+}
+
+function renderPokemonPacks() {
+  const container = document.getElementById('shop-packs-pokemon');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const section = document.createElement('div');
+  section.className = 'shop-pack-section';
+
+  // Pack card
+  const packCard = document.createElement('button');
+  const canAfford = _coins >= PACK_COST;
+  packCard.className = `shop-pack-buy ${canAfford ? '' : 'shop-pack-buy--disabled'}`;
+  packCard.innerHTML = `
+    <div class="shop-pack-visual">
+      <div class="shop-pack-ball">🔴</div>
+      <div class="shop-pack-glow"></div>
+    </div>
+    <div class="shop-pack-info">
+      <div class="shop-pack-title">Pokémon Pack</div>
+      <div class="shop-pack-desc">Contains 1 random Pokémon</div>
+      <div class="shop-pack-rates">
+        <span style="color:${TIER_COLORS.common}">Common 54%</span>
+        <span style="color:${TIER_COLORS.uncommon}">Uncommon 27%</span>
+        <span style="color:${TIER_COLORS.rare}">Rare 11%</span>
+        <span style="color:${TIER_COLORS.epic}">Epic 5%</span>
+        <span style="color:${TIER_COLORS.legendary}">Legend 2%</span>
+        <span style="color:${TIER_COLORS.mythic}">Mythic 1%</span>
+      </div>
+    </div>
+    <div class="shop-pack-price">
+      <span>🪙 ${PACK_COST}</span>
+    </div>
+  `;
+
+  packCard.addEventListener('click', () => {
+    if (_coins < PACK_COST) {
+      showShopToast(`Need ${PACK_COST} coins (you have ${_coins})`, 'error');
+      return;
+    }
+    const res = buyPokemonPack();
+    if (res.error) {
+      showShopToast(res.error, 'error');
+      return;
+    }
+    showPackReveal(res.result, res.isDuplicate);
+    updateCoinsDisplay();
+    renderPokemonPacks();
+    renderPokemonShop();
+  });
+
+  section.appendChild(packCard);
+
+  // Owned count
+  const ownedCount = _unlockedPokemon.length;
+  const pool = buildPackPool();
+  const info = document.createElement('div');
+  info.className = 'shop-pack-owned';
+  info.textContent = `${ownedCount} Pokémon unlocked from packs • ${pool.length} available in pool`;
+  section.appendChild(info);
+
+  container.appendChild(section);
+}
+
+function showPackReveal(result, isDuplicate) {
+  const pkmn = result.pkmn;
+  const tierColor = TIER_COLORS[result.tier] || '#fff';
+  const tierLabel = TIER_LABELS[result.tier] || '';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'pack-reveal-overlay';
+  overlay.innerHTML = `
+    <div class="pack-reveal-card">
+      <div class="pack-reveal-glow" style="--tier-color: ${tierColor}"></div>
+      <div class="pack-reveal-sparkles"></div>
+      <img class="pack-reveal-img" src="${pkmn.img || ''}" alt="${pkmn.name}" />
+      <div class="pack-reveal-name">${pkmn.name}</div>
+      <div class="pack-reveal-tier" style="color: ${tierColor}">${tierLabel} ${result.tier.toUpperCase()}</div>
+      <div class="pack-reveal-types">${pkmn.types.join(' / ')}</div>
+      <div class="pack-reveal-stats">❤️ ${pkmn.hp} HP  ⚔️ ${pkmn.damage} DMG</div>
+      ${isDuplicate
+        ? `<div class="pack-reveal-dupe">Already owned! 🪙 ${Math.floor(PACK_COST / 2)} refunded</div>`
+        : `<div class="pack-reveal-new">✨ NEW POKÉMON UNLOCKED! ✨</div>`
+      }
+      <button class="pack-reveal-close">Continue</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('pack-reveal-overlay--show'));
+
+  // Add sparkle particles
+  const sparkleContainer = overlay.querySelector('.pack-reveal-sparkles');
+  for (let i = 0; i < 20; i++) {
+    const s = document.createElement('div');
+    s.className = 'pack-reveal-sparkle';
+    s.style.setProperty('--x', `${Math.random() * 200 - 100}px`);
+    s.style.setProperty('--y', `${Math.random() * 200 - 100}px`);
+    s.style.setProperty('--d', `${Math.random() * 0.5 + 0.2}s`);
+    s.style.setProperty('--color', tierColor);
+    sparkleContainer.appendChild(s);
+  }
+
+  overlay.querySelector('.pack-reveal-close').addEventListener('click', () => {
+    overlay.classList.remove('pack-reveal-overlay--show');
+    setTimeout(() => overlay.remove(), 300);
+  });
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.classList.remove('pack-reveal-overlay--show');
+      setTimeout(() => overlay.remove(), 300);
+    }
+  });
 }
 
 function showShopToast(message, type) {

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cosmetic Test — All Ancient Pokémon</title>
+<style>
+body { background: #1a1a2e; color: white; font-family: sans-serif; display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; }
+.test-piece {
+  width: 88px; height: 88px;
+  background: #2d4a3e;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border-radius: 6px;
+  position: relative;
+}
+.sprite-wrap {
+  position: relative;
+  width: 88%; height: 88%;
+  overflow: visible;
+}
+.sprite-wrap img.sprite {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+.cosmetic {
+  position: absolute;
+  pointer-events: none;
+  z-index: 6;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  object-fit: contain;
+}
+.label { font-size: 8px; margin-top: 2px; text-align: center; opacity: 0.7; }
+h2 { width: 100%; margin: 8px 0; font-size: 14px; }
+</style>
+</head>
+<body>
+<script>
+const BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/';
+
+const tests = [
+  { name: 'Koraidon',     key: 'KORAIDON',     id: 1007, headTop: 28, headLeft: 48, headScale: 1.0 },
+  { name: 'Sandy Shocks', key: 'SANDY_SHOCKS', id: 989,  headTop: 15, headLeft: 43, headScale: 1.0 },
+  { name: 'Flutter Mane', key: 'FLUTTER_MANE', id: 987,  headTop: 50, headLeft: 35, headScale: 1.0 },
+  { name: 'Raging Bolt',  key: 'RAGING_BOLT',  id: 1021, headTop: 10, headLeft: 45, headScale: 0.7 },
+  { name: 'Roaring Moon', key: 'ROARING_MOON', id: 1005, headTop: 28, headLeft: 48, headScale: 1.0 },
+  { name: 'Scream Tail',  key: 'SCREAM_TAIL',  id: 985,  headTop: 38, headLeft: 40, headScale: 1.2 },
+  { name: 'Great Tusk',   key: 'GREAT_TUSK',   id: 984,  headTop: 38, headLeft: 30, headScale: 1.0 },
+  { name: 'Brute Bonnet', key: 'BRUTE_BONNET', id: 986,  headTop: 35, headLeft: 42, headScale: 1.1 },
+  { name: 'Slither Wing', key: 'SLITHER_WING', id: 988,  headTop: 35, headLeft: 35, headScale: 1.0 },
+  { name: 'Walking Wake', key: 'WALKING_WAKE', id: 1009, headTop: 22, headLeft: 30, headScale: 0.9 },
+  { name: 'Gouging Fire', key: 'GOUGING_FIRE', id: 1020, headTop: 30, headLeft: 40, headScale: 1.0 },
+];
+
+const imgCosmetics = [
+  { name: "Mario's Hat",   src: '/assets/cosmetics/marios_hat.png',   position: 'top',    id: 'MARIOS_HAT' },
+  { name: "Link's Hat",    src: '/assets/cosmetics/links_hat.png',    position: 'top',    id: 'LINKS_HAT' },
+  { name: 'Pikachu Ears',  src: '/assets/cosmetics/pikachu_ears.png', position: 'top',    id: 'PIKACHU_EARS' },
+  { name: "Majora's Mask", src: '/assets/cosmetics/majoras_mask.png', position: 'middle', id: 'MAJORAS_MASK' },
+  { name: 'Master Sword',  src: '/assets/cosmetics/master_sword.png', position: 'aura',   id: 'MASTER_SWORD' },
+  { name: 'Poké Ball',     src: '/assets/cosmetics/pokeball.png',     position: 'bottom', id: 'POKEBALL' },
+];
+
+const OVERRIDES = {
+  KORAIDON:     { MARIOS_HAT: {rot:8}, LINKS_HAT: {rot:8}, PIKACHU_EARS: {rot:5,oy:-2}, MAJORAS_MASK: {rot:3}, MASTER_SWORD: {}, POKEBALL: {} },
+  SANDY_SHOCKS: { MARIOS_HAT: {rot:-5}, LINKS_HAT: {rot:-5}, PIKACHU_EARS: {oy:-2}, MAJORAS_MASK: {}, MASTER_SWORD: {}, POKEBALL: {ox:5} },
+  FLUTTER_MANE: { MARIOS_HAT: {rot:-10,oy:-3}, LINKS_HAT: {rot:-10,oy:-3}, PIKACHU_EARS: {rot:-5,oy:-5}, MAJORAS_MASK: {rot:-3}, MASTER_SWORD: {}, POKEBALL: {ox:10} },
+  RAGING_BOLT:  { MARIOS_HAT: {rot:3,oy:-2}, LINKS_HAT: {rot:3,oy:-2}, PIKACHU_EARS: {oy:-3}, MAJORAS_MASK: {}, MASTER_SWORD: {scale:1.2,ox:5,oy:10}, POKEBALL: {ox:5} },
+  ROARING_MOON: { MARIOS_HAT: {rot:-3}, LINKS_HAT: {rot:-3}, PIKACHU_EARS: {oy:-3}, MAJORAS_MASK: {}, MASTER_SWORD: {}, POKEBALL: {} },
+  SCREAM_TAIL:  { MARIOS_HAT: {rot:-8,oy:-2}, LINKS_HAT: {rot:-6,oy:-2}, PIKACHU_EARS: {rot:-3,oy:-4}, MAJORAS_MASK: {}, MASTER_SWORD: {ox:10}, POKEBALL: {ox:10} },
+  GREAT_TUSK:   { MARIOS_HAT: {rot:-5}, LINKS_HAT: {rot:-5}, PIKACHU_EARS: {oy:-3}, MAJORAS_MASK: {}, MASTER_SWORD: {}, POKEBALL: {ox:-5} },
+  BRUTE_BONNET: { MARIOS_HAT: {}, LINKS_HAT: {}, PIKACHU_EARS: {oy:-2}, MAJORAS_MASK: {}, MASTER_SWORD: {ox:5}, POKEBALL: {ox:5} },
+  SLITHER_WING: { MARIOS_HAT: {rot:-5}, LINKS_HAT: {rot:-5}, PIKACHU_EARS: {oy:-3}, MAJORAS_MASK: {oy:3}, MASTER_SWORD: {}, POKEBALL: {} },
+  WALKING_WAKE: { MARIOS_HAT: {rot:-8}, LINKS_HAT: {rot:-8}, PIKACHU_EARS: {rot:-3,oy:-2}, MAJORAS_MASK: {rot:-3}, MASTER_SWORD: {ox:-5}, POKEBALL: {} },
+  GOUGING_FIRE: { MARIOS_HAT: {rot:-3}, LINKS_HAT: {rot:-3}, PIKACHU_EARS: {oy:-2}, MAJORAS_MASK: {}, MASTER_SWORD: {}, POKEBALL: {} },
+};
+
+function makeTest(pkmn, cos) {
+  const ovr = OVERRIDES[pkmn.key]?.[cos.id] || {};
+  const rot = ovr.rot || 0;
+  const scale = ovr.scale || 1.0;
+  const ox = ovr.ox || 0;
+  const oy = ovr.oy || 0;
+
+  const piece = document.createElement('div');
+  piece.className = 'test-piece';
+  const wrap = document.createElement('div');
+  wrap.className = 'sprite-wrap';
+  const img = document.createElement('img');
+  img.className = 'sprite';
+  img.src = BASE + pkmn.id + '.png';
+  wrap.appendChild(img);
+
+  const cosEl = document.createElement('img');
+  cosEl.className = 'cosmetic';
+  cosEl.src = cos.src;
+  const baseSize = cos.position === 'middle' ? 65 : cos.position === 'top' ? 70 : cos.position === 'bottom' ? 45 : 60;
+  const size = Math.round(baseSize * pkmn.headScale * scale);
+  cosEl.style.width = size + '%';
+  cosEl.style.height = 'auto';
+
+  if (cos.position === 'top') {
+    cosEl.style.top = (pkmn.headTop - 12 + oy) + '%';
+    cosEl.style.left = (pkmn.headLeft + ox) + '%';
+    cosEl.style.transform = `translateX(-50%) rotate(${-5 + rot}deg)`;
+  } else if (cos.position === 'middle') {
+    cosEl.style.top = (pkmn.headTop + oy) + '%';
+    cosEl.style.left = (pkmn.headLeft + ox) + '%';
+    cosEl.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
+  } else if (cos.position === 'aura') {
+    cosEl.style.bottom = (5 + oy) + '%';
+    cosEl.style.left = (pkmn.headLeft - 15 + ox) + '%';
+    cosEl.style.top = 'auto';
+    cosEl.style.right = 'auto';
+    cosEl.style.transform = `translateX(-50%) rotate(${-35 + rot}deg)`;
+  } else if (cos.position === 'bottom') {
+    cosEl.style.bottom = (2 + oy) + '%';
+    cosEl.style.left = (pkmn.headLeft + ox) + '%';
+    cosEl.style.transform = `translateX(-50%) rotate(${rot}deg)`;
+    cosEl.style.top = 'auto';
+  }
+  wrap.appendChild(cosEl);
+  piece.appendChild(wrap);
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = pkmn.name;
+  piece.appendChild(label);
+  return piece;
+}
+
+for (const cos of imgCosmetics) {
+  const h2 = document.createElement('h2');
+  h2.textContent = `${cos.position === 'top' ? '🎩' : cos.position === 'middle' ? '🎭' : cos.position === 'aura' ? '⚔️' : '🔴'} ${cos.name}`;
+  document.body.appendChild(h2);
+  tests.forEach(p => document.body.appendChild(makeTest(p, cos)));
+}
+</script>
+</body>
+</html>

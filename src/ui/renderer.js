@@ -14,18 +14,18 @@ import { getEquippedCosmetic, COSMETICS } from './shop.js';
 // Tall sprites fill most of the square, short/wide ones have space above.
 // headTop: % from wrapper top to face center, headLeft: % horizontal, headScale: cosmetic size
 const POKEMON_HEAD_MAP = {
-  // Scarlet Paradox — mostly tall/medium sprites
-  KORAIDON:     { headTop: 8,  headLeft: 48, headScale: 0.9 },  // tall bipedal
-  SANDY_SHOCKS: { headTop: 20, headLeft: 50, headScale: 0.8 },  // floating magnet
-  FLUTTER_MANE: { headTop: 12, headLeft: 48, headScale: 0.9 },  // tall ghostly hair
-  RAGING_BOLT:  { headTop: 5,  headLeft: 50, headScale: 0.8 },  // very tall neck
-  ROARING_MOON: { headTop: 10, headLeft: 45, headScale: 0.9 },  // dragon with wings
-  SCREAM_TAIL:  { headTop: 20, headLeft: 50, headScale: 1.1 },  // round jigglypuff
-  GREAT_TUSK:   { headTop: 12, headLeft: 52, headScale: 1.0 },  // big elephant
-  BRUTE_BONNET: { headTop: 10, headLeft: 50, headScale: 1.0 },  // mushroom cap
-  SLITHER_WING: { headTop: 10, headLeft: 50, headScale: 0.9 },  // tall bug
-  WALKING_WAKE: { headTop: 8,  headLeft: 42, headScale: 0.9 },  // suicune variant
-  GOUGING_FIRE: { headTop: 8,  headLeft: 48, headScale: 0.9 },  // entei variant
+  // Scarlet Paradox — face positions verified via composite testing
+  KORAIDON:     { headTop: 28, headLeft: 48, headScale: 1.0 },  // face center, feathered crest
+  SANDY_SHOCKS: { headTop: 15, headLeft: 43, headScale: 1.0 },  // top magnet unit face
+  FLUTTER_MANE: { headTop: 50, headLeft: 35, headScale: 1.0 },  // face very low-left
+  RAGING_BOLT:  { headTop: 10, headLeft: 45, headScale: 0.7 },  // tiny face on long neck
+  ROARING_MOON: { headTop: 28, headLeft: 48, headScale: 1.0 },  // face between wings
+  SCREAM_TAIL:  { headTop: 38, headLeft: 40, headScale: 1.2 },  // big round face
+  GREAT_TUSK:   { headTop: 38, headLeft: 30, headScale: 1.0 },  // face left behind tusks
+  BRUTE_BONNET: { headTop: 35, headLeft: 42, headScale: 1.1 },  // face under mushroom cap
+  SLITHER_WING: { headTop: 35, headLeft: 35, headScale: 1.0 },  // face low-left, wings above
+  WALKING_WAKE: { headTop: 22, headLeft: 30, headScale: 0.9 },  // face upper-left
+  GOUGING_FIRE: { headTop: 30, headLeft: 40, headScale: 1.0 },  // face center under plumes
   // Scarlet Classics
   BULBASAUR:    { headTop: 35, headLeft: 52, headScale: 0.9 },  // short quadruped
   CHARIZARD:    { headTop: 8,  headLeft: 50, headScale: 0.8 },  // tall dragon
@@ -39,17 +39,17 @@ const POKEMON_HEAD_MAP = {
   MAGCARGO:     { headTop: 20, headLeft: 48, headScale: 0.9 },  // snail
   COMFEY:       { headTop: 25, headLeft: 50, headScale: 0.7 },  // tiny ring
   // Violet Paradox
-  MIRAIDON:     { headTop: 5,  headLeft: 50, headScale: 0.9 },  // tall mech dragon
-  IRON_MOTH:    { headTop: 15, headLeft: 50, headScale: 0.95 }, // moth
-  IRON_CROWN:   { headTop: 5,  headLeft: 50, headScale: 0.85 }, // tall mech deer
-  IRON_BOULDER: { headTop: 8,  headLeft: 50, headScale: 0.9 },  // mech bull
-  IRON_JUGULIS: { headTop: 8,  headLeft: 50, headScale: 0.9 },  // flyer
-  IRON_BUNDLE:  { headTop: 12, headLeft: 50, headScale: 1.0 },  // penguin
-  IRON_TREADS:  { headTop: 12, headLeft: 52, headScale: 0.9 },  // mech elephant
-  IRON_HANDS:   { headTop: 5,  headLeft: 50, headScale: 0.95 }, // big mech fighter
-  IRON_THORNS:  { headTop: 5,  headLeft: 50, headScale: 0.9 },  // mech tyranitar
-  IRON_VALIANT: { headTop: 5,  headLeft: 50, headScale: 0.8 },  // slim mech
-  IRON_LEAVES:  { headTop: 5,  headLeft: 50, headScale: 0.85 }, // mech virizion
+  MIRAIDON:     { headTop: 15, headLeft: 48, headScale: 0.8 },  // face upper-center
+  IRON_MOTH:    { headTop: 35, headLeft: 45, headScale: 0.9 },  // face center-low, wings radiate out
+  IRON_CROWN:   { headTop: 18, headLeft: 48, headScale: 0.8 },  // face upper-center, tall deer
+  IRON_BOULDER: { headTop: 25, headLeft: 55, headScale: 0.9 },  // face right-center
+  IRON_JUGULIS: { headTop: 18, headLeft: 35, headScale: 0.8 },  // face left, tendrils right
+  IRON_BUNDLE:  { headTop: 18, headLeft: 48, headScale: 1.1 },  // round face, center
+  IRON_TREADS:  { headTop: 35, headLeft: 55, headScale: 0.9 },  // face right behind treads
+  IRON_HANDS:   { headTop: 12, headLeft: 45, headScale: 0.9 },  // small head, big hands
+  IRON_THORNS:  { headTop: 10, headLeft: 48, headScale: 0.9 },  // face at top, wide body
+  IRON_VALIANT: { headTop: 12, headLeft: 42, headScale: 0.7 },  // small head left-center, slim body
+  IRON_LEAVES:  { headTop: 15, headLeft: 48, headScale: 0.8 },  // face upper-center, quadruped
   // Violet Classics
   PIKACHU:      { headTop: 15, headLeft: 50, headScale: 1.1 },  // short mouse
   GENGAR:       { headTop: 12, headLeft: 50, headScale: 1.15 }, // round ghost
@@ -62,8 +62,208 @@ const POKEMON_HEAD_MAP = {
   ZAPDOS:       { headTop: 5,  headLeft: 50, headScale: 0.8 },  // tall bird
   BRAMBLEGHAST: { headTop: 18, headLeft: 50, headScale: 0.95 }, // tumbleweed
   AUDINO:       { headTop: 12, headLeft: 50, headScale: 1.0 },  // round bipedal
+  // New Scarlet classics
+  BELLIBOLT:    { headTop: 30, headLeft: 50, headScale: 1.2 },  // big round face center
+  ARCANINE:     { headTop: 18, headLeft: 40, headScale: 0.9 },  // face upper-left, quadruped
+  TYRANITAR:    { headTop: 12, headLeft: 42, headScale: 0.9 },  // face upper-left, tall bipedal
+  SKELEDIRGE:   { headTop: 35, headLeft: 25, headScale: 0.9 },  // face far-left, croc
+  TINKATON:     { headTop: 60, headLeft: 35, headScale: 0.8 },  // small face bottom-left, big hammer
+  // New Violet classics
+  MIMIKYU:      { headTop: 20, headLeft: 48, headScale: 1.0 },  // face center-upper
+  TOXTRICITY:   { headTop: 12, headLeft: 48, headScale: 0.8 },  // small face top-center, tall
+  CERULEDGE:    { headTop: 12, headLeft: 48, headScale: 0.7 },  // helmeted head, slim
+  KINGAMBIT:    { headTop: 15, headLeft: 48, headScale: 0.8 },  // face upper-center, blade head
+  HATTERENE:    { headTop: 25, headLeft: 45, headScale: 0.7 },  // tiny face under hat
 };
 const DEFAULT_HEAD = { headTop: 10, headLeft: 50, headScale: 0.9 };
+
+// ── Per-Pokémon per-cosmetic transform overrides ──
+// Keys: POKEMON_KEY, values: { COSMETIC_ID: { rot, scale, ox, oy } }
+// rot = extra rotation (degrees), scale = size multiplier, ox/oy = position offset %
+const COSMETIC_OVERRIDES = {
+  KORAIDON: {
+    MARIOS_HAT:   { rot: 8,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 8,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 5,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 3,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  SANDY_SHOCKS: {
+    MARIOS_HAT:   { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
+  },
+  FLUTTER_MANE: {
+    MARIOS_HAT:   { rot: -10,scale: 1.0, ox: 0, oy: -3 },
+    LINKS_HAT:    { rot: -10,scale: 1.0, ox: 0, oy: -3 },
+    PIKACHU_EARS: { rot: -5, scale: 1.0, ox: 0, oy: -5 },
+    MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 10,oy: 0 },
+  },
+  RAGING_BOLT: {
+    MARIOS_HAT:   { rot: 3,  scale: 1.0, ox: 0, oy: -2 },
+    LINKS_HAT:    { rot: 3,  scale: 1.0, ox: 0, oy: -2 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.2, ox: 5, oy: 10 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
+  },
+  ROARING_MOON: {
+    MARIOS_HAT:   { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  SCREAM_TAIL: {
+    MARIOS_HAT:   { rot: -8, scale: 1.0, ox: 0, oy: -2 },
+    LINKS_HAT:    { rot: -6, scale: 1.0, ox: 0, oy: -2 },
+    PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -4 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 10,oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 10,oy: 0 },
+  },
+  GREAT_TUSK: {
+    MARIOS_HAT:   { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
+  },
+  BRUTE_BONNET: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
+  },
+  SLITHER_WING: {
+    MARIOS_HAT:   { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 3 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  WALKING_WAKE: {
+    MARIOS_HAT:   { rot: -8, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -8, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  GOUGING_FIRE: {
+    MARIOS_HAT:   { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  // ── Violet Paradox (Future) ──
+  MIRAIDON: {
+    MARIOS_HAT:   { rot: 5,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 5,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 3,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 3,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  IRON_MOTH: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  IRON_CROWN: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  IRON_BOULDER: {
+    MARIOS_HAT:   { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
+    MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
+  },
+  IRON_JUGULIS: {
+    MARIOS_HAT:   { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -3 },
+    MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  IRON_BUNDLE: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -4 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  IRON_TREADS: {
+    MARIOS_HAT:   { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
+  },
+  IRON_HANDS: {
+    MARIOS_HAT:   { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
+  },
+  IRON_THORNS: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  IRON_VALIANT: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  IRON_LEAVES: {
+    MARIOS_HAT:   { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -5, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+};
+
+/** Get cosmetic override for a specific pokemon + cosmetic combo */
+function getCosmeticOverride(pokemonKey, cosmeticId) {
+  return COSMETIC_OVERRIDES[pokemonKey]?.[cosmeticId] || null;
+}
 
 // Persistent board grid — built once, updated in-place
 let _cells = null; // Map<"row,col", HTMLElement>
@@ -346,32 +546,38 @@ function createPieceElement(piece, playerColor) {
         cosEl.className = `piece__cosmetic piece__cosmetic--${cosmetic.position} piece__cosmetic--img`;
         cosEl.src = cosmetic.img;
         cosEl.draggable = false;
-        // Size relative to head — smaller = more realistic worn look
-        const baseSize = cosmetic.position === 'middle' ? 40 : cosmetic.position === 'top' ? 45 : cosmetic.position === 'bottom' ? 30 : 35;
-        const size = Math.round(baseSize * headData.headScale);
+        // Get per-pokemon per-cosmetic overrides for rotation, scale, offset
+        const ovr = getCosmeticOverride(piece.pokemon, cosmeticId);
+        const extraRot = ovr?.rot || 0;
+        const extraScale = ovr?.scale || 1.0;
+        const ox = ovr?.ox || 0;
+        const oy = ovr?.oy || 0;
+        // Size — masks/sword are large and prominent, hats are smaller (sit on head)
+        const baseSize = cosmetic.position === 'middle' ? 65 : cosmetic.position === 'top' ? 40 : cosmetic.position === 'bottom' ? 45 : 60;
+        const size = Math.round(baseSize * headData.headScale * extraScale);
         cosEl.style.width = `${size}%`;
         if (cosmetic.position === 'top') {
-          // Hats: overlap the top of the head, slightly above face center
-          cosEl.style.top = `${headData.headTop - 8}%`;
-          cosEl.style.left = `${headData.headLeft}%`;
-          cosEl.style.transform = 'translateX(-50%) rotate(-5deg)';
+          // Hats: sit prominently on top of the head
+          cosEl.style.top = `${headData.headTop - 12 + oy}%`;
+          cosEl.style.left = `${headData.headLeft + ox}%`;
+          cosEl.style.transform = `translateX(-50%) rotate(${-5 + extraRot}deg)`;
         } else if (cosmetic.position === 'middle') {
-          // Masks: center directly on the face
-          cosEl.style.top = `${headData.headTop}%`;
-          cosEl.style.left = `${headData.headLeft}%`;
-          cosEl.style.transform = 'translate(-50%, -40%)';
+          // Masks: large, covering most of the face
+          cosEl.style.top = `${headData.headTop + oy}%`;
+          cosEl.style.left = `${headData.headLeft + ox}%`;
+          cosEl.style.transform = `translate(-50%, -50%) rotate(${extraRot}deg)`;
         } else if (cosmetic.position === 'aura') {
-          // Side accessory (sword etc)
-          cosEl.style.bottom = '15%';
-          cosEl.style.right = '-10%';
+          // Sword: held at front-left, angled diagonally blade-up
+          cosEl.style.bottom = `${5 + oy}%`;
+          cosEl.style.left = `${headData.headLeft - 15 + ox}%`;
           cosEl.style.top = 'auto';
-          cosEl.style.left = 'auto';
-          cosEl.style.transform = 'rotate(-15deg)';
+          cosEl.style.right = 'auto';
+          cosEl.style.transform = `translateX(-50%) rotate(${-35 + extraRot}deg)`;
         } else if (cosmetic.position === 'bottom') {
           // Feet items (pokeball)
-          cosEl.style.bottom = '2%';
-          cosEl.style.left = `${headData.headLeft}%`;
-          cosEl.style.transform = 'translateX(-50%)';
+          cosEl.style.bottom = `${2 + oy}%`;
+          cosEl.style.left = `${headData.headLeft + ox}%`;
+          cosEl.style.transform = `translateX(-50%) rotate(${extraRot}deg)`;
           cosEl.style.top = 'auto';
         }
         wrap.appendChild(cosEl);
@@ -380,22 +586,26 @@ function createPieceElement(piece, playerColor) {
         const overlay = document.createElement('span');
         overlay.className = `piece__cosmetic piece__cosmetic--${cosmetic.position}`;
         overlay.textContent = cosmetic.overlay;
+        // Get per-pokemon per-cosmetic overrides
+        const eovr = getCosmeticOverride(piece.pokemon, cosmeticId);
+        const eRot = eovr?.rot || 0;
+        const eScale = eovr?.scale || 1.0;
+        const eox = eovr?.ox || 0;
+        const eoy = eovr?.oy || 0;
         if (cosmetic.position === 'top') {
-          // Emoji hats: sit on top of the head, slight overlap
-          overlay.style.top = `${headData.headTop - 10}%`;
-          overlay.style.left = `${headData.headLeft}%`;
-          overlay.style.transform = 'translateX(-50%)';
-          overlay.style.fontSize = `${Math.round(110 * headData.headScale)}%`;
+          overlay.style.top = `${headData.headTop - 12 + eoy}%`;
+          overlay.style.left = `${headData.headLeft + eox}%`;
+          overlay.style.transform = `translateX(-50%) rotate(${eRot}deg)`;
+          overlay.style.fontSize = `${Math.round(180 * headData.headScale * eScale)}%`;
         } else if (cosmetic.position === 'middle') {
-          // Emoji masks: center on face
-          overlay.style.top = `${headData.headTop}%`;
-          overlay.style.left = `${headData.headLeft}%`;
-          overlay.style.transform = 'translate(-50%, -40%)';
-          overlay.style.fontSize = `${Math.round(110 * headData.headScale)}%`;
+          overlay.style.top = `${headData.headTop + eoy}%`;
+          overlay.style.left = `${headData.headLeft + eox}%`;
+          overlay.style.transform = `translate(-50%, -50%) rotate(${eRot}deg)`;
+          overlay.style.fontSize = `${Math.round(180 * headData.headScale * eScale)}%`;
         } else if (cosmetic.position === 'bottom') {
-          overlay.style.bottom = '5%';
-          overlay.style.left = `${headData.headLeft}%`;
-          overlay.style.transform = 'translateX(-50%)';
+          overlay.style.bottom = `${5 + eoy}%`;
+          overlay.style.left = `${headData.headLeft + eox}%`;
+          overlay.style.transform = `translateX(-50%) rotate(${eRot}deg)`;
           overlay.style.top = 'auto';
         }
         wrap.appendChild(overlay);
