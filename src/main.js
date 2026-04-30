@@ -611,58 +611,65 @@ function applyItemToCell(itemId, row, col) {
     return false;
   }
 
+  // Check if this item was already used on this piece (for piece-targeting items)
+  const pieceTargetItems = ['MAX_POTION','X_ATTACK','X_DEFENSE','FOCUS_SASH','LEFTOVERS','SMOKE_BALL','DESTINY_BOND'];
+  if (pieceTargetItems.includes(itemId) && piece) {
+    const applied = piece.appliedItems || [];
+    if (applied.includes(itemId)) {
+      return cancelItem(`Already used ${SHOP_ITEMS[itemId]?.name} on this Pokémon!`);
+    }
+  }
+
   switch (itemId) {
     case 'MAX_POTION': {
       if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
       if (piece.hp >= piece.maxHp) return cancelItem('Already at full HP!');
-      game.board[row][col] = { ...piece, hp: piece.maxHp };
+      game.board[row][col] = { ...piece, hp: piece.maxHp, appliedItems: [...(piece.appliedItems || []), itemId] };
       showStatusToast(`🧪 ${POKEMON[piece.pokemon]?.name || 'Piece'} healed to full!`, 'heal');
       break;
     }
     case 'X_ATTACK': {
       if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
-      game.board[row][col] = { ...piece, damage: piece.damage + 1 };
+      game.board[row][col] = { ...piece, damage: piece.damage + 1, appliedItems: [...(piece.appliedItems || []), itemId] };
       showStatusToast(`⚔️ ${POKEMON[piece.pokemon]?.name || 'Piece'} +1 damage!`, 'buff');
       break;
     }
     case 'X_DEFENSE': {
       if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
-      game.board[row][col] = { ...piece, maxHp: piece.maxHp + 2, hp: piece.hp + 2 };
+      game.board[row][col] = { ...piece, maxHp: piece.maxHp + 2, hp: piece.hp + 2, appliedItems: [...(piece.appliedItems || []), itemId] };
       showStatusToast(`🔰 ${POKEMON[piece.pokemon]?.name || 'Piece'} +2 HP!`, 'buff');
       break;
     }
     case 'FOCUS_SASH': {
       if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
-      game.board[row][col] = { ...piece, focusSash: true };
+      game.board[row][col] = { ...piece, focusSash: true, appliedItems: [...(piece.appliedItems || []), itemId] };
       showStatusToast(`🛡️ ${POKEMON[piece.pokemon]?.name || 'Piece'} protected by Focus Sash!`, 'buff');
       break;
     }
     case 'LEFTOVERS': {
       if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
-      game.board[row][col] = { ...piece, leftovers: true };
+      game.board[row][col] = { ...piece, leftovers: true, appliedItems: [...(piece.appliedItems || []), itemId] };
       showStatusToast(`🍎 ${POKEMON[piece.pokemon]?.name || 'Piece'} got Leftovers!`, 'heal');
       break;
     }
     case 'SMOKE_BALL': {
       if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
-      game.board[row][col] = { ...piece, smokeBall: 5 };
+      game.board[row][col] = { ...piece, smokeBall: 5, appliedItems: [...(piece.appliedItems || []), itemId] };
       showStatusToast(`💨 ${POKEMON[piece.pokemon]?.name || 'Piece'} immune to abilities for 5 turns!`, 'buff');
       break;
     }
     case 'DESTINY_BOND': {
       if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
-      game.board[row][col] = { ...piece, destinyBond: true };
+      game.board[row][col] = { ...piece, destinyBond: true, appliedItems: [...(piece.appliedItems || []), itemId] };
       showStatusToast(`💀 ${POKEMON[piece.pokemon]?.name || 'Piece'} bound by destiny!`, 'status');
       break;
     }
     case 'QUICK_CLAW': {
-      // Grants an extra turn after the next move
       game.quickClaw = playerColor;
       showStatusToast(`⚡ Quick Claw active — your next move grants an extra turn!`, 'buff');
       break;
     }
     case 'SHINY_CHARM': {
-      // Cosmetic — auto-applied, no targeting needed
       showStatusToast(`👑 Shiny Charm active for 10 games!`, 'buff');
       break;
     }
@@ -672,7 +679,6 @@ function applyItemToCell(itemId, row, col) {
     case 'RARE_CANDY': {
       if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly pawn!');
       if (piece.role !== 'KING') return cancelItem('Can only promote pawns!');
-      // TODO: implement pawn promotion via item
       return cancelItem('Pawn promotion item coming soon!');
     }
     case 'REVIVE': {
