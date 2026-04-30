@@ -68,6 +68,13 @@ export function resolveBattle(attacker, defender) {
   const tierLabel = tierLabels[attacker.damageTier] ?? '⚔️';
   result.messages.push(`${tierLabel} attack! ${baseDamage} damage dealt.`);
 
+  // Focus Sash: survive fatal blow with 1 HP, then consume the sash
+  if (result.defenderHpAfter <= 0 && defender.focusSash) {
+    result.defenderHpAfter = 1;
+    result.focusSashTriggered = true;
+    result.messages.push('🛡️ Focus Sash! Survived with 1 HP!');
+  }
+
   if (result.defenderHpAfter <= 0) {
     // Kill — defender is eliminated
     result.outcome = 'kill';

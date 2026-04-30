@@ -263,6 +263,8 @@ export function executeMove(game, toRow, toCol) {
       newGame.board = cloneBoard(game.board);
       // Update defender HP on the board
       const updatedDefender = { ...defender, hp: battleResult.defenderHpAfter };
+      // Consume Focus Sash if it triggered
+      if (battleResult.focusSashTriggered) updatedDefender.focusSash = false;
       newGame.board[defRow][defCol] = updatedDefender;
       // Update attacker bike mode
       if (attacker.role === 'TRUE_KING') {
@@ -393,7 +395,11 @@ export function executeOptionalAttack(game, targetRow, targetCol) {
   } else {
     // Damage only — defender survives
     newGame.board = cloneBoard(game.board);
-    newGame.board[targetRow][targetCol] = { ...defender, hp: battleResult.defenderHpAfter };
+    newGame.board[targetRow][targetCol] = {
+      ...defender,
+      hp: battleResult.defenderHpAfter,
+      ...(battleResult.focusSashTriggered ? { focusSash: false } : {}),
+    };
     newGame.board[row][col] = updatedAttacker;
   }
 
