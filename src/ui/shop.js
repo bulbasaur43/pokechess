@@ -712,6 +712,9 @@ function renderShopItems() {
   container.innerHTML = '';
 
   for (const item of Object.values(SHOP_ITEMS)) {
+    const owned = _inventory[item.id]?.uses || 0;
+    const canAfford = _coins >= item.coinCost;
+
     const card = document.createElement('div');
     card.className = 'shop-card';
     card.style.setProperty('--item-color', item.color);
@@ -719,13 +722,30 @@ function renderShopItems() {
     card.innerHTML = `
       <div class="shop-card__icon">${item.emoji}</div>
       <div class="shop-card__info">
-        <div class="shop-card__name">${item.name}</div>
+        <div class="shop-card__name">${item.name}${owned > 0 ? ` <span class="shop-card__owned">${owned} left</span>` : ''}</div>
         <div class="shop-card__desc">${item.description}</div>
       </div>
-      <div class="shop-card__buy shop-card__buy--disabled" title="Coming soon">
+      <button class="shop-card__buy ${!canAfford ? 'shop-card__buy--disabled' : ''}" ${!canAfford ? 'title="Not enough coins"' : ''}>
         <span class="shop-card__price">🪙 ${item.coinCost}</span>
-      </div>
+      </button>
     `;
+
+    const buyBtn = card.querySelector('.shop-card__buy');
+    buyBtn.addEventListener('click', () => {
+      if (!canAfford) {
+        showShopToast(`Need ${item.coinCost} coins (you have ${_coins})`, 'error');
+        return;
+      }
+      const result = buyItemWithCoins(item.id);
+      if (result.error) {
+        showShopToast(result.error, 'error');
+      } else {
+        showShopToast(`${item.emoji} ${item.name} purchased! (+${item.usesPerPurchase} uses)`, 'success');
+        updateCoinsDisplay();
+        renderShopItems();
+        renderInventory();
+      }
+    });
 
     container.appendChild(card);
   }
@@ -782,18 +802,18 @@ async function renderPokemonShop() {
   const stats = loadPlayerStats();
   const playerElo = stats?.rating || 600;
 
-  // Collect only ELO-locked Pokémon the player can't access yet
+  // Collect only ELO-locked Pokémon the player can't access yet (and not already coin-unlocked)
   const allPokemon = [];
   for (const teamKey of ['scarlet', 'violet']) {
     const pool = POKEMON_POOL[teamKey] || [];
     for (const entry of pool) {
-      if (entry.requiredElo > 0 && playerElo < entry.requiredElo) {
+      if (entry.requiredElo > 0 && playerElo < entry.requiredElo && !_unlockedPokemon.includes(entry.key)) {
         allPokemon.push({ ...entry, team: teamKey });
       }
     }
     const kings = KING_POOL[teamKey] || [];
     for (const entry of kings) {
-      if (entry.requiredElo > 0 && playerElo < entry.requiredElo) {
+      if (entry.requiredElo > 0 && playerElo < entry.requiredElo && !_unlockedPokemon.includes(entry.key)) {
         allPokemon.push({ ...entry, team: teamKey, isKing: true });
       }
     }
@@ -803,7 +823,7 @@ async function renderPokemonShop() {
   allPokemon.sort((a, b) => a.requiredElo - b.requiredElo);
 
   if (allPokemon.length === 0) {
-    container.innerHTML = '<div class="shop-inv-empty">You\'ve unlocked all Pokémon! 🎉</div>';
+    container.innerHTML = '<div class="shop-inv-empty">You\'ve unlocked all Pok\u00e9mon! \ud83c\udf89</div>';
     return;
   }
 
@@ -815,16 +835,30 @@ async function renderPokemonShop() {
     if (!pkmn) continue;
 
     const cost = getPokemonCoinCost(entry.requiredElo);
+    const canAfford = _coins >= cost;
 
-    const card = document.createElement('div');
-    card.className = 'shop-pkmn-card shop-pkmn-card--locked';
-    card.title = `${pkmn.name} — 🪙 ${cost} coins (Coming soon!)`;
+    const card = document.createElement('button');
+    card.className = `shop-pkmn-card ${canAfford ? '' : 'shop-pkmn-card--locked'}`;
+    card.title = `${pkmn.name} — \ud83e\ude99 ${cost} coins`;
     card.innerHTML = `
       <img class="shop-pkmn-img" src="${pkmn.img || ''}" alt="${pkmn.name}" />
       <div class="shop-pkmn-name">${pkmn.name}</div>
-      <div class="shop-pkmn-stats">❤️${pkmn.hp} ⚔️${pkmn.damage}</div>
-      <div class="shop-pkmn-cost">🪙 ${cost}</div>
+      <div class="shop-pkmn-stats">\u2764\ufe0f${pkmn.hp} \u2694\ufe0f${pkmn.damage}</div>
+      <div class="shop-pkmn-cost">\ud83e\ude99 ${cost}</div>
     `;
+
+    card.addEventListener('click', () => {
+      if (!canAfford) {
+        showShopToast(`Need ${cost} coins for ${pkmn.name} (you have ${_coins})`, 'error');
+        return;
+      }
+      if (unlockPokemon(entry.key, cost)) {
+        showShopToast(`\ud83c\udf89 ${pkmn.name} unlocked!`, 'success');
+        updateCoinsDisplay();
+        renderPokemonShop();
+        renderPokemonPacks();
+      }
+    });
 
     grid.appendChild(card);
   }
