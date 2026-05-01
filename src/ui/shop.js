@@ -803,16 +803,19 @@ async function renderPokemonShop() {
   const playerElo = stats?.rating || 600;
 
   // Collect only ELO-locked Pokémon the player can't access yet (and not already coin-unlocked)
+  // Pack-only Pokémon are excluded — they can only be obtained from packs
   const allPokemon = [];
   for (const teamKey of ['scarlet', 'violet']) {
     const pool = POKEMON_POOL[teamKey] || [];
     for (const entry of pool) {
+      if (entry.packOnly) continue; // pack-only: not purchasable directly
       if (entry.requiredElo > 0 && playerElo < entry.requiredElo && !_unlockedPokemon.includes(entry.key)) {
         allPokemon.push({ ...entry, team: teamKey });
       }
     }
     const kings = KING_POOL[teamKey] || [];
     for (const entry of kings) {
+      if (entry.packOnly) continue;
       if (entry.requiredElo > 0 && playerElo < entry.requiredElo && !_unlockedPokemon.includes(entry.key)) {
         allPokemon.push({ ...entry, team: teamKey, isKing: true });
       }

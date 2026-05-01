@@ -74,6 +74,18 @@ const POKEMON_HEAD_MAP = {
   CERULEDGE:    { headTop: 12, headLeft: 48, headScale: 0.7 },  // helmeted head, slim
   KINGAMBIT:    { headTop: 15, headLeft: 48, headScale: 0.8 },  // face upper-center, blade head
   HATTERENE:    { headTop: 25, headLeft: 45, headScale: 0.7 },  // tiny face under hat
+  // Scarlet pack-only
+  IVYSAUR:      { headTop: 30, headLeft: 50, headScale: 0.9 },  // quadruped with bud
+  VENUSAUR:     { headTop: 35, headLeft: 45, headScale: 1.0 },  // wide quadruped with flower
+  SCIZOR:       { headTop: 8,  headLeft: 50, headScale: 0.85 }, // tall bipedal with pincers
+  VOLCANION:    { headTop: 15, headLeft: 48, headScale: 0.9 },  // quadruped with steam ring
+  LYCANROC:     { headTop: 12, headLeft: 50, headScale: 0.9 },  // wolf bipedal
+  // Violet pack-only
+  PICHU:        { headTop: 18, headLeft: 50, headScale: 1.2 },  // tiny mouse
+  RAICHU:       { headTop: 12, headLeft: 50, headScale: 1.0 },  // round mouse
+  AEGISLASH:    { headTop: 15, headLeft: 50, headScale: 0.8 },  // sword/shield
+  ZOROARK:      { headTop: 5,  headLeft: 48, headScale: 0.85 }, // tall fox
+  TOXAPEX:      { headTop: 25, headLeft: 50, headScale: 0.9 },  // spiky sea star
 };
 const DEFAULT_HEAD = { headTop: 10, headLeft: 50, headScale: 0.9 };
 
@@ -255,6 +267,88 @@ const COSMETIC_OVERRIDES = {
     LINKS_HAT:    { rot: -5, scale: 1.0, ox: 0, oy: 0 },
     PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  // Scarlet pack-only
+  IVYSAUR: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  VENUSAUR: {
+    MARIOS_HAT:   { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  SCIZOR: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  VOLCANION: {
+    MARIOS_HAT:   { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: -3, scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  LYCANROC: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  // Violet pack-only
+  PICHU: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -4 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  RAICHU: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  AEGISLASH: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  ZOROARK: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+  },
+  TOXAPEX: {
+    MARIOS_HAT:   { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    LINKS_HAT:    { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
+    MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },

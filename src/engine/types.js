@@ -117,12 +117,18 @@ export const POKEMON = {
   CHI_YU:       { name: 'Chi-Yu',       types: ['DARK','FIRE'],        team: 'scarlet', emoji: '🐟', img: SPRITE(1004), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
   INCINEROAR:   { name: 'Incineroar',   types: ['FIRE','DARK'],        team: 'violet',  emoji: '🐯', img: SPRITE(727),  desc: 'Heel Pokémon',          hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
   MAGCARGO:     { name: 'Magcargo',     types: ['FIRE','ROCK'],        team: 'scarlet', emoji: '🐌', img: SPRITE(219),  desc: 'Lava Pokémon',          hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
-  COMFEY:       { name: 'Comfey',       types: ['FAIRY'],              team: 'scarlet', emoji: '🌼', img: SPRITE(764),  desc: 'Posy Picker Pokémon',   hp: 10, maxHp: 10, damage: 1, damageTier: 'weak' },
+  COMFEY:       { name: 'Comfey',       types: ['FAIRY'],              team: 'scarlet', emoji: '🌼', img: SPRITE(764),  desc: 'Posy Picker Pokémon',   hp: 8,  maxHp: 8,  damage: 1, damageTier: 'weak' },
   BELLIBOLT:    { name: 'Bellibolt',    types: ['ELECTRIC'],           team: 'scarlet', emoji: '🔋', img: SPRITE(938),  desc: 'EleFrog Pokémon',       hp: 9,  maxHp: 9,  damage: 2, damageTier: 'weak' },
   ARCANINE:     { name: 'Arcanine',     types: ['FIRE'],               team: 'scarlet', emoji: '🐕', img: SPRITE(59),   desc: 'Legendary Pokémon',     hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
   TYRANITAR:    { name: 'Tyranitar',    types: ['ROCK','DARK'],        team: 'scarlet', emoji: '🦖', img: SPRITE(248),  desc: 'Armor Pokémon',         hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
   SKELEDIRGE:   { name: 'Skeledirge',   types: ['FIRE','GHOST'],       team: 'scarlet', emoji: '🐊', img: SPRITE(911),  desc: 'Singer Pokémon',        hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
   TINKATON:     { name: 'Tinkaton',     types: ['FAIRY','STEEL'],      team: 'scarlet', emoji: '🔨', img: SPRITE(959),  desc: 'Hammer Pokémon',        hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
+  // Scarlet pack-only
+  IVYSAUR:      { name: 'Ivysaur',      types: ['GRASS','POISON'],     team: 'scarlet', emoji: '🌿', img: SPRITE(2),    desc: 'Seed Pokémon',          hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
+  VENUSAUR:     { name: 'Venusaur',     types: ['GRASS','POISON'],     team: 'scarlet', emoji: '🌺', img: SPRITE(3),    desc: 'Seed Pokémon',          hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
+  SCIZOR:       { name: 'Scizor',       types: ['BUG','STEEL'],        team: 'scarlet', emoji: '✂️', img: SPRITE(212),  desc: 'Pincer Pokémon',        hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
+  VOLCANION:    { name: 'Volcanion',    types: ['FIRE','WATER'],       team: 'scarlet', emoji: '🌋', img: SPRITE(721),  desc: 'Steam Pokémon',         hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
+  LYCANROC:     { name: 'Lycanroc',     types: ['ROCK'],               team: 'scarlet', emoji: '🐺', img: SPRITE(745),  desc: 'Wolf Pokémon',          hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
 
   // ── Violet Team (Black) ──
   MIRAIDON:     { name: 'Miraidon',     types: ['ELECTRIC','DRAGON'],  team: 'violet',  emoji: '🐲', img: SPRITE(1008), desc: 'The Iron Serpent',      hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
@@ -147,12 +153,18 @@ export const POKEMON = {
   CHIEN_PAO:    { name: 'Chien-Pao',    types: ['DARK','ICE'],         team: 'violet',  emoji: '🐆', img: SPRITE(1002), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
   ZAPDOS:       { name: 'Zapdos',       types: ['ELECTRIC','FLYING'],  team: 'scarlet', emoji: '⚡', img: SPRITE(145),  desc: 'Electric Pokémon',      hp: 6,  maxHp: 6,  damage: 1, damageTier: 'weak' },
   BRAMBLEGHAST: { name: 'Brambleghast', types: ['GRASS','GHOST'],      team: 'violet',  emoji: '🌿', img: SPRITE(947),  desc: 'Tumbleweed Pokémon',    hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
-  AUDINO:       { name: 'Audino',       types: ['NORMAL','FAIRY'],     team: 'violet',  emoji: '👂', img: SPRITE(531),  desc: 'Hearing Pokémon',       hp: 10, maxHp: 10, damage: 1, damageTier: 'weak' },
+  AUDINO:       { name: 'Audino',       types: ['NORMAL','FAIRY'],     team: 'violet',  emoji: '👂', img: SPRITE(531),  desc: 'Hearing Pokémon',       hp: 8,  maxHp: 8,  damage: 1, damageTier: 'weak' },
   MIMIKYU:      { name: 'Mimikyu',      types: ['GHOST','FAIRY'],      team: 'violet',  emoji: '👻', img: SPRITE(778),  desc: 'Disguise Pokémon',      hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
   TOXTRICITY:   { name: 'Toxtricity',   types: ['ELECTRIC','POISON'],  team: 'violet',  emoji: '🎸', img: SPRITE(849),  desc: 'Punk Pokémon',          hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   CERULEDGE:    { name: 'Ceruledge',    types: ['FIRE','GHOST'],       team: 'violet',  emoji: '🗡️', img: SPRITE(937),  desc: 'Fire Blades Pokémon',   hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
   KINGAMBIT:    { name: 'Kingambit',    types: ['DARK','STEEL'],       team: 'violet',  emoji: '♚', img: SPRITE(983),  desc: 'Big Boss Pokémon',      hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
   HATTERENE:    { name: 'Hatterene',    types: ['PSYCHIC','FAIRY'],    team: 'violet',  emoji: '🧙', img: SPRITE(858),  desc: 'Silent Pokémon',        hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
+  // Violet pack-only
+  PICHU:        { name: 'Pichu',        types: ['ELECTRIC'],           team: 'violet',  emoji: '⚡', img: SPRITE(172),  desc: 'Tiny Mouse Pokémon',    hp: 5,  maxHp: 5,  damage: 2, damageTier: 'weak' },
+  RAICHU:       { name: 'Raichu',       types: ['ELECTRIC','PSYCHIC'], team: 'violet',  emoji: '⚡', img: SPRITE(26),   desc: 'Mouse Pokémon',         hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
+  AEGISLASH:    { name: 'Aegislash',    types: ['STEEL','GHOST'],      team: 'violet',  emoji: '🛡️', img: SPRITE(681),  desc: 'Royal Sword Pokémon',   hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
+  ZOROARK:      { name: 'Zoroark',      types: ['DARK'],               team: 'violet',  emoji: '🦊', img: SPRITE(571),  desc: 'Illusion Fox Pokémon',  hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
+  TOXAPEX:      { name: 'Toxapex',      types: ['POISON','WATER'],     team: 'violet',  emoji: '🌊', img: SPRITE(748),  desc: 'Brutal Star Pokémon',   hp: 10, maxHp: 10, damage: 1, damageTier: 'weak' },
 };
 
 // ─── Team Rosters ───────────────────────────────────────────────────
@@ -215,6 +227,11 @@ export const POKEMON_POOL = {
     { key: 'TYRANITAR',    requiredElo: 1400 },
     { key: 'SKELEDIRGE',   requiredElo: 1100 },
     { key: 'TINKATON',     requiredElo: 1200 },
+    { key: 'IVYSAUR',      requiredElo: 800,  packOnly: true },
+    { key: 'VENUSAUR',     requiredElo: 1300, packOnly: true },
+    { key: 'SCIZOR',       requiredElo: 1200, packOnly: true },
+    { key: 'VOLCANION',    requiredElo: 1000, packOnly: true },
+    { key: 'LYCANROC',     requiredElo: 700,  packOnly: true },
   ],
   violet: [
     { key: 'IRON_MOTH',    requiredElo: 0 },
@@ -242,6 +259,11 @@ export const POKEMON_POOL = {
     { key: 'CERULEDGE',    requiredElo: 1100 },
     { key: 'KINGAMBIT',    requiredElo: 1400 },
     { key: 'HATTERENE',    requiredElo: 1200 },
+    { key: 'PICHU',        requiredElo: 700,  packOnly: true },
+    { key: 'RAICHU',       requiredElo: 1000, packOnly: true },
+    { key: 'AEGISLASH',    requiredElo: 1200, packOnly: true },
+    { key: 'ZOROARK',      requiredElo: 1000, packOnly: true },
+    { key: 'TOXAPEX',      requiredElo: 1300, packOnly: true },
   ],
 };
 
@@ -285,12 +307,18 @@ export const ABILITIES = {
   CHI_YU:       { name: 'Ruination',       effect: 'damage',  damage: 4,         targets: 'random_1',         emoji: '🔥', color: '#f08030' },
   INCINEROAR:   { name: 'Intimidate',      effect: 'intimidate', duration: 5,    targets: 'adjacent_enemies', emoji: '💪', color: '#705848' },
   MAGCARGO:     { name: 'Lava Trail',      effect: 'lava_trail', damage: 3, duration: 5, targets: 'self',  emoji: '🌋', color: '#f08030' },
-  COMFEY:       { name: 'Floral Healing',  effect: 'heal_allies', heal: 2,       targets: 'adjacent_allies',  emoji: '🌼', color: '#ee99ac' },
+  COMFEY:       { name: 'Floral Healing',  effect: 'heal_allies', heal: 1,       targets: 'adjacent_allies',  emoji: '🌼', color: '#ee99ac' },
   BELLIBOLT:    { name: 'Electromorphosis',effect: 'status', status: 'paralyzed',targets: 'adjacent_enemies', emoji: '⚡', color: '#f8d030' },
   ARCANINE:     { name: 'Flamethrower',    effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '🔥', color: '#f08030' },
   TYRANITAR:    { name: 'Stone Edge',      effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '🪨', color: '#b8a038' },
   SKELEDIRGE:   { name: 'Torch Song',      effect: 'drain',   damage: 2, heal: 1,targets: 'adjacent_enemies', emoji: '🎵', color: '#f08030' },
   TINKATON:     { name: 'Gigaton Hammer',  effect: 'damage',  damage: 4,         targets: 'random_1',         emoji: '🔨', color: '#b8b8d0' },
+  // Scarlet pack-only
+  IVYSAUR:      { name: 'Razor Leaf',      effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '🍃', color: '#78c850' },
+  VENUSAUR:     { name: 'Solar Beam',      effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '☀️', color: '#78c850', bonusStatus: 'poisoned', bonusTargets: 'random_1' },
+  SCIZOR:       { name: 'Bullet Punch',    effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '👊', color: '#b8b8d0' },
+  VOLCANION:    { name: 'Steam Eruption',  effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '💨', color: '#f08030' },
+  LYCANROC:     { name: 'Accelerock',      effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '🪨', color: '#b8a038' },
 
   // ── Violet Team ──
   MIRAIDON:     { name: 'Hadron Engine',   effect: 'damage',  damage: 3,         targets: 'adjacent_enemies', emoji: '⚡', color: '#6d28d9' },
@@ -314,12 +342,18 @@ export const ABILITIES = {
   CHIEN_PAO:    { name: 'Sword of Ruin',   effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '❄️', color: '#64c8ff', bonusStatus: 'frozen', bonusTargets: 'random_1' },
   ZAPDOS:       { name: 'Static Storm',    effect: 'damage',  damage: 2,         targets: 'radius_2_enemies', emoji: '⚡', color: '#f8d030' },
   BRAMBLEGHAST: { name: 'Thorny Trap',     effect: 'counter', damage: 2,         targets: 'self',             emoji: '🌿', color: '#78c850' },
-  AUDINO:       { name: 'Heal Pulse',      effect: 'heal_allies', heal: 2,       targets: 'adjacent_allies',  emoji: '💖', color: '#ee99ac' },
+  AUDINO:       { name: 'Heal Pulse',      effect: 'heal_allies', heal: 1,       targets: 'adjacent_allies',  emoji: '💖', color: '#ee99ac' },
   MIMIKYU:      { name: 'Play Rough',      effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '🎭', color: '#ee99ac' },
   TOXTRICITY:   { name: 'Overdrive',       effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '🎸', color: '#a040a0' },
   CERULEDGE:    { name: 'Bitter Blade',    effect: 'drain',   damage: 3, heal: 1,targets: 'random_1',         emoji: '🗡️', color: '#705898' },
   KINGAMBIT:    { name: 'Kowtow Cleave',   effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '⚔️', color: '#705848' },
   HATTERENE:    { name: 'Psyshock',        effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '🔮', color: '#f85888' },
+  // Violet pack-only
+  PICHU:        { name: 'Charm',           effect: 'status',  status: 'stunned', targets: 'random_1',         emoji: '🥺', color: '#f8d030' },
+  RAICHU:       { name: 'Thunderbolt',     effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '⚡', color: '#f8d030', bonusStatus: 'paralyzed', bonusTargets: 'random_1' },
+  AEGISLASH:    { name: "King's Shield",   effect: 'heal',    heal: 2,           targets: 'self',             emoji: '🛡️', color: '#b8b8d0' },
+  ZOROARK:      { name: 'Night Daze',      effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '🌑', color: '#705848' },
+  TOXAPEX:      { name: 'Toxic',           effect: 'status',  status: 'poisoned',targets: 'adjacent_enemies', emoji: '☠️', color: '#a040a0' },
 };
 
 // White = Scarlet, Black = Violet

@@ -359,7 +359,10 @@ export function renderTitleScreen(onStart) {
     pool.forEach(entry => {
       const pkmn = POKEMON[entry.key];
       if (!pkmn) return;
-      const unlocked = playerElo >= entry.requiredElo || isPokemonUnlocked(entry.key);
+      const isPackOnly = !!entry.packOnly;
+      const unlocked = isPackOnly
+        ? isPokemonUnlocked(entry.key)  // pack-only: only unlockable via packs
+        : (playerElo >= entry.requiredElo || isPokemonUnlocked(entry.key));
       const isCurrent = entry.key === currentKey;
       const ability = ABILITIES[entry.key];
       const abilityLabel = ability ? `${ability.emoji} ${ability.name}` : '';
@@ -373,6 +376,10 @@ export function renderTitleScreen(onStart) {
 
       const disabled = !unlocked || isCurrent || atLimit;
 
+      const lockLabel = !unlocked
+        ? (isPackOnly ? '📦 Pack Only' : `🔒 ${entry.requiredElo}`)
+        : '';
+
       html += `
         <button class="swap-option ${isCurrent ? 'swap-option--current' : ''} ${!unlocked ? 'swap-option--locked' : ''} ${atLimit ? 'swap-option--maxed' : ''}"
                 data-pkmn-key="${entry.key}" ${disabled ? 'disabled' : ''}>
@@ -382,7 +389,7 @@ export function renderTitleScreen(onStart) {
             <span class="swap-option__stats">❤️${pkmn.hp} ⚔️${pkmn.damage}</span>
             ${abilityLabel ? `<span class="swap-option__ability">${abilityLabel}</span>` : ''}
           </div>
-          ${!unlocked ? `<span class="swap-option__lock">🔒 ${entry.requiredElo}</span>` : ''}
+          ${lockLabel ? `<span class="swap-option__lock">${lockLabel}</span>` : ''}
           ${isCurrent ? '<span class="swap-option__check">✓</span>' : ''}
           ${atLimit ? '<span class="swap-option__lock">2x max</span>' : ''}
         </button>
