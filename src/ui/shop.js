@@ -232,7 +232,6 @@ const STATE_KEY = 'pokechess_shop';
 // Per-asset config: 'dark' removes near-black, 'light' removes near-white.
 const BG_REMOVAL_CONFIG = {
   MASTER_SWORD: 'dark',
-  LINKS_HAT:    'light',
 };
 
 (function initCosmeticImages() {
