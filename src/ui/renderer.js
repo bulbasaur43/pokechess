@@ -353,7 +353,7 @@ const COSMETIC_OVERRIDES = {
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   // ── Scarlet Classics ──
-  BULBASAUR:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  BULBASAUR:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -20, scale: 1.1, ox: -3, oy: -5 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
   CHARIZARD:    { MARIOS_HAT: { rot: 3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
   DRAGONITE:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
   GARCHOMP:     { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
