@@ -229,13 +229,16 @@ let _equippedCosmetic = ''; // currently active cosmetic ID
 const STATE_KEY = 'pokechess_shop';
 
 // Pre-process cosmetic images that need background removal.
-// Only MASTER_SWORD has a dark background — all others already have transparency.
-const NEEDS_BG_REMOVAL = new Set(['MASTER_SWORD', 'LINKS_HAT']);
+// Per-asset config: 'dark' removes near-black, 'light' removes near-white.
+const BG_REMOVAL_CONFIG = {
+  MASTER_SWORD: 'dark',
+  LINKS_HAT:    'light',
+};
 
 (function initCosmeticImages() {
   for (const [key, c] of Object.entries(COSMETICS)) {
-    if (!c.img || !NEEDS_BG_REMOVAL.has(key)) continue;
-    const origSrc = c.img;
+    const mode = BG_REMOVAL_CONFIG[key];
+    if (!c.img || !mode) continue;
     const imgEl = new Image();
     imgEl.crossOrigin = 'anonymous';
     imgEl.onload = () => {
@@ -248,19 +251,26 @@ const NEEDS_BG_REMOVAL = new Set(['MASTER_SWORD', 'LINKS_HAT']);
       const d = data.data;
       for (let i = 0; i < d.length; i += 4) {
         const r = d[i], g = d[i+1], b = d[i+2];
-        // Remove near-black pixels only (the sword's dark background)
-        if (r < 35 && g < 35 && b < 35) {
-          d[i+3] = 0;
-        }
-        // Soften dark edges
-        else if (r < 55 && g < 55 && b < 55) {
-          d[i+3] = Math.min(d[i+3], Math.round(((r + g + b) / 3 - 35) / 20 * 255));
+        if (mode === 'dark') {
+          // Remove near-black pixels (the sword's dark background)
+          if (r < 35 && g < 35 && b < 35) {
+            d[i+3] = 0;
+          } else if (r < 55 && g < 55 && b < 55) {
+            d[i+3] = Math.min(d[i+3], Math.round(((r + g + b) / 3 - 35) / 20 * 255));
+          }
+        } else if (mode === 'light') {
+          // Remove near-white pixels (Link's Hat white background)
+          if (r > 220 && g > 220 && b > 220) {
+            d[i+3] = 0;
+          } else if (r > 200 && g > 200 && b > 200) {
+            d[i+3] = Math.min(d[i+3], Math.round((255 - (r + g + b) / 3) / 55 * 255));
+          }
         }
       }
       ctx.putImageData(data, 0, 0);
       c.img = canvas.toDataURL('image/png');
     };
-    imgEl.src = origSrc;
+    imgEl.src = c.img;
   }
 })();
 
