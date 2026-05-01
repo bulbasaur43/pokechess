@@ -230,7 +230,7 @@ const STATE_KEY = 'pokechess_shop';
 
 // Pre-process cosmetic images that need background removal.
 // Only MASTER_SWORD has a dark background — all others already have transparency.
-const NEEDS_BG_REMOVAL = new Set(['MASTER_SWORD']);
+const NEEDS_BG_REMOVAL = new Set(['MASTER_SWORD', 'LINKS_HAT']);
 
 (function initCosmeticImages() {
   for (const [key, c] of Object.entries(COSMETICS)) {
@@ -325,15 +325,17 @@ export function equipCosmetic(cosmeticId) {
 export function getEquippedCosmetic() { return _equippedCosmetic; }
 export function getOwnedCosmetics() { return [..._ownedCosmetics]; }
 
-/** Coin cost scales with ELO requirement */
-export function getPokemonCoinCost(requiredElo) {
+/** Coin cost scales with ELO requirement. Pack-only Pokémon cost 2x. */
+export function getPokemonCoinCost(requiredElo, packOnly = false) {
+  let base;
   if (requiredElo <= 0) return 0; // Free Pokémon can't be bought
-  if (requiredElo <= 700) return 50;
-  if (requiredElo <= 1000) return 100;
-  if (requiredElo <= 1300) return 200;
-  if (requiredElo <= 1600) return 350;
-  if (requiredElo <= 1900) return 500;
-  return 750; // 2000+ (legendaries)
+  if (requiredElo <= 700) base = 50;
+  else if (requiredElo <= 1000) base = 100;
+  else if (requiredElo <= 1300) base = 200;
+  else if (requiredElo <= 1600) base = 350;
+  else if (requiredElo <= 1900) base = 500;
+  else base = 750; // 2000+ (legendaries)
+  return packOnly ? base * 2 : base;
 }
 
 export function isPokemonUnlocked(key) {
@@ -802,21 +804,25 @@ async function renderPokemonShop() {
   const stats = loadPlayerStats();
   const playerElo = stats?.rating || 600;
 
-  // Collect only ELO-locked Pokémon the player can't access yet (and not already coin-unlocked)
-  // Pack-only Pokémon are excluded — they can only be obtained from packs
+  // Collect ELO-locked + pack-only Pokémon the player hasn't unlocked yet
   const allPokemon = [];
   for (const teamKey of ['scarlet', 'violet']) {
     const pool = POKEMON_POOL[teamKey] || [];
     for (const entry of pool) {
-      if (entry.packOnly) continue; // pack-only: not purchasable directly
-      if (entry.requiredElo > 0 && playerElo < entry.requiredElo && !_unlockedPokemon.includes(entry.key)) {
+      // Pack-only: always show (no ELO gate). Regular: show if ELO-locked.
+      const shouldShow = entry.packOnly
+        ? !_unlockedPokemon.includes(entry.key)
+        : (entry.requiredElo > 0 && playerElo < entry.requiredElo && !_unlockedPokemon.includes(entry.key));
+      if (shouldShow) {
         allPokemon.push({ ...entry, team: teamKey });
       }
     }
     const kings = KING_POOL[teamKey] || [];
     for (const entry of kings) {
-      if (entry.packOnly) continue;
-      if (entry.requiredElo > 0 && playerElo < entry.requiredElo && !_unlockedPokemon.includes(entry.key)) {
+      const shouldShow = entry.packOnly
+        ? !_unlockedPokemon.includes(entry.key)
+        : (entry.requiredElo > 0 && playerElo < entry.requiredElo && !_unlockedPokemon.includes(entry.key));
+      if (shouldShow) {
         allPokemon.push({ ...entry, team: teamKey, isKing: true });
       }
     }
@@ -837,13 +843,14 @@ async function renderPokemonShop() {
     const pkmn = POKEMON[entry.key];
     if (!pkmn) continue;
 
-    const cost = getPokemonCoinCost(entry.requiredElo);
+    const cost = getPokemonCoinCost(entry.requiredElo, !!entry.packOnly);
     const canAfford = _coins >= cost;
 
     const card = document.createElement('button');
-    card.className = `shop-pkmn-card ${canAfford ? '' : 'shop-pkmn-card--locked'}`;
-    card.title = `${pkmn.name} — \ud83e\ude99 ${cost} coins`;
+    card.className = `shop-pkmn-card ${canAfford ? '' : 'shop-pkmn-card--locked'} ${entry.packOnly ? 'shop-pkmn-card--pack' : ''}`;
+    card.title = `${pkmn.name} — \ud83e\ude99 ${cost} coins${entry.packOnly ? ' (Pack Exclusive — 2x price)' : ''}`;
     card.innerHTML = `
+      ${entry.packOnly ? '<div class="shop-pkmn-badge">📦 Pack Exclusive</div>' : ''}
       <img class="shop-pkmn-img" src="${pkmn.img || ''}" alt="${pkmn.name}" />
       <div class="shop-pkmn-name">${pkmn.name}</div>
       <div class="shop-pkmn-stats">\u2764\ufe0f${pkmn.hp} \u2694\ufe0f${pkmn.damage}</div>

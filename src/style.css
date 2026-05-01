@@ -4907,9 +4907,23 @@ body {
 }
 
 .shop-pkmn-badge {
-  font-size: 0.65rem;
-  color: #86efac;
+  font-size: 0.55rem;
+  color: #fbbf24;
   font-weight: 700;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.08));
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 6px;
+  padding: 1px 6px;
+  margin-bottom: 4px;
+  display: inline-block;
+}
+
+.shop-pkmn-card--pack {
+  border-color: rgba(251, 191, 36, 0.2);
+}
+.shop-pkmn-card--pack:hover:not(:disabled) {
+  border-color: rgba(251, 191, 36, 0.5);
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.15);
 }
 
 /* ── Cooldown indicator ── */
