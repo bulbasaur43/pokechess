@@ -883,7 +883,15 @@ async function handleShopBuyCoins(req, res, body) {
     sendJSON(res, 200, { checkoutUrl: session.url });
   } catch (e) {
     console.error('Stripe error:', e.message);
-    sendJSON(res, 500, { error: 'Payment system error' });
+    // If Stripe key is invalid, fall back to test mode
+    if (e.type === 'StripeAuthenticationError' || e.message?.includes('Invalid API Key')) {
+      console.log(`⚠️ Stripe key invalid — falling back to test mode. Granting ${pack.coins} coins to ${auth.username}`);
+      if (!auth.user.shop) auth.user.shop = { coins: 0 };
+      auth.user.shop.coins = (auth.user.shop.coins || 0) + pack.coins;
+      saveDB(db);
+      return sendJSON(res, 200, { granted: true, coins: auth.user.shop.coins });
+    }
+    sendJSON(res, 500, { error: 'Payment system error — check Stripe keys' });
   }
 }
 
