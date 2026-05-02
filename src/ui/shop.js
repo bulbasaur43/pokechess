@@ -1001,6 +1001,7 @@ function showPackRipOpen(result, isDuplicate) {
 
   const overlay = document.createElement('div');
   overlay.className = 'pack-rip-overlay';
+  const pkmn = result.pkmn;
   overlay.innerHTML = `
     <div class="pack-rip-hint">✂️ Drag across the top to open!</div>
     <div class="pack-rip-container">
@@ -1016,6 +1017,7 @@ function showPackRipOpen(result, isDuplicate) {
           <div class="pack-rip-label">Pokémon Pack</div>
           <div class="pack-rip-glow" style="--tier-color: ${tierColor}"></div>
         </div>
+        <img class="pack-rip-pokemon" src="${pkmn.img || ''}" alt="${pkmn.name}" style="--tier-color: ${tierColor}" />
       </div>
     </div>
   `;
@@ -1072,13 +1074,16 @@ function showPackRipOpen(result, isDuplicate) {
       p.style.setProperty('--color', tierColor);
       particles.appendChild(p);
     }
+    // Pokémon pops out of the pack
+    const pokemonEl = card.querySelector('.pack-rip-pokemon');
+    if (pokemonEl) pokemonEl.classList.add('pack-rip-pokemon--pop');
     setTimeout(() => {
       overlay.classList.remove('pack-rip-overlay--show');
       setTimeout(() => {
         overlay.remove();
         showPackReveal(result, isDuplicate);
       }, 300);
-    }, 800);
+    }, 1400);
   }
 
   // Mouse events
