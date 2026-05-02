@@ -474,40 +474,13 @@ async function buyCoins(packId) {
       return { success: true, testMode: true };
     }
 
-    // Real Stripe flow
-    const stripe = await loadStripeJS();
-    if (!stripe) return { error: 'Payment system unavailable' };
-
-    const { clientSecret } = data;
-
-    const paymentRequest = stripe.paymentRequest({
-      country: 'US',
-      currency: 'usd',
-      total: { label: `${pack.coins} PokéCoins`, amount: pack.price },
-      requestPayerName: true,
-    });
-
-    const canMakePayment = await paymentRequest.canMakePayment();
-    if (canMakePayment) {
-      return new Promise((resolve) => {
-        paymentRequest.on('paymentmethod', async (ev) => {
-          const { error: err } = await stripe.confirmCardPayment(
-            clientSecret, { payment_method: ev.paymentMethod.id }, { handleActions: false }
-          );
-          if (err) { ev.complete('fail'); resolve({ error: err.message }); }
-          else { ev.complete('success'); _coins += pack.coins; saveState(); resolve({ success: true }); }
-        });
-        paymentRequest.show();
-      });
-    } else {
-      const { error } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: { card: { token: 'tok_visa' } },
-      });
-      if (error) return { error: error.message };
-      _coins += pack.coins;
-      saveState();
-      return { success: true };
+    // Real Stripe: redirect to Checkout
+    if (data.checkoutUrl) {
+      window.location.href = data.checkoutUrl;
+      return { success: true, redirecting: true };
     }
+
+    return { error: 'Payment system error' };
   } catch (e) {
     return { error: e.message || 'Payment failed' };
   }
@@ -527,7 +500,7 @@ async function syncToServer() {
   } catch { /* silent */ }
 }
 
-async function loadFromServer() {
+export async function loadFromServer() {
   const token = localStorage.getItem('pokechess_token');
   if (!token) return;
   try {
@@ -610,7 +583,7 @@ export function openShop(onItemUse) {
     </div>
 
     <div class="shop-section">
-      <h3 class="shop-section-title">💰 PokéCoin Packs <span class="shop-section-hint">Coming soon</span></h3>
+      <h3 class="shop-section-title">💰 PokéCoin Packs</h3>
       <div class="shop-packs" id="shop-packs"></div>
     </div>
 
@@ -712,14 +685,30 @@ function renderCoinPacks() {
 
   for (const pack of COIN_PACKS) {
     const card = document.createElement('button');
-    card.className = 'shop-pack shop-pack--disabled';
-    card.disabled = true;
-    card.title = 'Coming soon!';
+    card.className = 'shop-pack';
     card.innerHTML = `
       <div class="shop-pack__coins">🪙 ${pack.coins}</div>
       <div class="shop-pack__price">${pack.priceLabel}</div>
       ${pack.bonus ? `<div class="shop-pack__bonus">${pack.bonus}</div>` : ''}
     `;
+    card.addEventListener('click', async () => {
+      card.disabled = true;
+      card.classList.add('shop-pack--loading');
+      const origText = card.querySelector('.shop-pack__price').textContent;
+      card.querySelector('.shop-pack__price').textContent = 'Processing...';
+      const result = await buyCoins(pack.id);
+      card.disabled = false;
+      card.classList.remove('shop-pack--loading');
+      card.querySelector('.shop-pack__price').textContent = origText;
+      if (result.error) {
+        showShopToast(result.error, 'error');
+      } else {
+        showShopToast(`🪙 +${pack.coins} PokéCoins added!`, 'success');
+        renderShopCoins();
+        renderShopItems();
+        renderPokemonPacks();
+      }
+    });
     container.appendChild(card);
   }
 }

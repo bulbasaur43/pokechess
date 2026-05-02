@@ -859,15 +859,28 @@ async function handleShopBuyCoins(req, res, body) {
     return sendJSON(res, 200, { granted: true, coins: auth.user.shop.coins });
   }
 
-  // Real Stripe PaymentIntent
+  // Real Stripe Checkout Session
   try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: pack.price,
-      currency: 'usd',
-      metadata: { username: auth.username, packId, coins: pack.coins },
+    const origin = req.headers.origin || req.headers.referer?.replace(/\/$/, '') || 'https://pokechess.onrender.com';
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
       payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: `${pack.coins} PokéCoins`,
+            description: `PokéChess in-game currency`,
+          },
+          unit_amount: pack.price,
+        },
+        quantity: 1,
+      }],
+      metadata: { username: auth.username, packId, coins: String(pack.coins) },
+      success_url: `${origin}/?payment=success&coins=${pack.coins}`,
+      cancel_url: `${origin}/?payment=cancelled`,
     });
-    sendJSON(res, 200, { clientSecret: paymentIntent.client_secret });
+    sendJSON(res, 200, { checkoutUrl: session.url });
   } catch (e) {
     console.error('Stripe error:', e.message);
     sendJSON(res, 500, { error: 'Payment system error' });
@@ -944,9 +957,9 @@ function handleStripeWebhook(req, res, rawBody) {
     return;
   }
 
-  if (event.type === 'payment_intent.succeeded') {
-    const pi = event.data.object;
-    const { username, coins } = pi.metadata || {};
+  if (event.type === 'checkout.session.completed' || event.type === 'payment_intent.succeeded') {
+    const obj = event.data.object;
+    const { username, coins } = obj.metadata || {};
     if (username && coins) {
       const user = db.users[username.toLowerCase()];
       if (user) {

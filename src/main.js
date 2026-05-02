@@ -45,6 +45,20 @@ function withRandomReplay(values, fn) {
 }
 
 function init() {
+  // Handle Stripe payment return
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('payment') === 'success') {
+    const coins = urlParams.get('coins') || '';
+    setTimeout(() => showStatusToast(`💳 Payment successful! +${coins} PokéCoins added!`, 'buff'), 500);
+    // Sync coins from server to get the updated balance
+    import('./ui/shop.js').then(m => m.loadFromServer?.());
+    // Clean up URL
+    window.history.replaceState({}, '', window.location.pathname);
+  } else if (urlParams.get('payment') === 'cancelled') {
+    setTimeout(() => showStatusToast('Payment cancelled', 'error'), 500);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
   renderTitleScreen((clockPreset, options) => {
     gameMode = options.mode || 'ai';
 

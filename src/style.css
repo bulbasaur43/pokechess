@@ -4538,6 +4538,16 @@ body {
   filter: grayscale(0.3);
 }
 
+.shop-pack--loading {
+  opacity: 0.7;
+  pointer-events: none;
+  animation: shopPulse 1.5s ease-in-out infinite;
+}
+@keyframes shopPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.4; }
+}
+
 /* ── Item Cards ── */
 .shop-items {
   display: flex;
