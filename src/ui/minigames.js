@@ -3,49 +3,27 @@
  * Three canvas-based minigames accessible from the title logo
  */
 
-const BULBA_COLOR = '#6dbd8a';
-const BULBA_DARK = '#3a7a5a';
-const BULBA_BULB = '#2f8a5a';
+// Preload Bulbasaur sprite from PokeAPI official artwork
+const BULBA_IMG = new Image();
+BULBA_IMG.crossOrigin = 'anonymous';
+BULBA_IMG.src = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png';
 
 function drawBulbasaur(ctx, x, y, size, facing = 1) {
-  const s = size;
   ctx.save();
-  ctx.translate(x, y);
-  if (facing < 0) { ctx.scale(-1, 1); ctx.translate(-s, 0); }
-  // Body
-  ctx.fillStyle = BULBA_COLOR;
-  ctx.beginPath();
-  ctx.ellipse(s * 0.5, s * 0.65, s * 0.38, s * 0.28, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // Legs
-  ctx.fillStyle = BULBA_DARK;
-  [[0.2, 0.85], [0.4, 0.88], [0.6, 0.88], [0.8, 0.85]].forEach(([lx, ly]) => {
-    ctx.fillRect(s * lx - 4, s * ly, 8, s * 0.12);
-  });
-  // Bulb
-  ctx.fillStyle = BULBA_BULB;
-  ctx.beginPath();
-  ctx.ellipse(s * 0.5, s * 0.42, s * 0.22, s * 0.2, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#1a6040';
-  ctx.beginPath();
-  ctx.moveTo(s * 0.5, s * 0.22);
-  ctx.lineTo(s * 0.38, s * 0.42);
-  ctx.lineTo(s * 0.62, s * 0.42);
-  ctx.fill();
-  // Eyes
-  ctx.fillStyle = '#c33';
-  [[0.32, 0.58], [0.68, 0.58]].forEach(([ex, ey]) => {
+  if (facing < 0) {
+    ctx.translate(x + size, y);
+    ctx.scale(-1, 1);
+    x = 0; y = 0;
+  }
+  if (BULBA_IMG.complete && BULBA_IMG.naturalWidth > 0) {
+    ctx.drawImage(BULBA_IMG, x, y, size, size);
+  } else {
+    // Fallback while loading
+    ctx.fillStyle = '#6dbd8a';
     ctx.beginPath();
-    ctx.arc(s * ex, s * ey, s * 0.06, 0, Math.PI * 2);
+    ctx.arc(x + size / 2, y + size / 2, size / 2.5, 0, Math.PI * 2);
     ctx.fill();
-  });
-  ctx.fillStyle = '#fff';
-  [[0.34, 0.56], [0.70, 0.56]].forEach(([ex, ey]) => {
-    ctx.beginPath();
-    ctx.arc(s * ex, s * ey, s * 0.025, 0, Math.PI * 2);
-    ctx.fill();
-  });
+  }
   ctx.restore();
 }
 
