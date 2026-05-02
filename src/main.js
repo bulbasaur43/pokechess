@@ -48,12 +48,34 @@ function init() {
   // Handle Stripe payment return
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('payment') === 'success') {
-    const coins = urlParams.get('coins') || '';
-    setTimeout(() => showStatusToast(`💳 Payment successful! +${coins} PokéCoins added!`, 'buff'), 500);
-    // Sync coins from server to get the updated balance
-    import('./ui/shop.js').then(m => m.loadFromServer?.());
-    // Clean up URL
+    const sessionId = urlParams.get('session_id');
+    // Clean up URL immediately
     window.history.replaceState({}, '', window.location.pathname);
+
+    if (sessionId) {
+      // Verify payment and grant coins
+      const token = localStorage.getItem('pokechess_token');
+      const isDev = window.location.port === '5173' || window.location.port === '5174';
+      const apiBase = isDev ? `http://${window.location.hostname}:3001/api` : `${window.location.origin}/api`;
+      fetch(`${apiBase}/shop/verify-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ sessionId }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.granted || data.alreadyFulfilled) {
+            showStatusToast(`💳 Payment successful! Balance: ${data.coins} PokéCoins`, 'buff');
+            import('./ui/shop.js').then(m => m.loadFromServer?.());
+          } else {
+            showStatusToast(data.error || 'Could not verify payment', 'error');
+          }
+        })
+        .catch(() => showStatusToast('Payment received — coins will appear shortly', 'buff'));
+    } else {
+      setTimeout(() => showStatusToast('💳 Payment processed!', 'buff'), 500);
+      import('./ui/shop.js').then(m => m.loadFromServer?.());
+    }
   } else if (urlParams.get('payment') === 'cancelled') {
     setTimeout(() => showStatusToast('Payment cancelled', 'error'), 500);
     window.history.replaceState({}, '', window.location.pathname);

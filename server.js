@@ -260,6 +260,8 @@ function routeRequest(req, res, body) {
     sendJSON(res, 200, { stripePublishableKey: STRIPE_PK || null, testMode: !stripe });
   } else if (req.method === 'POST' && url === '/api/shop/buy-coins') {
     handleShopBuyCoins(req, res, body);
+  } else if (req.method === 'POST' && url === '/api/shop/verify-payment') {
+    handleVerifyPayment(req, res, body);
   } else if (req.method === 'GET' && url === '/api/shop/sync') {
     handleShopGet(req, res);
   } else if (req.method === 'POST' && url === '/api/shop/sync') {
@@ -877,7 +879,7 @@ async function handleShopBuyCoins(req, res, body) {
         quantity: 1,
       }],
       metadata: { username: auth.username, packId, coins: String(pack.coins) },
-      success_url: `${origin}/?payment=success&coins=${pack.coins}`,
+      success_url: `${origin}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/?payment=cancelled`,
     });
     sendJSON(res, 200, { checkoutUrl: session.url });
@@ -892,6 +894,50 @@ async function handleShopBuyCoins(req, res, body) {
       return sendJSON(res, 200, { granted: true, coins: auth.user.shop.coins });
     }
     sendJSON(res, 500, { error: 'Payment system error — check Stripe keys' });
+  }
+}
+
+// Track already-fulfilled sessions to prevent double-granting
+const fulfilledSessions = new Set();
+
+async function handleVerifyPayment(req, res, body) {
+  const auth = getAuthUser(req);
+  if (!auth) return sendJSON(res, 401, { error: 'Not logged in' });
+
+  const { sessionId } = body || {};
+  if (!sessionId) return sendJSON(res, 400, { error: 'Missing session ID' });
+
+  // Already fulfilled?
+  if (fulfilledSessions.has(sessionId)) {
+    return sendJSON(res, 200, { alreadyFulfilled: true, coins: auth.user.shop?.coins || 0 });
+  }
+
+  if (!stripe) return sendJSON(res, 400, { error: 'Stripe not configured' });
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status !== 'paid') {
+      return sendJSON(res, 400, { error: 'Payment not completed' });
+    }
+
+    const { username, coins } = session.metadata || {};
+    if (!username || !coins) return sendJSON(res, 400, { error: 'Invalid session metadata' });
+
+    // Verify this session belongs to the logged-in user
+    if (username.toLowerCase() !== auth.username.toLowerCase()) {
+      return sendJSON(res, 403, { error: 'Session does not belong to this user' });
+    }
+
+    // Grant coins
+    fulfilledSessions.add(sessionId);
+    if (!auth.user.shop) auth.user.shop = { coins: 0 };
+    auth.user.shop.coins = (auth.user.shop.coins || 0) + parseInt(coins);
+    saveDB(db);
+    console.log(`💳 Payment verified! +${coins} coins for ${username} (balance: ${auth.user.shop.coins})`);
+    return sendJSON(res, 200, { granted: true, coins: auth.user.shop.coins });
+  } catch (e) {
+    console.error('Verify payment error:', e.message);
+    return sendJSON(res, 500, { error: 'Could not verify payment' });
   }
 }
 
