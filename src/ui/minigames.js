@@ -198,7 +198,8 @@ function startShooterGame(canvas) {
 
   function spawnEnemy() {
     const sz = 15 + Math.random() * 20;
-    enemies.push({ x: W + 10, y: 30 + Math.random() * (H - 90), size: sz, hp: 1, speed: 1.5 + Math.random() * 2 });
+    const ehp = sz > 30 ? 3 : sz > 22 ? 2 : 1;
+    enemies.push({ x: W + 10, y: 30 + Math.random() * (H - 90), size: sz, hp: ehp, maxHp: ehp, speed: 1.5 + Math.random() * 2, flash: 0 });
   }
 
   function resetGame() {
@@ -227,14 +228,22 @@ function startShooterGame(canvas) {
     leaves.forEach(l => { l.x += l.vx; l.y += l.vy; });
     leaves = leaves.filter(l => l.x > -10 && l.x < W + 10 && l.y > -10 && l.y < H + 10);
 
-    enemies.forEach(e => e.x -= e.speed);
+    enemies.forEach(e => { e.x -= e.speed; if (e.flash > 0) e.flash--; });
 
     // Leaf-enemy collision
     for (let i = enemies.length - 1; i >= 0; i--) {
       for (let j = leaves.length - 1; j >= 0; j--) {
         const e = enemies[i], l = leaves[j];
         if (l && e && l.x > e.x && l.x < e.x + e.size && l.y > e.y && l.y < e.y + e.size) {
-          enemies.splice(i, 1); leaves.splice(j, 1); score++; break;
+          leaves.splice(j, 1);
+          e.hp--;
+          if (e.hp <= 0) {
+            enemies.splice(i, 1);
+            score += e.maxHp; // More points for tougher enemies
+          } else {
+            e.flash = 6; // Flash white when hit
+          }
+          break;
         }
       }
     }
@@ -298,13 +307,15 @@ function startShooterGame(canvas) {
       ctx.restore();
     });
     // Enemies (Zubats - simple)
-    ctx.fillStyle = '#a855f7';
     enemies.forEach(e => {
+      const baseColor = e.flash > 0 ? '#fff' : '#a855f7';
+      const wingColor = e.flash > 0 ? '#ddd' : '#7c3aed';
+      ctx.fillStyle = baseColor;
       ctx.beginPath();
       ctx.ellipse(e.x + e.size / 2, e.y + e.size / 2, e.size / 2, e.size / 3, 0, 0, Math.PI * 2);
       ctx.fill();
       // Wings
-      ctx.fillStyle = '#7c3aed';
+      ctx.fillStyle = wingColor;
       const wy = Math.sin(frameCount * 0.3 + e.x) * 5;
       ctx.beginPath();
       ctx.moveTo(e.x + e.size / 2, e.y + e.size / 2);
@@ -316,7 +327,17 @@ function startShooterGame(canvas) {
       ctx.lineTo(e.x + e.size + 5, e.y + wy);
       ctx.lineTo(e.x + e.size - 5, e.y + wy + 5);
       ctx.fill();
-      ctx.fillStyle = '#a855f7';
+      // HP pips for multi-HP enemies
+      if (e.maxHp > 1) {
+        const pipY = e.y - 6;
+        const pipW = 4, pipGap = 2;
+        const totalW = e.maxHp * pipW + (e.maxHp - 1) * pipGap;
+        const startX = e.x + e.size / 2 - totalW / 2;
+        for (let p = 0; p < e.maxHp; p++) {
+          ctx.fillStyle = p < e.hp ? '#ef4444' : 'rgba(255,255,255,0.2)';
+          ctx.fillRect(startX + p * (pipW + pipGap), pipY, pipW, 3);
+        }
+      }
     });
     // HUD
     ctx.fillStyle = '#fff';
