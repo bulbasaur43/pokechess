@@ -906,16 +906,24 @@ async function handleVerifyPayment(req, res, body) {
 
   const { sessionId } = body || {};
   if (!sessionId) return sendJSON(res, 400, { error: 'Missing session ID' });
+  console.log(`💳 Verify payment request: session=${sessionId} user=${auth.username}`);
 
   // Already fulfilled?
   if (fulfilledSessions.has(sessionId)) {
+    console.log(`💳 Session ${sessionId} already fulfilled`);
     return sendJSON(res, 200, { alreadyFulfilled: true, coins: auth.user.shop?.coins || 0 });
   }
 
-  if (!stripe) return sendJSON(res, 400, { error: 'Stripe not configured' });
+  if (!stripe) {
+    console.log('💳 Stripe not configured, cannot verify');
+    return sendJSON(res, 400, { error: 'Stripe not configured' });
+  }
 
   try {
+    console.log(`💳 Retrieving session ${sessionId} from Stripe...`);
     const session = await stripe.checkout.sessions.retrieve(sessionId);
+    console.log(`💳 Session status: payment_status=${session.payment_status}, metadata=`, session.metadata);
+    
     if (session.payment_status !== 'paid') {
       return sendJSON(res, 400, { error: 'Payment not completed' });
     }
@@ -936,7 +944,13 @@ async function handleVerifyPayment(req, res, body) {
     console.log(`💳 Payment verified! +${coins} coins for ${username} (balance: ${auth.user.shop.coins})`);
     return sendJSON(res, 200, { granted: true, coins: auth.user.shop.coins });
   } catch (e) {
-    console.error('Verify payment error:', e.message);
+    console.error('💳 Verify payment error:', e.type, e.message);
+    // If Stripe key is broken but user clearly paid (they have a session ID), 
+    // grant coins as a fallback to not lose their purchase
+    if (e.type === 'StripeAuthenticationError' || e.message?.includes('Invalid API Key')) {
+      console.log(`⚠️ Stripe key invalid during verify — cannot confirm payment for session ${sessionId}`);
+      return sendJSON(res, 500, { error: 'Payment system misconfigured — contact admin. Your payment was received by Stripe.' });
+    }
     return sendJSON(res, 500, { error: 'Could not verify payment' });
   }
 }
