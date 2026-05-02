@@ -164,7 +164,7 @@ export const POKEMON = {
   RAICHU:       { name: 'Raichu',       types: ['ELECTRIC','PSYCHIC'], team: 'violet',  emoji: '⚡', img: SPRITE(26),   desc: 'Mouse Pokémon',         hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
   AEGISLASH:    { name: 'Aegislash',    types: ['STEEL','GHOST'],      team: 'violet',  emoji: '🛡️', img: SPRITE(681),  desc: 'Royal Sword Pokémon',   hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
   ZOROARK:      { name: 'Zoroark',      types: ['DARK'],               team: 'violet',  emoji: '🦊', img: SPRITE(571),  desc: 'Illusion Fox Pokémon',  hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
-  TOXAPEX:      { name: 'Toxapex',      types: ['POISON','WATER'],     team: 'violet',  emoji: '🌊', img: SPRITE(748),  desc: 'Brutal Star Pokémon',   hp: 8,  maxHp: 8,  damage: 1, damageTier: 'weak' },
+  TOXAPEX:      { name: 'Toxapex',      types: ['POISON','WATER'],     team: 'violet',  emoji: '🌊', img: SPRITE(748),  desc: 'Brutal Star Pokémon',   hp: 6,  maxHp: 6,  damage: 1, damageTier: 'weak' },
 };
 
 // ─── Team Rosters ───────────────────────────────────────────────────
