@@ -133,6 +133,7 @@ function startShooterGame(canvas) {
   let frameCount = 0;
   let gameOver = false;
   let animId;
+  let keys = {};
   let mouseX = W / 2, mouseY = H / 2;
   let shootTimer = 0;
   const SHOOT_INTERVAL = 8; // Auto-shoot every 8 frames (~7.5 shots/sec)
@@ -164,6 +165,10 @@ function startShooterGame(canvas) {
 
   canvas.setAttribute('tabindex', '0');
   canvas.focus();
+
+  // Keyboard movement
+  canvas.onkeydown = (e) => { keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); };
+  canvas.onkeyup = (e) => { keys[e.code] = false; };
 
   // Track mouse position
   canvas.addEventListener('mousemove', (e) => {
@@ -206,9 +211,10 @@ function startShooterGame(canvas) {
     frameCount++;
     if (frameCount % 45 === 0) spawnEnemy();
 
-    // Bulbasaur smoothly follows mouse Y
-    const targetY = Math.max(0, Math.min(H - bulba.size, mouseY - bulba.size / 2));
-    bulba.y += (targetY - bulba.y) * 0.15;
+    // Keyboard movement
+    const spd = 4;
+    if (keys['ArrowUp'] || keys['KeyW']) bulba.y = Math.max(0, bulba.y - spd);
+    if (keys['ArrowDown'] || keys['KeyS']) bulba.y = Math.min(H - bulba.size, bulba.y + spd);
 
     // Auto-shoot
     shootTimer++;
@@ -318,7 +324,7 @@ function startShooterGame(canvas) {
     ctx.fillText(`Score: ${score}  HP: ${'❤️'.repeat(hp)}`, 10, 22);
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
     ctx.font = '11px monospace';
-    ctx.fillText('Move mouse to aim • Auto-fires!', 10, H - 10);
+    ctx.fillText('↑↓ move • Mouse aims • Auto-fires!', 10, H - 10);
 
     if (gameOver) {
       ctx.fillStyle = 'rgba(0,0,0,0.6)';
@@ -339,7 +345,7 @@ function startShooterGame(canvas) {
     animId = requestAnimationFrame(loop);
   }
   loop();
-  return () => { cancelAnimationFrame(animId); canvas.onclick = null; };
+  return () => { cancelAnimationFrame(animId); canvas.onkeydown = null; canvas.onkeyup = null; canvas.onclick = null; };
 }
 
 // ─── Game 3: Maze ───────────────────────────────────────────
