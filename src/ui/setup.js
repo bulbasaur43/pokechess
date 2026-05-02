@@ -8,6 +8,7 @@ import { AI_DIFFICULTIES } from '../engine/ai.js';
 import { loadPlayerStats, getRankTitle, getWinRate } from '../engine/elo.js';
 import { isLoggedIn, getUsername, login, signup, logout, refreshProfile, getLeaderboard, saveTeam, loadTeam } from '../engine/auth.js';
 import { isPokemonUnlocked, openShop, getCoins, initShop } from './shop.js';
+import { openMinigames } from './minigames.js';
 
 export function renderTitleScreen(onStart) {
   const app = document.getElementById('app');
@@ -489,6 +490,9 @@ export function renderTitleScreen(onStart) {
 
   // Pokédex button
   document.getElementById('btn-pokedex')?.addEventListener('click', showPokedex);
+
+  // Logo click → Minigames
+  document.querySelector('.title-screen__logo-img')?.addEventListener('click', openMinigames);
 
   function showPokedex() {
     const overlay = document.getElementById('pokedex-overlay');
