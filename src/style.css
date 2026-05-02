@@ -2451,6 +2451,7 @@ body {
   display: flex;
   gap: 4px;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 .admin-action-btn {
   padding: 4px 8px;
@@ -2485,6 +2486,11 @@ body {
   border-color: #ff6b6b;
   color: #ff6b6b;
   background: rgba(255,107,107,0.08);
+}
+.admin-action-btn--coins:hover {
+  border-color: #fbbf24;
+  color: #fbbf24;
+  background: rgba(251,191,36,0.08);
 }
 
 .admin-empty {

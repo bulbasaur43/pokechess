@@ -807,9 +807,10 @@ export function renderTitleScreen(onStart) {
           if (data.ok) {
             const verb = coins > 0 ? `+${coins} gifted` : coins < 0 ? `${coins} removed` : 'reset to 0';
             showStatus(`🪙 ${username}: ${verb} (balance: ${data.newBalance})`);
+            refreshUsers();
           }
           else showStatus(data.error || 'Failed', true);
-        });
+        }).catch(err => showStatus(`Network error: ${err.message}`, true));
 
       } else if (action === 'team') {
         const user = allUsers.find(u => u.username === username);
