@@ -2500,6 +2500,57 @@ body {
   font-size: 0.85rem;
 }
 
+.admin-dialog {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--accent);
+  padding: 16px 20px;
+  z-index: 10;
+  animation: slideUp 0.2s ease-out;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.admin-dialog__content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.admin-dialog__msg {
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+.admin-dialog__msg small {
+  color: var(--text-dimmed);
+}
+.admin-dialog__input {
+  width: 100%;
+}
+.admin-dialog__btns {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.admin-dialog__ok {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim)) !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 6px 16px !important;
+  border-radius: var(--radius-md) !important;
+  font-weight: 600;
+  cursor: pointer;
+}
+.admin-dialog__cancel {
+  padding: 6px 16px !important;
+  cursor: pointer;
+}
+
 .admin-status {
   text-align: center;
   padding: 8px 20px;

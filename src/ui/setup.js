@@ -760,36 +760,86 @@ export function renderTitleScreen(onStart) {
       refreshProfile().then(() => populateRatingBadge());
     }
 
+    // Custom inline dialog (replaces prompt/confirm which can be blocked)
+    function showAdminDialog(message, { input = false, placeholder = '', onConfirm }) {
+      const existing = document.querySelector('.admin-dialog');
+      if (existing) existing.remove();
+      const dialog = document.createElement('div');
+      dialog.className = 'admin-dialog';
+      dialog.innerHTML = `
+        <div class="admin-dialog__content">
+          <div class="admin-dialog__msg">${message}</div>
+          ${input ? `<input type="text" class="admin-input admin-dialog__input" placeholder="${placeholder}" autofocus />` : ''}
+          <div class="admin-dialog__btns">
+            <button class="btn btn--small btn--secondary admin-dialog__cancel">Cancel</button>
+            <button class="btn btn--small admin-dialog__ok">Confirm</button>
+          </div>
+        </div>
+      `;
+      const panel = document.querySelector('.admin-panel');
+      if (panel) panel.appendChild(dialog);
+      else document.body.appendChild(dialog);
+
+      const inputEl = dialog.querySelector('.admin-dialog__input');
+      if (inputEl) inputEl.focus();
+
+      function close() { dialog.remove(); }
+      dialog.querySelector('.admin-dialog__cancel').addEventListener('click', close);
+      dialog.querySelector('.admin-dialog__ok').addEventListener('click', () => {
+        const value = inputEl ? inputEl.value : true;
+        close();
+        onConfirm(value);
+      });
+      if (inputEl) inputEl.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); const value = inputEl.value; close(); onConfirm(value); }
+        if (e.key === 'Escape') close();
+      });
+    }
+
     function handleAdminAction(action, username) {
       if (action === 'delete') {
-        if (!confirm(`Delete user "${username}" permanently? This cannot be undone.`)) return;
-        adminFetch('/admin/delete', { username }).then(data => {
-          showStatus(data.message || data.error, !!data.error);
-          if (data.success) refreshUsers();
+        showAdminDialog(`Delete user "${username}" permanently? This cannot be undone.`, {
+          onConfirm: () => {
+            adminFetch('/admin/delete', { username }).then(data => {
+              showStatus(data.message || data.error, !!data.error);
+              if (data.success) refreshUsers();
+            });
+          }
         });
 
       } else if (action === 'elo') {
-        const amount = prompt(`Set ELO for "${username}".\nEnter new ELO value (e.g. 1500):`);
-        if (amount === null) return;
-        adminFetch('/admin/elo', { username, amount: parseInt(amount) }).then(data => {
-          if (data.success) showStatus(`${username}: ${data.oldRating} → ${data.newRating} ${data.rankEmoji} ${data.rank}`);
-          else showStatus(data.error, true);
-          if (data.success) refreshUsers();
+        showAdminDialog(`Set ELO for "${username}":`, {
+          input: true, placeholder: 'e.g. 1500',
+          onConfirm: (amount) => {
+            if (!amount) return;
+            adminFetch('/admin/elo', { username, amount: parseInt(amount) }).then(data => {
+              if (data.success) showStatus(`${username}: ${data.oldRating} → ${data.newRating} ${data.rankEmoji} ${data.rank}`);
+              else showStatus(data.error, true);
+              if (data.success) refreshUsers();
+            });
+          }
         });
 
       } else if (action === 'reset') {
-        if (!confirm(`Reset ALL stats for "${username}" to default?`)) return;
-        adminFetch('/admin/reset-elo', { username }).then(data => {
-          showStatus(data.message || data.error, !!data.error);
-          if (data.success) refreshUsers();
+        showAdminDialog(`Reset ALL stats for "${username}" to default?`, {
+          onConfirm: () => {
+            adminFetch('/admin/reset-elo', { username }).then(data => {
+              showStatus(data.message || data.error, !!data.error);
+              if (data.success) refreshUsers();
+            });
+          }
         });
 
       } else if (action === 'ban') {
-        const hours = prompt(`Ban "${username}" for how many hours?`);
-        if (hours === null) return;
-        adminFetch('/admin/ban', { username, hours: parseInt(hours) }).then(data => {
-          showStatus(data.message || data.error, !!data.error);
-          if (data.success) refreshUsers();
+        showAdminDialog(`Ban "${username}" for how many hours?`, {
+          input: true, placeholder: 'e.g. 24',
+          onConfirm: (hours) => {
+            if (!hours) return;
+            adminFetch('/admin/ban', { username, hours: parseInt(hours) }).then(data => {
+              showStatus(data.message || data.error, !!data.error);
+              if (data.success) refreshUsers();
+            });
+          }
         });
 
       } else if (action === 'unban') {
@@ -799,18 +849,22 @@ export function renderTitleScreen(onStart) {
         });
 
       } else if (action === 'gift-coins') {
-        const amount = prompt(`Manage PokéCoins for "${username}".\n\nEnter coins to add (positive) or remove (negative).\nEnter 0 to reset balance to zero.\n\nExamples: 50, -20, 0`);
-        if (amount === null) return;
-        const coins = parseInt(amount);
-        if (isNaN(coins)) return;
-        adminFetch('/admin/gift-coins', { username, coins }).then(data => {
-          if (data.ok) {
-            const verb = coins > 0 ? `+${coins} gifted` : coins < 0 ? `${coins} removed` : 'reset to 0';
-            showStatus(`🪙 ${username}: ${verb} (balance: ${data.newBalance})`);
-            refreshUsers();
+        showAdminDialog(`Manage PokéCoins for "${username}".<br><small>Positive to add, negative to remove, 0 to reset.</small>`, {
+          input: true, placeholder: 'e.g. 50, -20, 0',
+          onConfirm: (amount) => {
+            if (amount === '' || amount === null) return;
+            const coins = parseInt(amount);
+            if (isNaN(coins)) return;
+            adminFetch('/admin/gift-coins', { username, coins }).then(data => {
+              if (data.ok) {
+                const verb = coins > 0 ? `+${coins} gifted` : coins < 0 ? `${coins} removed` : 'reset to 0';
+                showStatus(`🪙 ${username}: ${verb} (balance: ${data.newBalance})`);
+                refreshUsers();
+              }
+              else showStatus(data.error || 'Failed', true);
+            }).catch(err => showStatus(`Network error: ${err.message}`, true));
           }
-          else showStatus(data.error || 'Failed', true);
-        }).catch(err => showStatus(`Network error: ${err.message}`, true));
+        });
 
       } else if (action === 'team') {
         const user = allUsers.find(u => u.username === username);
@@ -821,23 +875,23 @@ export function renderTitleScreen(onStart) {
         const t = user.savedTeam;
         const roleNames = ['Rook','Knight','Bishop','Queen','True King','Bishop','Knight','Rook'];
 
-        let info = `${username}'s Saved Team\n${'─'.repeat(30)}\n`;
+        let info = `<strong>${username}'s Saved Team</strong><br>`;
 
         for (const side of ['scarlet', 'violet']) {
           if (!t[side]) continue;
           const label = side === 'scarlet' ? '🔴 Scarlet' : '🟣 Violet';
-          info += `\n${label}:\n`;
+          info += `<br>${label}:<br>`;
           if (t[side].backRank && Array.isArray(t[side].backRank)) {
             t[side].backRank.forEach((name, i) => {
-              info += `  ${roleNames[i] || '?'}: ${name}\n`;
+              info += `&nbsp;&nbsp;${roleNames[i] || '?'}: ${name}<br>`;
             });
           }
           if (t[side].pawnPokemon) {
-            info += `  Pawn: ${t[side].pawnPokemon}\n`;
+            info += `&nbsp;&nbsp;Pawn: ${t[side].pawnPokemon}<br>`;
           }
         }
 
-        alert(info);
+        showAdminDialog(info, { onConfirm: () => {} });
       }
     }
   }
