@@ -596,6 +596,7 @@ function createPieceElement(piece, playerColor) {
   if (piece.role === 'TRUE_KING') el.classList.add('piece--true-king');
   if (piece.bikeMode) el.classList.add('piece--bike-mode');
   if (piece.promoted) el.classList.add('piece--promoted');
+  if (piece.focusSash) el.classList.add('piece--sash');
   el.dataset.pieceId = piece.id;
   el.dataset.role = piece.role;
 

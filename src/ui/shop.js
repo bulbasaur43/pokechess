@@ -16,6 +16,7 @@ import { POKEMON, POKEMON_POOL, KING_POOL } from '../engine/types.js';
 // Rarer Pokémon have lower drop weights.
 
 const PACK_COST = 50;
+const BOX_COST = 200; // 5 packs for 200 (saves 50 vs buying singles)
 
 /** Map requiredElo → rarity tier & drop weight */
 function getPackWeight(requiredElo) {
@@ -933,6 +934,27 @@ export function buyPokemonPack() {
   return { success: true, result, isDuplicate };
 }
 
+export function buyPokemonBox() {
+  if (_coins < BOX_COST) return { error: `Need ${BOX_COST} coins (you have ${_coins})` };
+  _coins -= BOX_COST;
+  const results = [];
+  for (let i = 0; i < 5; i++) {
+    const result = rollPack();
+    if (!result) continue;
+    const isDuplicate = _unlockedPokemon.includes(result.key);
+    if (isDuplicate) {
+      const refund = Math.floor(PACK_COST / 2);
+      _coins += refund;
+    } else {
+      _unlockedPokemon.push(result.key);
+    }
+    results.push({ result, isDuplicate });
+  }
+  saveState();
+  syncToServer();
+  return { success: true, results };
+}
+
 function renderPokemonPacks() {
   const container = document.getElementById('shop-packs-pokemon');
   if (!container) return;
@@ -985,6 +1007,45 @@ function renderPokemonPacks() {
 
   section.appendChild(packCard);
 
+  // Box card (5 packs)
+  const boxCard = document.createElement('button');
+  const canAffordBox = _coins >= BOX_COST;
+  boxCard.className = `shop-pack-buy shop-pack-buy--box ${canAffordBox ? '' : 'shop-pack-buy--disabled'}`;
+  boxCard.innerHTML = `
+    <div class="shop-pack-visual">
+      <div class="shop-pack-ball">📦</div>
+      <div class="shop-pack-glow shop-pack-glow--box"></div>
+    </div>
+    <div class="shop-pack-info">
+      <div class="shop-pack-title">Pokémon Box</div>
+      <div class="shop-pack-desc">Contains 5 Pokémon Packs</div>
+      <div class="shop-pack-rates">
+        <span style="color:#86efac">Save 50 coins vs singles!</span>
+      </div>
+    </div>
+    <div class="shop-pack-price">
+      <span>🪙 ${BOX_COST}</span>
+    </div>
+  `;
+
+  boxCard.addEventListener('click', () => {
+    if (_coins < BOX_COST) {
+      showShopToast(`Need ${BOX_COST} coins (you have ${_coins})`, 'error');
+      return;
+    }
+    const res = buyPokemonBox();
+    if (res.error) {
+      showShopToast(res.error, 'error');
+      return;
+    }
+    updateCoinsDisplay();
+    renderPokemonPacks();
+    renderPokemonShop();
+    showBoxRipOpen(res.results);
+  });
+
+  section.appendChild(boxCard);
+
   // Owned count
   const ownedCount = _unlockedPokemon.length;
   const pool = buildPackPool();
@@ -996,13 +1057,16 @@ function renderPokemonPacks() {
   container.appendChild(section);
 }
 
-function showPackRipOpen(result, isDuplicate) {
+function showPackRipOpen(result, isDuplicate, options = {}) {
   const tierColor = TIER_COLORS[result.tier] || '#fff';
+  const { packIndex, totalPacks, onComplete } = options;
+  const showCounter = typeof packIndex === 'number';
 
   const overlay = document.createElement('div');
   overlay.className = 'pack-rip-overlay';
   const pkmn = result.pkmn;
   overlay.innerHTML = `
+    ${showCounter ? `<div class="pack-rip-counter">Pack ${packIndex + 1} / ${totalPacks}</div>` : ''}
     <div class="pack-rip-hint">✂️ Drag across the top to open!</div>
     <div class="pack-rip-container">
       <div class="pack-rip-card">
@@ -1081,7 +1145,11 @@ function showPackRipOpen(result, isDuplicate) {
       overlay.classList.remove('pack-rip-overlay--show');
       setTimeout(() => {
         overlay.remove();
-        showPackReveal(result, isDuplicate);
+        if (onComplete) {
+          onComplete();
+        } else {
+          showPackReveal(result, isDuplicate);
+        }
       }, 300);
     }, 1400);
   }
@@ -1141,6 +1209,79 @@ function showPackRipOpen(result, isDuplicate) {
 
   const origRemove = overlay.remove.bind(overlay);
   overlay.remove = () => { cleanup(); origRemove(); };
+}
+
+function showBoxRipOpen(results) {
+  let currentIndex = 0;
+
+  function openNext() {
+    if (currentIndex >= results.length) {
+      showBoxSummary(results);
+      return;
+    }
+    const { result, isDuplicate } = results[currentIndex];
+    const idx = currentIndex;
+    currentIndex++;
+    showPackRipOpen(result, isDuplicate, {
+      packIndex: idx,
+      totalPacks: results.length,
+      onComplete: openNext,
+    });
+  }
+
+  openNext();
+}
+
+function showBoxSummary(results) {
+  const overlay = document.createElement('div');
+  overlay.className = 'pack-reveal-overlay';
+
+  let cardsHtml = '';
+  for (const { result, isDuplicate } of results) {
+    const pkmn = result.pkmn;
+    const tierColor = TIER_COLORS[result.tier] || '#fff';
+    const tierLabel = TIER_LABELS[result.tier] || '';
+    cardsHtml += `
+      <div class="box-summary-card" style="--tier-color: ${tierColor}">
+        <div class="box-summary-glow"></div>
+        <img class="box-summary-img" src="${pkmn.img || ''}" alt="${pkmn.name}" />
+        <div class="box-summary-name">${pkmn.name}</div>
+        <div class="box-summary-tier">${tierLabel} ${result.tier.toUpperCase()}</div>
+        <div class="box-summary-stats">\u2764\ufe0f${pkmn.hp} \u2694\ufe0f${pkmn.damage}</div>
+        ${isDuplicate
+          ? '<div class="box-summary-dupe">DUPE \ud83d\udcb0</div>'
+          : '<div class="box-summary-new">\u2728 NEW</div>'
+        }
+      </div>
+    `;
+  }
+
+  const newCount = results.filter(r => !r.isDuplicate).length;
+  const dupeCount = results.length - newCount;
+  const refundTotal = dupeCount * Math.floor(PACK_COST / 2);
+
+  overlay.innerHTML = `
+    <div class="box-summary-panel">
+      <div class="box-summary-title">\ud83d\udce6 Box Results</div>
+      <div class="box-summary-subtitle">${newCount} new \u2022 ${dupeCount} dupes${refundTotal > 0 ? ` \u2022 \ud83e\ude99${refundTotal} refunded` : ''}</div>
+      <div class="box-summary-grid">${cardsHtml}</div>
+      <button class="pack-reveal-close">Continue</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('pack-reveal-overlay--show'));
+
+  overlay.querySelector('.pack-reveal-close').addEventListener('click', () => {
+    overlay.classList.remove('pack-reveal-overlay--show');
+    setTimeout(() => overlay.remove(), 300);
+  });
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.classList.remove('pack-reveal-overlay--show');
+      setTimeout(() => overlay.remove(), 300);
+    }
+  });
 }
 
 function showPackReveal(result, isDuplicate) {
