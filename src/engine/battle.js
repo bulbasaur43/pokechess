@@ -69,10 +69,12 @@ export function resolveBattle(attacker, defender) {
   result.messages.push(`${tierLabel} attack! ${baseDamage} damage dealt.`);
 
   // Focus Sash: survive fatal blow with 1 HP, then consume the sash
+  console.log(`[Battle] ${defName} HP: ${defender.hp} → ${result.defenderHpAfter}, focusSash: ${defender.focusSash}, role: ${defender.role}`);
   if (result.defenderHpAfter <= 0 && defender.focusSash) {
     result.defenderHpAfter = 1;
     result.focusSashTriggered = true;
     result.messages.push('🛡️ Focus Sash! Survived with 1 HP!');
+    console.log(`[Battle] Focus Sash TRIGGERED for ${defName}!`);
   }
 
   if (result.defenderHpAfter <= 0) {
