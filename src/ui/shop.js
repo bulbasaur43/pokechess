@@ -1020,7 +1020,13 @@ function renderPokemonPacks() {
       <div class="shop-pack-title">Pokémon Box</div>
       <div class="shop-pack-desc">Contains 5 Pokémon Packs</div>
       <div class="shop-pack-rates">
-        <span style="color:#86efac">Save 50 coins vs singles!</span>
+        <span style="color:${TIER_COLORS.common}">Common 54%</span>
+        <span style="color:${TIER_COLORS.uncommon}">Uncommon 27%</span>
+        <span style="color:${TIER_COLORS.rare}">Rare 11%</span>
+        <span style="color:${TIER_COLORS.epic}">Epic 5%</span>
+        <span style="color:${TIER_COLORS.legendary}">Legend 2%</span>
+        <span style="color:${TIER_COLORS.mythic}">Mythic 1%</span>
+        <span style="color:#86efac">💰 Save 50 coins vs singles!</span>
       </div>
     </div>
     <div class="shop-pack-price">
