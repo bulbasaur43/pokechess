@@ -549,9 +549,14 @@ async function loadFromServer() {
 let _stripe = null;
 async function loadStripeJS() {
   if (_stripe) return _stripe;
-  const key = window.__STRIPE_PK__;
-  if (!key) return null;
   try {
+    // Fetch publishable key from server
+    const isDev = window.location.port === '5173' || window.location.port === '5174';
+    const base = isDev ? `http://${window.location.hostname}:3001/api` : `${window.location.origin}/api`;
+    const res = await fetch(`${base}/shop/config`);
+    const config = await res.json();
+    if (!config.stripePublishableKey) return null;
+
     if (!window.Stripe) {
       await new Promise((resolve, reject) => {
         const s = document.createElement('script');
@@ -560,7 +565,7 @@ async function loadStripeJS() {
         document.head.appendChild(s);
       });
     }
-    _stripe = window.Stripe(key);
+    _stripe = window.Stripe(config.stripePublishableKey);
     return _stripe;
   } catch { return null; }
 }

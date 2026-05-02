@@ -15,6 +15,7 @@ import Stripe from 'stripe';
 
 const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY;
 const STRIPE_PK = process.env.STRIPE_PUBLISHABLE_KEY;
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const stripe = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
 
 // ─── Shop Items (server-side source of truth) ───────────────────────
@@ -194,6 +195,17 @@ const httpServer = createServer((req, res) => {
     }
   }
 
+  // Stripe webhook needs raw body for signature verification
+  if (req.method === 'POST' && req.url === '/api/stripe/webhook') {
+    const chunks = [];
+    req.on('data', chunk => chunks.push(chunk));
+    req.on('end', () => {
+      const rawBody = Buffer.concat(chunks);
+      handleStripeWebhook(req, res, rawBody);
+    });
+    return;
+  }
+
   // Parse body for POST requests
   if (req.method === 'POST') {
     let body = '';
@@ -244,6 +256,8 @@ function routeRequest(req, res, body) {
     handleAdminUnban(req, res, body);
   } else if (req.method === 'GET' && url === '/api/online') {
     handleOnlineCount(req, res);
+  } else if (req.method === 'GET' && url === '/api/shop/config') {
+    sendJSON(res, 200, { stripePublishableKey: STRIPE_PK || null, testMode: !stripe });
   } else if (req.method === 'POST' && url === '/api/shop/buy-coins') {
     handleShopBuyCoins(req, res, body);
   } else if (req.method === 'GET' && url === '/api/shop/sync') {
@@ -905,6 +919,46 @@ function handleAdminGiftCoins(req, res, body) {
   const verb = coins > 0 ? 'gifted' : coins < 0 ? 'removed' : 'reset';
   console.log(`🪙 Admin ${verb} ${Math.abs(coins)} coins for ${username} (balance: ${target.shop.coins})`);
   sendJSON(res, 200, { ok: true, newBalance: target.shop.coins });
+}
+
+// ─── Stripe Webhook ─────────────────────────────────────────────────
+
+function handleStripeWebhook(req, res, rawBody) {
+  if (!stripe) {
+    res.writeHead(400); res.end('Stripe not configured');
+    return;
+  }
+
+  let event;
+  try {
+    if (STRIPE_WEBHOOK_SECRET) {
+      const sig = req.headers['stripe-signature'];
+      event = stripe.webhooks.constructEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET);
+    } else {
+      // No webhook secret — parse directly (dev/testing only)
+      event = JSON.parse(rawBody.toString());
+    }
+  } catch (err) {
+    console.error('⚠️ Webhook signature verification failed:', err.message);
+    res.writeHead(400); res.end(`Webhook Error: ${err.message}`);
+    return;
+  }
+
+  if (event.type === 'payment_intent.succeeded') {
+    const pi = event.data.object;
+    const { username, coins } = pi.metadata || {};
+    if (username && coins) {
+      const user = db.users[username.toLowerCase()];
+      if (user) {
+        if (!user.shop) user.shop = { coins: 0 };
+        user.shop.coins = (user.shop.coins || 0) + parseInt(coins);
+        saveDB(db);
+        console.log(`💳 Payment confirmed! +${coins} coins for ${username} (balance: ${user.shop.coins})`);
+      }
+    }
+  }
+
+  res.writeHead(200); res.end(JSON.stringify({ received: true }));
 }
 
 // Start — load from Redis first, then listen
