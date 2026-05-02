@@ -20,31 +20,31 @@ const BOX_COST = 200; // 5 packs for 200 (saves 50 vs buying singles)
 
 /** Map requiredElo → rarity tier & drop weight */
 function getPackWeight(requiredElo) {
-  if (requiredElo <= 0)    return { tier: 'starter',   weight: 0 }; // starters can't drop
-  if (requiredElo <= 700)  return { tier: 'common',    weight: 50 };
-  if (requiredElo <= 1000) return { tier: 'uncommon',  weight: 25 };
-  if (requiredElo <= 1300) return { tier: 'rare',      weight: 10 };
-  if (requiredElo <= 1600) return { tier: 'epic',      weight: 5 };
+  if (requiredElo <= 0) return { tier: 'starter', weight: 0 }; // starters can't drop
+  if (requiredElo <= 700) return { tier: 'common', weight: 50 };
+  if (requiredElo <= 1000) return { tier: 'uncommon', weight: 25 };
+  if (requiredElo <= 1300) return { tier: 'rare', weight: 10 };
+  if (requiredElo <= 1600) return { tier: 'epic', weight: 5 };
   if (requiredElo <= 1900) return { tier: 'legendary', weight: 2 };
-  return                            { tier: 'mythic',   weight: 1 };
+  return { tier: 'mythic', weight: 1 };
 }
 
 const TIER_COLORS = {
-  common:    '#9ca3af',
-  uncommon:  '#22c55e',
-  rare:      '#3b82f6',
-  epic:      '#a855f7',
+  common: '#9ca3af',
+  uncommon: '#22c55e',
+  rare: '#3b82f6',
+  epic: '#a855f7',
   legendary: '#f59e0b',
-  mythic:    '#ef4444',
+  mythic: '#ef4444',
 };
 
 const TIER_LABELS = {
-  common:    '★',
-  uncommon:  '★★',
-  rare:      '★★★',
-  epic:      '★★★★',
+  common: '★',
+  uncommon: '★★',
+  rare: '★★★',
+  epic: '★★★★',
   legendary: '★★★★★',
-  mythic:    '★★★★★★',
+  mythic: '★★★★★★',
 };
 
 const isDev = window.location.port === '5173' || window.location.port === '5174';
@@ -55,9 +55,9 @@ const API_BASE = isDev
 // ─── Coin Packs (buy with real money) ───────────────────────────────
 
 export const COIN_PACKS = [
-  { id: 'pack_100',  coins: 100,  price: 99,   priceLabel: '$0.99',  bonus: '' },
-  { id: 'pack_500',  coins: 500,  price: 399,  priceLabel: '$3.99',  bonus: '🔥 Best Value' },
-  { id: 'pack_1200', coins: 1200, price: 699,  priceLabel: '$6.99',  bonus: '💎 Premium' },
+  { id: 'pack_100', coins: 100, price: 99, priceLabel: '$0.99', bonus: '' },
+  { id: 'pack_500', coins: 500, price: 399, priceLabel: '$3.99', bonus: '🔥 Best Value' },
+  { id: 'pack_1200', coins: 1200, price: 699, priceLabel: '$6.99', bonus: '💎 Premium' },
 ];
 
 // ─── Shop Items (cost PokéCoins) ────────────────────────────────────
@@ -200,21 +200,21 @@ export const SHOP_ITEMS = {
 // ─── Cosmetics ──────────────────────────────────────────────────────
 
 export const COSMETICS = {
-  PARTY_HAT:   { id: 'PARTY_HAT',   name: 'Party Hat',     emoji: '🎉', overlay: '🥳', coinCost: 5,  position: 'top',    color: '#f472b6' },
-  CROWN:       { id: 'CROWN',       name: 'Crown',         emoji: '👑', overlay: '👑', coinCost: 15, position: 'top',    color: '#fbbf24' },
-  SUNGLASSES:  { id: 'SUNGLASSES',  name: 'Sunglasses',    emoji: '🕶️', overlay: '🕶️', coinCost: 10, position: 'middle', color: '#1e293b' },
-  BOW:         { id: 'BOW',         name: 'Bow',           emoji: '🎀', overlay: '🎀', coinCost: 5,  position: 'top',    color: '#fb7185' },
-  FLAME_AURA:  { id: 'FLAME_AURA',  name: 'Flame Aura',   emoji: '🔥', overlay: '🔥', coinCost: 20, position: 'aura',   color: '#ef4444' },
-  ICE_AURA:    { id: 'ICE_AURA',    name: 'Ice Aura',     emoji: '❄️', overlay: '❄️', coinCost: 20, position: 'aura',   color: '#38bdf8' },
-  SPARKLE:     { id: 'SPARKLE',     name: 'Sparkle',       emoji: '✨', overlay: '✨', coinCost: 12, position: 'aura',   color: '#fcd34d' },
-  RAINBOW:     { id: 'RAINBOW',     name: 'Rainbow Trail', emoji: '🌈', overlay: '🌈', coinCost: 25, position: 'bottom', color: '#a78bfa' },
+  PARTY_HAT: { id: 'PARTY_HAT', name: 'Party Hat', emoji: '🎉', overlay: '🥳', coinCost: 5, position: 'top', color: '#f472b6' },
+  CROWN: { id: 'CROWN', name: 'Crown', emoji: '👑', overlay: '👑', coinCost: 15, position: 'top', color: '#fbbf24' },
+  SUNGLASSES: { id: 'SUNGLASSES', name: 'Sunglasses', emoji: '🕶️', overlay: '🕶️', coinCost: 10, position: 'middle', color: '#1e293b' },
+  BOW: { id: 'BOW', name: 'Bow', emoji: '🎀', overlay: '🎀', coinCost: 5, position: 'top', color: '#fb7185' },
+  FLAME_AURA: { id: 'FLAME_AURA', name: 'Flame Aura', emoji: '🔥', overlay: '🔥', coinCost: 20, position: 'aura', color: '#ef4444' },
+  ICE_AURA: { id: 'ICE_AURA', name: 'Ice Aura', emoji: '❄️', overlay: '❄️', coinCost: 20, position: 'aura', color: '#38bdf8' },
+  SPARKLE: { id: 'SPARKLE', name: 'Sparkle', emoji: '✨', overlay: '✨', coinCost: 12, position: 'aura', color: '#fcd34d' },
+  RAINBOW: { id: 'RAINBOW', name: 'Rainbow Trail', emoji: '🌈', overlay: '🌈', coinCost: 25, position: 'bottom', color: '#a78bfa' },
   // Premium Gaming Cosmetics — actual pixel art images
-  MAJORAS_MASK:  { id: 'MAJORAS_MASK',  name: "Majora's Mask",  emoji: '🎭', overlay: '🎭', img: '/assets/cosmetics/majoras_mask.png', coinCost: 75, position: 'middle', color: '#7c3aed' },
-  LINKS_HAT:     { id: 'LINKS_HAT',     name: "Link's Hat",     emoji: '🧝', overlay: '🧝', img: '/assets/cosmetics/links_hat.png',   coinCost: 75, position: 'top',    color: '#22c55e' },
-  MARIOS_HAT:    { id: 'MARIOS_HAT',    name: "Mario's Hat",    emoji: '🍄', overlay: '🍄', img: '/assets/cosmetics/marios_hat.png',  coinCost: 75, position: 'top',    color: '#ef4444' },
-  PIKACHU_EARS:  { id: 'PIKACHU_EARS',  name: 'Pikachu Ears',   emoji: '⚡', overlay: '⚡', img: '/assets/cosmetics/pikachu_ears.png', coinCost: 75, position: 'top',    color: '#facc15' },
-  MASTER_SWORD:  { id: 'MASTER_SWORD',  name: 'Master Sword',   emoji: '⚔️', overlay: '⚔️', img: '/assets/cosmetics/master_sword.png', coinCost: 75, position: 'aura',   color: '#60a5fa' },
-  POKEBALL:      { id: 'POKEBALL',      name: 'Poké Ball',      emoji: '🔴', overlay: '🔴', img: '/assets/cosmetics/pokeball.png',    coinCost: 75, position: 'bottom', color: '#dc2626' },
+  MAJORAS_MASK: { id: 'MAJORAS_MASK', name: "Majora's Mask", emoji: '🎭', overlay: '🎭', img: '/assets/cosmetics/majoras_mask.png', coinCost: 75, position: 'middle', color: '#7c3aed' },
+  LINKS_HAT: { id: 'LINKS_HAT', name: "Link's Hat", emoji: '🧝', overlay: '🧝', img: '/assets/cosmetics/links_hat.png', coinCost: 75, position: 'top', color: '#22c55e' },
+  MARIOS_HAT: { id: 'MARIOS_HAT', name: "Mario's Hat", emoji: '🍄', overlay: '🍄', img: '/assets/cosmetics/marios_hat.png', coinCost: 75, position: 'top', color: '#ef4444' },
+  PIKACHU_EARS: { id: 'PIKACHU_EARS', name: 'Pikachu Ears', emoji: '⚡', overlay: '⚡', img: '/assets/cosmetics/pikachu_ears.png', coinCost: 75, position: 'top', color: '#facc15' },
+  MASTER_SWORD: { id: 'MASTER_SWORD', name: 'Master Sword', emoji: '⚔️', overlay: '⚔️', img: '/assets/cosmetics/master_sword.png', coinCost: 75, position: 'aura', color: '#60a5fa' },
+  POKEBALL: { id: 'POKEBALL', name: 'Poké Ball', emoji: '🔴', overlay: '🔴', img: '/assets/cosmetics/pokeball.png', coinCost: 75, position: 'bottom', color: '#dc2626' },
 };
 
 // ─── State ──────────────────────────────────────────────────────────
@@ -233,7 +233,7 @@ const STATE_KEY = 'pokechess_shop';
 // Per-asset config: 'dark' removes near-black, 'light' removes near-white.
 const BG_REMOVAL_CONFIG = {
   MASTER_SWORD: 'dark',
-  LINKS_HAT:    'light',
+  LINKS_HAT: 'light',
 };
 
 (function initCosmeticImages() {
@@ -251,20 +251,20 @@ const BG_REMOVAL_CONFIG = {
       const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const d = data.data;
       for (let i = 0; i < d.length; i += 4) {
-        const r = d[i], g = d[i+1], b = d[i+2];
+        const r = d[i], g = d[i + 1], b = d[i + 2];
         if (mode === 'dark') {
           // Remove near-black pixels (the sword's dark background)
           if (r < 35 && g < 35 && b < 35) {
-            d[i+3] = 0;
+            d[i + 3] = 0;
           } else if (r < 55 && g < 55 && b < 55) {
-            d[i+3] = Math.min(d[i+3], Math.round(((r + g + b) / 3 - 35) / 20 * 255));
+            d[i + 3] = Math.min(d[i + 3], Math.round(((r + g + b) / 3 - 35) / 20 * 255));
           }
         } else if (mode === 'light') {
           // Remove near-white pixels (Link's Hat white background)
           if (r > 220 && g > 220 && b > 220) {
-            d[i+3] = 0;
+            d[i + 3] = 0;
           } else if (r > 200 && g > 200 && b > 200) {
-            d[i+3] = Math.min(d[i+3], Math.round((255 - (r + g + b) / 3) / 55 * 255));
+            d[i + 3] = Math.min(d[i + 3], Math.round((255 - (r + g + b) / 3) / 55 * 255));
           }
         }
       }
@@ -1249,9 +1249,9 @@ function showBoxSummary(results) {
         <div class="box-summary-tier">${tierLabel} ${result.tier.toUpperCase()}</div>
         <div class="box-summary-stats">\u2764\ufe0f${pkmn.hp} \u2694\ufe0f${pkmn.damage}</div>
         ${isDuplicate
-          ? '<div class="box-summary-dupe">DUPE \ud83d\udcb0</div>'
-          : '<div class="box-summary-new">\u2728 NEW</div>'
-        }
+        ? '<div class="box-summary-dupe">DUPE \ud83d\udcb0</div>'
+        : '<div class="box-summary-new">\u2728 NEW</div>'
+      }
       </div>
     `;
   }
@@ -1301,9 +1301,9 @@ function showPackReveal(result, isDuplicate) {
       <div class="pack-reveal-types">${pkmn.types.join(' / ')}</div>
       <div class="pack-reveal-stats">❤️ ${pkmn.hp} HP  ⚔️ ${pkmn.damage} DMG</div>
       ${isDuplicate
-        ? `<div class="pack-reveal-dupe">Already owned! 🪙 ${Math.floor(PACK_COST / 2)} refunded</div>`
-        : `<div class="pack-reveal-new">✨ NEW POKÉMON UNLOCKED! ✨</div>`
-      }
+      ? `<div class="pack-reveal-dupe">Already owned! 🪙 ${Math.floor(PACK_COST / 2)} refunded</div>`
+      : `<div class="pack-reveal-new">✨ NEW POKÉMON UNLOCKED! ✨</div>`
+    }
       <button class="pack-reveal-close">Continue</button>
     </div>
   `;

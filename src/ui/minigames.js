@@ -133,20 +133,63 @@ function startShooterGame(canvas) {
   let frameCount = 0;
   let gameOver = false;
   let animId;
-  let keys = {};
+  let mouseX = W / 2, mouseY = H / 2;
+  let shootTimer = 0;
+  const SHOOT_INTERVAL = 8; // Auto-shoot every 8 frames (~7.5 shots/sec)
+  const LEAF_SPEED = 8;
+
+  // Get mouse/touch position relative to canvas
+  function getCanvasPos(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (clientX - rect.left) * (W / rect.width),
+      y: (clientY - rect.top) * (H / rect.height),
+    };
+  }
 
   function shoot() {
-    if (!gameOver) leaves.push({ x: bulba.x + bulba.size, y: bulba.y + bulba.size / 2, vx: 7 });
+    if (gameOver) return;
+    const bx = bulba.x + bulba.size;
+    const by = bulba.y + bulba.size / 2;
+    const dx = mouseX - bx;
+    const dy = mouseY - by;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    leaves.push({
+      x: bx, y: by,
+      vx: (dx / dist) * LEAF_SPEED,
+      vy: (dy / dist) * LEAF_SPEED,
+      angle: Math.atan2(dy, dx),
+    });
   }
 
   canvas.setAttribute('tabindex', '0');
   canvas.focus();
-  canvas.onkeydown = (e) => {
-    keys[e.code] = true;
-    if (e.code === 'Space') { e.preventDefault(); shoot(); }
+
+  // Track mouse position
+  canvas.addEventListener('mousemove', (e) => {
+    const pos = getCanvasPos(e.clientX, e.clientY);
+    mouseX = pos.x;
+    mouseY = pos.y;
+  });
+
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const pos = getCanvasPos(e.touches[0].clientX, e.touches[0].clientY);
+    mouseX = pos.x;
+    mouseY = pos.y;
+  }, { passive: false });
+
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const pos = getCanvasPos(e.touches[0].clientX, e.touches[0].clientY);
+    mouseX = pos.x;
+    mouseY = pos.y;
+  }, { passive: false });
+
+  // Click to retry on game over
+  canvas.onclick = () => {
+    if (gameOver) resetGame();
   };
-  canvas.onkeyup = (e) => { keys[e.code] = false; };
-  canvas.onclick = shoot;
 
   function spawnEnemy() {
     const sz = 15 + Math.random() * 20;
@@ -155,7 +198,7 @@ function startShooterGame(canvas) {
 
   function resetGame() {
     bulba = { x: 60, y: H / 2, size: 40 };
-    leaves = []; enemies = []; score = 0; hp = 5; frameCount = 0; gameOver = false;
+    leaves = []; enemies = []; score = 0; hp = 5; frameCount = 0; gameOver = false; shootTimer = 0;
   }
 
   function update() {
@@ -163,12 +206,20 @@ function startShooterGame(canvas) {
     frameCount++;
     if (frameCount % 45 === 0) spawnEnemy();
 
-    const spd = 4;
-    if (keys['ArrowUp'] || keys['KeyW']) bulba.y = Math.max(0, bulba.y - spd);
-    if (keys['ArrowDown'] || keys['KeyS']) bulba.y = Math.min(H - bulba.size, bulba.y + spd);
+    // Bulbasaur smoothly follows mouse Y
+    const targetY = Math.max(0, Math.min(H - bulba.size, mouseY - bulba.size / 2));
+    bulba.y += (targetY - bulba.y) * 0.15;
 
-    leaves.forEach(l => l.x += l.vx);
-    leaves = leaves.filter(l => l.x < W);
+    // Auto-shoot
+    shootTimer++;
+    if (shootTimer >= SHOOT_INTERVAL) {
+      shootTimer = 0;
+      shoot();
+    }
+
+    // Update leaves (now with vx and vy)
+    leaves.forEach(l => { l.x += l.vx; l.y += l.vy; });
+    leaves = leaves.filter(l => l.x > -10 && l.x < W + 10 && l.y > -10 && l.y < H + 10);
 
     enemies.forEach(e => e.x -= e.speed);
 
@@ -198,12 +249,44 @@ function startShooterGame(canvas) {
       const sy = (i * 97) % H;
       ctx.fillRect(sx, sy, 2, 2);
     }
+
+    // Aim line (subtle)
+    if (!gameOver) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(74, 222, 128, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 8]);
+      ctx.beginPath();
+      ctx.moveTo(bulba.x + bulba.size, bulba.y + bulba.size / 2);
+      ctx.lineTo(mouseX, mouseY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // Crosshair at mouse
+      ctx.save();
+      ctx.strokeStyle = 'rgba(74, 222, 128, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(mouseX, mouseY, 10, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(mouseX - 14, mouseY); ctx.lineTo(mouseX - 6, mouseY);
+      ctx.moveTo(mouseX + 6, mouseY); ctx.lineTo(mouseX + 14, mouseY);
+      ctx.moveTo(mouseX, mouseY - 14); ctx.lineTo(mouseX, mouseY - 6);
+      ctx.moveTo(mouseX, mouseY + 6); ctx.lineTo(mouseX, mouseY + 14);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // Bulbasaur
     drawBulbasaur(ctx, bulba.x, bulba.y, bulba.size);
-    // Leaves
+    // Leaves — rotated to face direction of travel
     ctx.fillStyle = '#4ade80';
     leaves.forEach(l => {
-      ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(frameCount * 0.2);
+      ctx.save();
+      ctx.translate(l.x, l.y);
+      ctx.rotate(l.angle || 0);
       ctx.fillRect(-4, -2, 8, 4);
       ctx.beginPath(); ctx.moveTo(4, 0); ctx.lineTo(10, -3); ctx.lineTo(10, 3); ctx.fill();
       ctx.restore();
@@ -235,7 +318,7 @@ function startShooterGame(canvas) {
     ctx.fillText(`Score: ${score}  HP: ${'❤️'.repeat(hp)}`, 10, 22);
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
     ctx.font = '11px monospace';
-    ctx.fillText('↑↓ move • SPACE/Click shoot', 10, H - 10);
+    ctx.fillText('Move mouse to aim • Auto-fires!', 10, H - 10);
 
     if (gameOver) {
       ctx.fillStyle = 'rgba(0,0,0,0.6)';
@@ -256,7 +339,7 @@ function startShooterGame(canvas) {
     animId = requestAnimationFrame(loop);
   }
   loop();
-  return () => { cancelAnimationFrame(animId); canvas.onkeydown = null; canvas.onkeyup = null; };
+  return () => { cancelAnimationFrame(animId); canvas.onclick = null; };
 }
 
 // ─── Game 3: Maze ───────────────────────────────────────────
