@@ -977,10 +977,10 @@ function renderPokemonPacks() {
       showShopToast(res.error, 'error');
       return;
     }
-    showPackReveal(res.result, res.isDuplicate);
     updateCoinsDisplay();
     renderPokemonPacks();
     renderPokemonShop();
+    showPackRipOpen(res.result, res.isDuplicate);
   });
 
   section.appendChild(packCard);
@@ -994,6 +994,148 @@ function renderPokemonPacks() {
   section.appendChild(info);
 
   container.appendChild(section);
+}
+
+function showPackRipOpen(result, isDuplicate) {
+  const tierColor = TIER_COLORS[result.tier] || '#fff';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'pack-rip-overlay';
+  overlay.innerHTML = `
+    <div class="pack-rip-hint">✂️ Drag across the top to open!</div>
+    <div class="pack-rip-container">
+      <div class="pack-rip-card">
+        <div class="pack-rip-top">
+          <div class="pack-rip-tear-zone"></div>
+          <div class="pack-rip-tear-line"></div>
+          <div class="pack-rip-progress"></div>
+          <div class="pack-rip-particles"></div>
+        </div>
+        <div class="pack-rip-body">
+          <div class="pack-rip-ball">🔴</div>
+          <div class="pack-rip-label">Pokémon Pack</div>
+          <div class="pack-rip-glow" style="--tier-color: ${tierColor}"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('pack-rip-overlay--show'));
+
+  const tearZone = overlay.querySelector('.pack-rip-tear-zone');
+  const tearLine = overlay.querySelector('.pack-rip-tear-line');
+  const progressBar = overlay.querySelector('.pack-rip-progress');
+  const particles = overlay.querySelector('.pack-rip-particles');
+  const card = overlay.querySelector('.pack-rip-card');
+
+  let progress = 0;
+  let isDragging = false;
+  let lastX = 0;
+  let completed = false;
+
+  function updateProgress(p) {
+    progress = Math.min(1, Math.max(0, p));
+    progressBar.style.width = `${progress * 100}%`;
+    tearLine.style.setProperty('--rip-progress', progress);
+
+    // Shake effect as progress increases
+    const shake = progress * 3;
+    card.style.transform = `translateY(${Math.sin(Date.now() / 50) * shake}px)`;
+
+    // Add tear particles at the rip edge
+    if (Math.random() < progress * 0.4) {
+      const particle = document.createElement('div');
+      particle.className = 'pack-rip-particle';
+      particle.style.left = `${progress * 100}%`;
+      particle.style.setProperty('--py', `${(Math.random() - 0.5) * 30}px`);
+      particle.style.setProperty('--px', `${(Math.random() - 0.5) * 20}px`);
+      particles.appendChild(particle);
+      setTimeout(() => particle.remove(), 600);
+    }
+
+    if (progress >= 1 && !completed) {
+      completed = true;
+      finishRip();
+    }
+  }
+
+  function finishRip() {
+    card.classList.add('pack-rip-card--opened');
+    // Burst of particles
+    for (let i = 0; i < 30; i++) {
+      const p = document.createElement('div');
+      p.className = 'pack-rip-particle pack-rip-particle--burst';
+      p.style.left = `${Math.random() * 100}%`;
+      p.style.setProperty('--py', `${Math.random() * -80 - 20}px`);
+      p.style.setProperty('--px', `${(Math.random() - 0.5) * 100}px`);
+      p.style.setProperty('--color', tierColor);
+      particles.appendChild(p);
+    }
+    setTimeout(() => {
+      overlay.classList.remove('pack-rip-overlay--show');
+      setTimeout(() => {
+        overlay.remove();
+        showPackReveal(result, isDuplicate);
+      }, 300);
+    }, 800);
+  }
+
+  // Mouse events
+  tearZone.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    lastX = e.clientX;
+    e.preventDefault();
+  });
+
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+
+  // Touch events
+  tearZone.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    lastX = e.touches[0].clientX;
+    e.preventDefault();
+  }, { passive: false });
+
+  window.addEventListener('touchmove', onTouchMove, { passive: false });
+  window.addEventListener('touchend', onUp);
+
+  function onMove(e) {
+    if (!isDragging || completed) return;
+    const dx = e.clientX - lastX;
+    if (dx > 0) {
+      const zoneWidth = tearZone.getBoundingClientRect().width;
+      updateProgress(progress + dx / zoneWidth);
+    }
+    lastX = e.clientX;
+  }
+
+  function onTouchMove(e) {
+    if (!isDragging || completed) return;
+    const dx = e.touches[0].clientX - lastX;
+    if (dx > 0) {
+      const zoneWidth = tearZone.getBoundingClientRect().width;
+      updateProgress(progress + dx / zoneWidth);
+    }
+    lastX = e.touches[0].clientX;
+    e.preventDefault();
+  }
+
+  function onUp() {
+    isDragging = false;
+  }
+
+  // Cleanup listeners when done
+  const cleanup = () => {
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('mouseup', onUp);
+    window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('touchend', onUp);
+  };
+
+  const origRemove = overlay.remove.bind(overlay);
+  overlay.remove = () => { cleanup(); origRemove(); };
 }
 
 function showPackReveal(result, isDuplicate) {

@@ -5408,6 +5408,202 @@ body {
   text-align: center;
 }
 
+/* ── Pack Rip-to-Open ── */
+.pack-rip-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 12000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.pack-rip-overlay--show { opacity: 1; }
+
+.pack-rip-hint {
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  margin-bottom: 24px;
+  animation: hintPulse 1.5s ease-in-out infinite;
+}
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.pack-rip-container {
+  perspective: 800px;
+}
+
+.pack-rip-card {
+  width: 220px;
+  height: 320px;
+  border-radius: 16px;
+  position: relative;
+  overflow: visible;
+  transition: transform 0.05s;
+  user-select: none;
+}
+
+.pack-rip-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(180deg, rgba(180, 40, 40, 0.95), rgba(140, 20, 20, 0.9));
+  z-index: 3;
+  overflow: hidden;
+  cursor: e-resize;
+}
+
+.pack-rip-tear-zone {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  cursor: e-resize;
+}
+
+.pack-rip-tear-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.5) 0px,
+    rgba(255, 255, 255, 0.5) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  z-index: 4;
+  /* Animate the tear effect: clip from left to right */
+  mask-image: linear-gradient(
+    90deg,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,0) calc(var(--rip-progress, 0) * 100%),
+    rgba(0,0,0,1) calc(var(--rip-progress, 0) * 100%),
+    rgba(0,0,0,1) 100%
+  );
+}
+
+.pack-rip-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  width: 0%;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
+  z-index: 5;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.6), 0 0 24px rgba(251, 191, 36, 0.3);
+  transition: width 0.05s linear;
+}
+
+.pack-rip-particles {
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  right: 0;
+  height: 20px;
+  z-index: 6;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.pack-rip-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #fbbf24;
+  border-radius: 50%;
+  animation: ripParticle 0.6s ease-out forwards;
+}
+.pack-rip-particle--burst {
+  width: 6px;
+  height: 6px;
+  background: var(--color, #fbbf24);
+  animation: ripBurst 0.8s ease-out forwards;
+}
+
+@keyframes ripParticle {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--px, 0), var(--py, -20px)) scale(0.3); }
+}
+@keyframes ripBurst {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--px, 0), var(--py, -50px)) scale(0.2); }
+}
+
+.pack-rip-body {
+  position: absolute;
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0 0 16px 16px;
+  background: linear-gradient(180deg, rgba(200, 50, 50, 0.9), rgba(160, 30, 30, 0.95) 40%, rgba(120, 20, 20, 0.95));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.pack-rip-ball {
+  font-size: 4rem;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+  animation: packBallFloat 2s ease-in-out infinite;
+}
+@keyframes packBallFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.pack-rip-label {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 800;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.pack-rip-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, var(--tier-color, transparent) 0%, transparent 70%);
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* Opened state — pack splits apart */
+.pack-rip-card--opened .pack-rip-top {
+  animation: ripTopFly 0.6s ease-in forwards;
+}
+.pack-rip-card--opened .pack-rip-body {
+  animation: ripBodyDrop 0.6s ease-in forwards;
+}
+.pack-rip-card--opened .pack-rip-hint {
+  opacity: 0;
+}
+
+@keyframes ripTopFly {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-80px) rotate(-15deg); opacity: 0; }
+}
+@keyframes ripBodyDrop {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  60% { transform: translateY(10px) scale(1.02); opacity: 0.8; }
+  100% { transform: translateY(40px) scale(0.95); opacity: 0; }
+}
+
 /* ── Pack Reveal Overlay ── */
 .pack-reveal-overlay {
   position: fixed;
