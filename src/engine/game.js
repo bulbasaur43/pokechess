@@ -199,8 +199,6 @@ export function executeMove(game, toRow, toCol) {
     });
 
     if (battleResult.outcome === 'kill') {
-      // Consume obliterator after use
-      if (attacker.obliterator) attacker = { ...attacker, obliterator: false };
 
       // Defender eliminated — attacker takes the square
       newGame.capturedPieces[defender.color].push(defender);
@@ -218,6 +216,11 @@ export function executeMove(game, toRow, toCol) {
         if (movedPiece) {
           newGame.board[toRow][toCol] = { ...movedPiece, bikeMode: attacker.bikeMode };
         }
+      }
+
+      // Consume obliterator after use
+      if (attacker.obliterator && newGame.board[toRow]?.[toCol]) {
+        newGame.board[toRow][toCol] = { ...newGame.board[toRow][toCol], obliterator: false };
       }
 
       // True King killed → game over
