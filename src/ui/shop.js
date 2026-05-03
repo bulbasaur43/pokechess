@@ -620,11 +620,6 @@ export function openShop(onItemUse) {
     </div>
 
     <div class="shop-section">
-      <h3 class="shop-section-title">⬆️ Upgrades <span class="shop-section-hint">+1 HP & +1 DMG per level</span></h3>
-      <div class="shop-upgrades" id="shop-upgrades"></div>
-    </div>
-
-    <div class="shop-section">
       <h3 class="shop-section-title">🎨 Cosmetics <span class="shop-section-hint">Customize your Pokémon!</span></h3>
       <div class="shop-cosmetics" id="shop-cosmetics"></div>
     </div>
@@ -642,6 +637,11 @@ export function openShop(onItemUse) {
     <div class="shop-section">
       <h3 class="shop-section-title">🐾 Pokémon <span class="shop-section-hint">Unlock without ELO requirement</span></h3>
       <div class="shop-pokemon" id="shop-pokemon"></div>
+    </div>
+
+    <div class="shop-section">
+      <h3 class="shop-section-title">⬆️ Upgrades <span class="shop-section-hint">Power up owned Pokémon — bonuses scale with level!</span></h3>
+      <div class="shop-upgrades" id="shop-upgrades"></div>
     </div>
   `;
 

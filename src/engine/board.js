@@ -55,7 +55,7 @@ export function createPiece(color, roleKey, pokemonKey, id, upgradeLevels = {}) 
     // Status effects
     statusEffect: null,     // 'frozen' | 'stunned' | null
     // Track upgrade level for display
-    upgradeLevel: upgradeBonus.hp > 0 ? (upgradeBonus.hp + 1) : 0,
+    upgradeLevel: level > 1 ? level : 0,
   };
   // True Kings get bike mode cooldown
   if (roleKey === 'TRUE_KING') {
