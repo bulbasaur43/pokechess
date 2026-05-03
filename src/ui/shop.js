@@ -199,7 +199,7 @@ export const SHOP_ITEMS = {
     id: 'OBLITERATOR',
     name: 'Obliterator',
     emoji: '🗡️',
-    coinCost: 200,
+    coinCost: 1000,
     description: 'One piece instantly KOs its next target',
     useDescription: 'Click a piece to arm with one-hit power',
     color: '#3b82f6',

@@ -817,19 +817,6 @@ function createPieceElement(piece, playerColor) {
       }
     }
   }
-  // Obliterator sword overlay (glowing blue sword)
-  if (piece.obliterator) {
-    const headData = (piece.pokemon && POKEMON_HEAD_MAP[piece.pokemon]) || DEFAULT_HEAD;
-    const sword = document.createElement('img');
-    sword.className = 'piece__obliterator-sword piece__cosmetic--obliterator';
-    sword.src = '/assets/cosmetics/one_hit_obliterator.png';
-    sword.alt = 'Obliterator';
-    sword.draggable = false;
-    sword.style.bottom = '5%';
-    sword.style.left = `${headData.headLeft - 15}%`;
-    sword.style.transform = 'translateX(-50%) rotate(-35deg)';
-    wrap.appendChild(sword);
-  }
 
   el.appendChild(wrap);
 

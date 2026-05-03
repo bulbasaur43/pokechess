@@ -648,7 +648,7 @@ function applyItemToCell(itemId, row, col) {
   }
 
   // Check if this item was already used on this piece (for piece-targeting items)
-  const pieceTargetItems = ['MAX_POTION','X_ATTACK','X_DEFENSE','FOCUS_SASH','LEFTOVERS','SMOKE_BALL','DESTINY_BOND'];
+  const pieceTargetItems = ['MAX_POTION','X_ATTACK','X_DEFENSE','FOCUS_SASH','LEFTOVERS','SMOKE_BALL','DESTINY_BOND','OBLITERATOR'];
   if (pieceTargetItems.includes(itemId) && piece) {
     const applied = piece.appliedItems || [];
     if (applied.includes(itemId)) {
