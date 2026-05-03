@@ -56,6 +56,12 @@ export function resolveBattle(attacker, defender) {
     baseDamage *= CRIT_MULTIPLIER;
     result.messages.push('💥 CRITICAL HIT! Double damage!');
   }
+  // Obliterator: one-hit KO, then consume
+  if (attacker.obliterator) {
+    baseDamage = 9999;
+    result.messages.push('🗡️ OBLITERATOR! One-hit KO!');
+    result.isObliterator = true;
+  }
 
   result.damageDealt = baseDamage;
   result.defenderHpAfter = Math.max(0, defender.hp - baseDamage);

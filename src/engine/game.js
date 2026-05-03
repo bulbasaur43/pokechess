@@ -199,6 +199,9 @@ export function executeMove(game, toRow, toCol) {
     });
 
     if (battleResult.outcome === 'kill') {
+      // Consume obliterator after use
+      if (attacker.obliterator) attacker = { ...attacker, obliterator: false };
+
       // Defender eliminated — attacker takes the square
       newGame.capturedPieces[defender.color].push(defender);
 
@@ -266,8 +269,10 @@ export function executeMove(game, toRow, toCol) {
       // Consume Focus Sash if it triggered
       if (battleResult.focusSashTriggered) updatedDefender.focusSash = false;
       newGame.board[defRow][defCol] = updatedDefender;
-      // Update attacker bike mode
-      if (attacker.role === 'TRUE_KING') {
+      // Consume obliterator after use
+      if (attacker.obliterator) {
+        newGame.board[fromRow][fromCol] = { ...attacker, obliterator: false, hasMoved: true };
+      } else if (attacker.role === 'TRUE_KING') {
         newGame.board[fromRow][fromCol] = { ...attacker, hasMoved: true };
       }
       newGame = endTurn(newGame);

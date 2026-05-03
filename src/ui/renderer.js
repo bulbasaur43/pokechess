@@ -639,6 +639,7 @@ function createPieceElement(piece, playerColor) {
   if (piece.bikeMode) el.classList.add('piece--bike-mode');
   if (piece.promoted) el.classList.add('piece--promoted');
   if (piece.focusSash) el.classList.add('piece--sash');
+  if (piece.obliterator) el.classList.add('piece--obliterator');
   el.dataset.pieceId = piece.id;
   el.dataset.role = piece.role;
 
@@ -782,6 +783,19 @@ function createPieceElement(piece, playerColor) {
         wrap.appendChild(overlay);
       }
     }
+  }
+  // Obliterator sword overlay (glowing blue sword)
+  if (piece.obliterator) {
+    const headData = (piece.pokemon && POKEMON_HEAD_MAP[piece.pokemon]) || DEFAULT_HEAD;
+    const sword = document.createElement('img');
+    sword.className = 'piece__obliterator-sword';
+    sword.src = '/assets/cosmetics/obliterator.png';
+    sword.alt = 'Obliterator';
+    sword.draggable = false;
+    sword.style.bottom = '5%';
+    sword.style.left = `${headData.headLeft - 15}%`;
+    sword.style.transform = 'translateX(-50%) rotate(-35deg)';
+    wrap.appendChild(sword);
   }
 
   el.appendChild(wrap);

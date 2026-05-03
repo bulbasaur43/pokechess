@@ -4820,6 +4820,46 @@ body {
   font-size: 0.6rem;
 }
 
+/* ── Obliterator (one-hit KO) ── */
+.piece--obliterator img.piece__img {
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.8))
+          drop-shadow(0 0 14px rgba(59, 130, 246, 0.5))
+          drop-shadow(0 0 22px rgba(100, 200, 255, 0.3)) !important;
+  animation: obliteratorPulse 1.5s ease-in-out infinite;
+}
+@keyframes obliteratorPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.7))
+            drop-shadow(0 0 12px rgba(59, 130, 246, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(100, 200, 255, 1))
+            drop-shadow(0 0 22px rgba(59, 130, 246, 0.7))
+            drop-shadow(0 0 32px rgba(100, 200, 255, 0.4));
+  }
+}
+.piece__obliterator-sword {
+  position: absolute;
+  width: 60%;
+  height: auto;
+  z-index: 6;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(100, 200, 255, 0.9))
+          drop-shadow(0 0 10px rgba(59, 130, 246, 0.6));
+  animation: obliteratorSwordGlow 2s ease-in-out infinite;
+}
+@keyframes obliteratorSwordGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(100, 200, 255, 0.8))
+            drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(100, 200, 255, 1))
+            drop-shadow(0 0 16px rgba(59, 130, 246, 0.8))
+            drop-shadow(0 0 24px rgba(100, 200, 255, 0.4));
+  }
+}
+
 @media (max-width: 768px) {
   .shop-panel {
     width: 95vw;

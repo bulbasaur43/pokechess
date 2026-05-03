@@ -195,6 +195,17 @@ export const SHOP_ITEMS = {
     usesPerPurchase: 10,
     cooldownBattles: 3,
   },
+  OBLITERATOR: {
+    id: 'OBLITERATOR',
+    name: 'Obliterator',
+    emoji: '🗡️',
+    coinCost: 200,
+    description: 'One piece instantly KOs its next target',
+    useDescription: 'Click a piece to arm with one-hit power',
+    color: '#3b82f6',
+    usesPerPurchase: 10,
+    cooldownBattles: 0,
+  },
 };
 
 // ─── Cosmetics ──────────────────────────────────────────────────────

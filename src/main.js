@@ -700,6 +700,12 @@ function applyItemToCell(itemId, row, col) {
       showStatusToast(`💀 ${POKEMON[piece.pokemon]?.name || 'Piece'} bound by destiny!`, 'status');
       break;
     }
+    case 'OBLITERATOR': {
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
+      game.board[row][col] = { ...piece, obliterator: true, appliedItems: [...(piece.appliedItems || []), itemId] };
+      showStatusToast(`🗡️ ${POKEMON[piece.pokemon]?.name || 'Piece'} armed with the Obliterator! Next attack is a one-hit KO!`, 'buff');
+      break;
+    }
     case 'QUICK_CLAW': {
       game.quickClaw = playerColor;
       showStatusToast(`⚡ Quick Claw active — your next move grants an extra turn!`, 'buff');
