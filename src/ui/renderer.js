@@ -818,6 +818,26 @@ function createPieceElement(piece, playerColor) {
     }
   }
 
+  // Obliterator weapon overlay — small, wielded at the front
+  if (piece.obliterator) {
+    const headData = (piece.pokemon && POKEMON_HEAD_MAP[piece.pokemon]) || DEFAULT_HEAD;
+    const sword = document.createElement('img');
+    sword.className = 'piece__obliterator-sword piece__cosmetic--obliterator';
+    sword.src = '/assets/cosmetics/one_hit_obliterator.png';
+    sword.alt = 'Obliterator';
+    sword.draggable = false;
+    // Position at front-bottom, small and held like a weapon
+    sword.style.position = 'absolute';
+    sword.style.width = '35%';
+    sword.style.height = 'auto';
+    sword.style.bottom = '8%';
+    sword.style.left = `${headData.headLeft - 22}%`;
+    sword.style.top = 'auto';
+    sword.style.transform = 'rotate(-30deg)';
+    sword.style.zIndex = '5';
+    wrap.appendChild(sword);
+  }
+
   el.appendChild(wrap);
 
   // HP Bar
