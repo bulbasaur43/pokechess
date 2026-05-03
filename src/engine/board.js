@@ -30,9 +30,9 @@ export function createPiece(color, roleKey, pokemonKey, id, upgradeLevels = {}) 
 
   // Calculate upgrade bonuses (progressive: each level gives more)
   const level = upgradeLevels[pokemonKey] || 1;
-  const HP_TABLE =  [0, 1, 3, 5, 8];
-  const DMG_TABLE = [0, 1, 2, 4, 6];
-  const idx = Math.min(level, 5) - 1;
+  const HP_TABLE =  [0, 1, 3, 5, 8, 12];
+  const DMG_TABLE = [0, 1, 2, 4, 6, 9];
+  const idx = Math.min(level, 6) - 1;
   const hpBonus = HP_TABLE[idx] || 0;
   const dmgBonus = DMG_TABLE[idx] || 0;
 

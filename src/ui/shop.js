@@ -230,13 +230,13 @@ let _equippedCosmetic = ''; // currently active cosmetic ID
 let _pokemonLevels = {};    // { POKEMON_KEY: level (1-5) }
 
 // ─── Upgrade System ─────────────────────────────────────────────────
-const MAX_POKEMON_LEVEL = 5;
-const UPGRADE_COSTS = [150, 350, 750, 1500, 3000]; // Cost to go from level N to N+1
+const MAX_POKEMON_LEVEL = 6;
+const UPGRADE_COSTS = [150, 350, 750, 1500, 3000]; // Cost for each of the 5 upgrades
 
-/** Get upgrade bonus stats for a given level (1-5). Each level gives more than the last. */
-// Cumulative bonuses: [L1, L2, L3, L4, L5]
-const UPGRADE_HP_TABLE =  [0, 1, 3, 5, 8];  // gained: +1, +2, +2, +3
-const UPGRADE_DMG_TABLE = [0, 1, 2, 4, 6];  // gained: +1, +1, +2, +2
+/** Get upgrade bonus stats for a given level (1-6). Each level gives more than the last. */
+// Cumulative bonuses: [L1, L2, L3, L4, L5, L6]
+const UPGRADE_HP_TABLE =  [0, 1, 3, 5, 8, 12];  // gained: +1, +2, +2, +3, +4
+const UPGRADE_DMG_TABLE = [0, 1, 2, 4, 6, 9];   // gained: +1, +1, +2, +2, +3
 
 export function getUpgradeBonus(level) {
   if (!level || level <= 1) return { hp: 0, damage: 0 };
