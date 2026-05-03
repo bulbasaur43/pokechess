@@ -200,8 +200,8 @@ export const SHOP_ITEMS = {
     name: 'Obliterator',
     emoji: '🗡️',
     coinCost: 200,
-    description: 'One piece instantly KOs its next target',
-    useDescription: 'Click a piece to arm with one-hit power',
+    description: 'Arm a piece as a trap — it can\'t attack, but counter-kills anything that hits it',
+    useDescription: 'Click a piece to arm as a one-hit trap',
     color: '#3b82f6',
     usesPerPurchase: 10,
     cooldownBattles: 0,
@@ -225,6 +225,7 @@ export const COSMETICS = {
   MARIOS_HAT: { id: 'MARIOS_HAT', name: "Mario's Hat", emoji: '🍄', overlay: '🍄', img: '/assets/cosmetics/marios_hat.png', coinCost: 75, position: 'top', color: '#ef4444' },
   PIKACHU_EARS: { id: 'PIKACHU_EARS', name: 'Pikachu Ears', emoji: '⚡', overlay: '⚡', img: '/assets/cosmetics/pikachu_ears.png', coinCost: 75, position: 'top', color: '#facc15' },
   MASTER_SWORD: { id: 'MASTER_SWORD', name: 'Master Sword', emoji: '⚔️', overlay: '⚔️', img: '/assets/cosmetics/master_sword.png', coinCost: 75, position: 'aura', color: '#60a5fa' },
+  ONE_HIT_OBLITERATOR: { id: 'ONE_HIT_OBLITERATOR', name: 'One-Hit Obliterator', emoji: '🗡️', overlay: '🗡️', img: '/assets/cosmetics/one_hit_obliterator.png', coinCost: 200, position: 'aura', color: '#22d3ee' },
   POKEBALL: { id: 'POKEBALL', name: 'Poké Ball', emoji: '🔴', overlay: '🔴', img: '/assets/cosmetics/pokeball.png', coinCost: 75, position: 'bottom', color: '#dc2626' },
 };
 
@@ -283,6 +284,7 @@ const STATE_KEY = 'pokechess_shop';
 // Per-asset config: 'dark' removes near-black, 'light' removes near-white.
 const BG_REMOVAL_CONFIG = {
   MASTER_SWORD: 'dark',
+  ONE_HIT_OBLITERATOR: 'dark',
   LINKS_HAT: 'light',
 };
 

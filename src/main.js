@@ -703,7 +703,7 @@ function applyItemToCell(itemId, row, col) {
     case 'OBLITERATOR': {
       if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
       game.board[row][col] = { ...piece, obliterator: true, appliedItems: [...(piece.appliedItems || []), itemId] };
-      showStatusToast(`🗡️ ${POKEMON[piece.pokemon]?.name || 'Piece'} armed with the Obliterator! Next attack is a one-hit KO!`, 'buff');
+      showStatusToast(`🗡️ ${POKEMON[piece.pokemon]?.name || 'Piece'} armed with the Obliterator! It can't attack, but will counter-kill anything that hits it!`, 'buff');
       break;
     }
     case 'QUICK_CLAW': {

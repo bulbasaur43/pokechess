@@ -57,21 +57,22 @@ const imgCosmetics = [
   { name: 'Pikachu Ears',  src: '/assets/cosmetics/pikachu_ears.png', position: 'top',    id: 'PIKACHU_EARS' },
   { name: "Majora's Mask", src: '/assets/cosmetics/majoras_mask.png', position: 'middle', id: 'MAJORAS_MASK' },
   { name: 'Master Sword',  src: '/assets/cosmetics/master_sword.png', position: 'aura',   id: 'MASTER_SWORD' },
+  { name: 'One-Hit Obliterator', src: '/assets/cosmetics/one_hit_obliterator.png', position: 'aura', id: 'ONE_HIT_OBLITERATOR' },
   { name: 'Poké Ball',     src: '/assets/cosmetics/pokeball.png',     position: 'bottom', id: 'POKEBALL' },
 ];
 
 const OVERRIDES = {
-  KORAIDON:     { MARIOS_HAT: {rot:8}, LINKS_HAT: {rot:8}, PIKACHU_EARS: {rot:5,oy:-2}, MAJORAS_MASK: {rot:3}, MASTER_SWORD: {}, POKEBALL: {} },
-  SANDY_SHOCKS: { MARIOS_HAT: {rot:-5}, LINKS_HAT: {rot:-5}, PIKACHU_EARS: {oy:-2}, MAJORAS_MASK: {}, MASTER_SWORD: {}, POKEBALL: {ox:5} },
-  FLUTTER_MANE: { MARIOS_HAT: {rot:-10,oy:-3}, LINKS_HAT: {rot:-10,oy:-3}, PIKACHU_EARS: {rot:-5,oy:-5}, MAJORAS_MASK: {rot:-3}, MASTER_SWORD: {}, POKEBALL: {ox:10} },
-  RAGING_BOLT:  { MARIOS_HAT: {rot:3,oy:-2}, LINKS_HAT: {rot:3,oy:-2}, PIKACHU_EARS: {oy:-3}, MAJORAS_MASK: {}, MASTER_SWORD: {scale:1.2,ox:5,oy:10}, POKEBALL: {ox:5} },
-  ROARING_MOON: { MARIOS_HAT: {rot:-3}, LINKS_HAT: {rot:-3}, PIKACHU_EARS: {oy:-3}, MAJORAS_MASK: {}, MASTER_SWORD: {}, POKEBALL: {} },
-  SCREAM_TAIL:  { MARIOS_HAT: {rot:-8,oy:-2}, LINKS_HAT: {rot:-6,oy:-2}, PIKACHU_EARS: {rot:-3,oy:-4}, MAJORAS_MASK: {}, MASTER_SWORD: {ox:10}, POKEBALL: {ox:10} },
-  GREAT_TUSK:   { MARIOS_HAT: {rot:-5}, LINKS_HAT: {rot:-5}, PIKACHU_EARS: {oy:-3}, MAJORAS_MASK: {}, MASTER_SWORD: {}, POKEBALL: {ox:-5} },
-  BRUTE_BONNET: { MARIOS_HAT: {}, LINKS_HAT: {}, PIKACHU_EARS: {oy:-2}, MAJORAS_MASK: {}, MASTER_SWORD: {ox:5}, POKEBALL: {ox:5} },
-  SLITHER_WING: { MARIOS_HAT: {rot:-5}, LINKS_HAT: {rot:-5}, PIKACHU_EARS: {oy:-3}, MAJORAS_MASK: {oy:3}, MASTER_SWORD: {}, POKEBALL: {} },
-  WALKING_WAKE: { MARIOS_HAT: {rot:-8}, LINKS_HAT: {rot:-8}, PIKACHU_EARS: {rot:-3,oy:-2}, MAJORAS_MASK: {rot:-3}, MASTER_SWORD: {ox:-5}, POKEBALL: {} },
-  GOUGING_FIRE: { MARIOS_HAT: {rot:-3}, LINKS_HAT: {rot:-3}, PIKACHU_EARS: {oy:-2}, MAJORAS_MASK: {}, MASTER_SWORD: {}, POKEBALL: {} },
+  KORAIDON:     { MARIOS_HAT: {rot:8}, LINKS_HAT: {rot:8}, PIKACHU_EARS: {rot:5,oy:-2}, MAJORAS_MASK: {rot:3}, MASTER_SWORD: {}, ONE_HIT_OBLITERATOR: {}, POKEBALL: {} },
+  SANDY_SHOCKS: { MARIOS_HAT: {rot:-5}, LINKS_HAT: {rot:-5}, PIKACHU_EARS: {oy:-2}, MAJORAS_MASK: {}, MASTER_SWORD: {}, ONE_HIT_OBLITERATOR: {}, POKEBALL: {ox:5} },
+  FLUTTER_MANE: { MARIOS_HAT: {rot:-10,oy:-3}, LINKS_HAT: {rot:-10,oy:-3}, PIKACHU_EARS: {rot:-5,oy:-5}, MAJORAS_MASK: {rot:-3}, MASTER_SWORD: {}, ONE_HIT_OBLITERATOR: {}, POKEBALL: {ox:10} },
+  RAGING_BOLT:  { MARIOS_HAT: {rot:3,oy:-2}, LINKS_HAT: {rot:3,oy:-2}, PIKACHU_EARS: {oy:-3}, MAJORAS_MASK: {}, MASTER_SWORD: {scale:1.2,ox:5,oy:10}, ONE_HIT_OBLITERATOR: {scale:1.2,ox:5,oy:10}, POKEBALL: {ox:5} },
+  ROARING_MOON: { MARIOS_HAT: {rot:-3}, LINKS_HAT: {rot:-3}, PIKACHU_EARS: {oy:-3}, MAJORAS_MASK: {}, MASTER_SWORD: {}, ONE_HIT_OBLITERATOR: {}, POKEBALL: {} },
+  SCREAM_TAIL:  { MARIOS_HAT: {rot:-8,oy:-2}, LINKS_HAT: {rot:-6,oy:-2}, PIKACHU_EARS: {rot:-3,oy:-4}, MAJORAS_MASK: {}, MASTER_SWORD: {ox:10}, ONE_HIT_OBLITERATOR: {ox:10}, POKEBALL: {ox:10} },
+  GREAT_TUSK:   { MARIOS_HAT: {rot:-5}, LINKS_HAT: {rot:-5}, PIKACHU_EARS: {oy:-3}, MAJORAS_MASK: {}, MASTER_SWORD: {}, ONE_HIT_OBLITERATOR: {}, POKEBALL: {ox:-5} },
+  BRUTE_BONNET: { MARIOS_HAT: {}, LINKS_HAT: {}, PIKACHU_EARS: {oy:-2}, MAJORAS_MASK: {}, MASTER_SWORD: {ox:5}, ONE_HIT_OBLITERATOR: {ox:5}, POKEBALL: {ox:5} },
+  SLITHER_WING: { MARIOS_HAT: {rot:-5}, LINKS_HAT: {rot:-5}, PIKACHU_EARS: {oy:-3}, MAJORAS_MASK: {oy:3}, MASTER_SWORD: {}, ONE_HIT_OBLITERATOR: {}, POKEBALL: {} },
+  WALKING_WAKE: { MARIOS_HAT: {rot:-8}, LINKS_HAT: {rot:-8}, PIKACHU_EARS: {rot:-3,oy:-2}, MAJORAS_MASK: {rot:-3}, MASTER_SWORD: {ox:-5}, ONE_HIT_OBLITERATOR: {ox:-5}, POKEBALL: {} },
+  GOUGING_FIRE: { MARIOS_HAT: {rot:-3}, LINKS_HAT: {rot:-3}, PIKACHU_EARS: {oy:-2}, MAJORAS_MASK: {}, MASTER_SWORD: {}, ONE_HIT_OBLITERATOR: {}, POKEBALL: {} },
 };
 
 function makeTest(pkmn, cos) {

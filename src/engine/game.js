@@ -198,7 +198,44 @@ export function executeMove(game, toRow, toCol) {
       result: battleResult,
     });
 
-    if (battleResult.outcome === 'kill') {
+    if (battleResult.obliteratorCounter) {
+      // Obliterator counter-kill: attacker dies, defender consumes obliterator
+      newGame.capturedPieces[attacker.color].push(attacker);
+      newGame.board = cloneBoard(game.board);
+      // Remove attacker
+      newGame.board[fromRow][fromCol] = null;
+      // Consume obliterator from defender, apply normal damage
+      const updatedDefender = {
+        ...defender,
+        hp: battleResult.defenderHpAfter,
+        obliterator: false,
+      };
+      if (battleResult.focusSashTriggered) updatedDefender.focusSash = false;
+      newGame.board[defRow][defCol] = updatedDefender;
+
+      // Check if attacker was a TRUE_KING
+      if (attacker.role === 'TRUE_KING') {
+        newGame.phase = PHASES.GAME_OVER;
+        newGame.winner = defender.color;
+        newGame.clockRunning = false;
+        return { game: newGame, battleResult };
+      }
+
+      // Check if defender also died from normal damage
+      if (battleResult.defenderHpAfter <= 0) {
+        newGame.capturedPieces[defender.color].push(defender);
+        newGame.board[defRow][defCol] = null;
+        if (defender.role === 'TRUE_KING') {
+          newGame.phase = PHASES.GAME_OVER;
+          newGame.winner = attacker.color;
+          newGame.clockRunning = false;
+          return { game: newGame, battleResult };
+        }
+      }
+
+      newGame = endTurn(newGame);
+
+    } else if (battleResult.outcome === 'kill') {
       // Consume obliterator after use
       if (attacker.obliterator) attacker = { ...attacker, obliterator: false };
 

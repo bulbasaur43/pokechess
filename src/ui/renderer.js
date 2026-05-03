@@ -99,6 +99,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 5,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 3,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   SANDY_SHOCKS: {
@@ -107,6 +108,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
   },
   FLUTTER_MANE: {
@@ -115,6 +117,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: -5, scale: 1.0, ox: 0, oy: -5 },
     MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 10,oy: 0 },
   },
   RAGING_BOLT: {
@@ -123,6 +126,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.2, ox: 5, oy: 10 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.2, ox: 5, oy: 10 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
   },
   ROARING_MOON: {
@@ -131,6 +135,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   SCREAM_TAIL: {
@@ -139,6 +144,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -4 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 10,oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 10,oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 10,oy: 0 },
   },
   GREAT_TUSK: {
@@ -147,6 +153,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
   },
   BRUTE_BONNET: {
@@ -155,6 +162,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
   },
   SLITHER_WING: {
@@ -163,6 +171,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 3 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   WALKING_WAKE: {
@@ -171,6 +180,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   GOUGING_FIRE: {
@@ -179,6 +189,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   // ── Violet Paradox (Future) ──
@@ -188,6 +199,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 3,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 3,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   IRON_MOTH: {
@@ -196,6 +208,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   IRON_CROWN: {
@@ -204,6 +217,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   IRON_BOULDER: {
@@ -212,6 +226,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
     MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
   },
   IRON_JUGULIS: {
@@ -220,6 +235,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -3 },
     MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   IRON_BUNDLE: {
@@ -228,6 +244,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -4 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   IRON_TREADS: {
@@ -236,6 +253,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -3 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 5, oy: 0 },
   },
   IRON_HANDS: {
@@ -244,6 +262,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: -5,oy: 0 },
   },
   IRON_THORNS: {
@@ -252,6 +271,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   IRON_VALIANT: {
@@ -260,6 +280,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   IRON_LEAVES: {
@@ -268,6 +289,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   // Scarlet pack-only
@@ -277,6 +299,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   VENUSAUR: {
@@ -285,6 +308,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   SCIZOR: {
@@ -293,6 +317,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   VOLCANION: {
@@ -301,6 +326,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   LYCANROC: {
@@ -309,6 +335,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   // Violet pack-only
@@ -318,6 +345,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -4 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   RAICHU: {
@@ -326,6 +354,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   AEGISLASH: {
@@ -334,6 +363,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   ZOROARK: {
@@ -342,6 +372,7 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   TOXAPEX: {
@@ -350,42 +381,43 @@ const COSMETIC_OVERRIDES = {
     PIKACHU_EARS: { rot: 0,  scale: 1.0, ox: 0, oy: -2 },
     MAJORAS_MASK: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     MASTER_SWORD: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
+    ONE_HIT_OBLITERATOR: { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
     POKEBALL:     { rot: 0,  scale: 1.0, ox: 0, oy: 0 },
   },
   // ── Scarlet Classics ──
-  BULBASAUR:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -20, scale: 1.1, ox: -3, oy: -5 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  CHARIZARD:    { MARIOS_HAT: { rot: 3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  DRAGONITE:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  GARCHOMP:     { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  BLAZIKEN:     { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  SCEPTILE:     { MARIOS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  GHOLDENGO:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  CHI_YU:       { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -3 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  INCINEROAR:   { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  MAGCARGO:     { MARIOS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  COMFEY:       { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  BELLIBOLT:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -3 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  ARCANINE:     { MARIOS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -5, oy: 0 } },
-  TYRANITAR:    { MARIOS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  SKELEDIRGE:   { MARIOS_HAT: { rot: -8, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -8, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: -5, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: -10, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -10, oy: 0 } },
-  TINKATON:     { MARIOS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -3 }, MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -5, oy: 0 } },
+  BULBASAUR:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -20, scale: 1.1, ox: -3, oy: -5 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 5, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  CHARIZARD:    { MARIOS_HAT: { rot: 3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  DRAGONITE:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  GARCHOMP:     { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  BLAZIKEN:     { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  SCEPTILE:     { MARIOS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  GHOLDENGO:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  CHI_YU:       { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -3 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  INCINEROAR:   { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  MAGCARGO:     { MARIOS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  COMFEY:       { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  BELLIBOLT:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -3 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  ARCANINE:     { MARIOS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -5, oy: 0 } },
+  TYRANITAR:    { MARIOS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  SKELEDIRGE:   { MARIOS_HAT: { rot: -8, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -8, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: -5, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: -10, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: -10, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -10, oy: 0 } },
+  TINKATON:     { MARIOS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -3 }, MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -5, oy: 0 } },
   // ── Violet Classics ──
-  PIKACHU:      { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -4 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  GENGAR:       { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -4 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  METAGROSS:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  LUCARIO:      { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  GARDEVOIR:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  SYLVEON:      { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  DRAGAPULT:    { MARIOS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -5, oy: 0 } },
-  CHIEN_PAO:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  ZAPDOS:       { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  BRAMBLEGHAST: { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  AUDINO:       { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  MIMIKYU:      { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -4 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  TOXTRICITY:   { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  CERULEDGE:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  KINGAMBIT:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
-  HATTERENE:    { MARIOS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -5, oy: 0 } },
+  PIKACHU:      { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -4 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  GENGAR:       { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -4 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  METAGROSS:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  LUCARIO:      { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  GARDEVOIR:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  SYLVEON:      { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  DRAGAPULT:    { MARIOS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -5, oy: 0 } },
+  CHIEN_PAO:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  ZAPDOS:       { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  BRAMBLEGHAST: { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  AUDINO:       { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  MIMIKYU:      { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -4 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  TOXTRICITY:   { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  CERULEDGE:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  KINGAMBIT:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  HATTERENE:    { MARIOS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -5, oy: 0 } },
 };
 
 /** Get cosmetic override for a specific pokemon + cosmetic combo */
@@ -716,6 +748,7 @@ function createPieceElement(piece, playerColor) {
         // Image-based cosmetics (hats, masks, sword, pokeball)
         const cosEl = document.createElement('img');
         cosEl.className = `piece__cosmetic piece__cosmetic--${cosmetic.position} piece__cosmetic--img`;
+        if (cosmeticId === 'ONE_HIT_OBLITERATOR') cosEl.classList.add('piece__cosmetic--obliterator');
         cosEl.src = cosmetic.img;
         cosEl.draggable = false;
         // Get per-pokemon per-cosmetic overrides for rotation, scale, offset
@@ -812,6 +845,15 @@ function createPieceElement(piece, playerColor) {
   else if (hpPercent > 30) hpFill.classList.add('hp--mid');
   else hpFill.classList.add('hp--low');
   hpBar.appendChild(hpFill);
+  // Obliterator indicator next to HP bar
+  if (piece.obliterator) {
+    const oblIcon = document.createElement('img');
+    oblIcon.className = 'piece__hp-obliterator';
+    oblIcon.src = '/assets/cosmetics/one_hit_obliterator.png';
+    oblIcon.alt = '🗡️';
+    oblIcon.draggable = false;
+    hpBar.appendChild(oblIcon);
+  }
   el.appendChild(hpBar);
 
   // HP text (shown on hover)

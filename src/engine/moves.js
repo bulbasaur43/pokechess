@@ -36,7 +36,14 @@ export function getLegalMoves(board, row, col, enPassantTarget = null) {
     default:          moves = []; break;
   }
 
-  return applyParalysis(moves, piece);
+  let finalMoves = applyParalysis(moves, piece);
+
+  // Obliterator-armed pieces cannot attack — they are a defensive trap
+  if (piece.obliterator) {
+    finalMoves = finalMoves.filter(m => !m.isCapture);
+  }
+
+  return finalMoves;
 }
 
 /**
