@@ -104,12 +104,14 @@ function startLocalOrAI(clockPreset, options) {
     teamPresets[aiTeam] = generateAITeam(aiTeam, aiDiff);
   }
 
+  const upgLevels = getAllPokemonLevels();
+  console.log('[Game] Starting with upgrade levels:', upgLevels);
   game = startGame(game, clockPreset, {
     playerColor: options.playerColor ?? 'white',
     aiDifficulty: options.aiDifficulty ?? 'medium',
     isAIGame: gameMode === 'ai',
     teamPresets,
-    upgradeLevels: getAllPokemonLevels(),
+    upgradeLevels: upgLevels,
   });
   // For local mode, allow both colors
   if (gameMode === 'local') {

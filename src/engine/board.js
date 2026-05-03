@@ -38,6 +38,9 @@ export function createPiece(color, roleKey, pokemonKey, id, upgradeLevels = {}) 
 
   const baseHp = (pkmn?.hp ?? 5) + hpBonus;
   const baseDmg = (pkmn?.damage ?? 2) + dmgBonus;
+  if (hpBonus > 0 || dmgBonus > 0) {
+    console.log(`[Upgrade] ${pokemonKey} Lv.${level}: base ${pkmn?.hp}/${pkmn?.damage} → ${baseHp}/${baseDmg} (+${hpBonus} HP, +${dmgBonus} DMG)`);
+  }
 
   const piece = {
     color,
