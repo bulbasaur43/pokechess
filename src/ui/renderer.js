@@ -821,8 +821,8 @@ function createPieceElement(piece, playerColor) {
   if (piece.obliterator) {
     const headData = (piece.pokemon && POKEMON_HEAD_MAP[piece.pokemon]) || DEFAULT_HEAD;
     const sword = document.createElement('img');
-    sword.className = 'piece__obliterator-sword';
-    sword.src = '/assets/cosmetics/obliterator.png';
+    sword.className = 'piece__obliterator-sword piece__cosmetic--obliterator';
+    sword.src = '/assets/cosmetics/one_hit_obliterator.png';
     sword.alt = 'Obliterator';
     sword.draggable = false;
     sword.style.bottom = '5%';
