@@ -13,7 +13,7 @@ import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect,
 import { reportGameResult, loadPlayerStats, getRankTitle } from './engine/elo.js';
 import { isLoggedIn, reportGameResultToServer } from './engine/auth.js';
 import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS, COLOR_TO_TEAM } from './engine/types.js';
-import { openShop, closeShop, consumeItem, incrementBattleCount, awardDailyCoins, SHOP_ITEMS } from './ui/shop.js';
+import { openShop, closeShop, consumeItem, incrementBattleCount, awardDailyCoins, SHOP_ITEMS, getAllPokemonLevels } from './ui/shop.js';
 
 let game = createGame();
 let clockInterval = null;
@@ -109,6 +109,7 @@ function startLocalOrAI(clockPreset, options) {
     aiDifficulty: options.aiDifficulty ?? 'medium',
     isAIGame: gameMode === 'ai',
     teamPresets,
+    upgradeLevels: getAllPokemonLevels(),
   });
   // For local mode, allow both colors
   if (gameMode === 'local') {

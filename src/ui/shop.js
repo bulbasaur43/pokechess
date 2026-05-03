@@ -227,6 +227,41 @@ let _unlockedPokemon = [];
 let _lastDailyReward = '';
 let _ownedCosmetics = [];   // cosmetic IDs owned
 let _equippedCosmetic = ''; // currently active cosmetic ID
+let _pokemonLevels = {};    // { POKEMON_KEY: level (1-5) }
+
+// ─── Upgrade System ─────────────────────────────────────────────────
+const MAX_POKEMON_LEVEL = 5;
+const UPGRADE_COSTS = [150, 350, 750, 1500, 3000]; // Cost to go from level N to N+1
+
+/** Get upgrade bonus stats for a given level (1-5) */
+export function getUpgradeBonus(level) {
+  if (!level || level <= 1) return { hp: 0, damage: 0 };
+  const lvl = Math.min(level, MAX_POKEMON_LEVEL);
+  return {
+    hp: lvl - 1,      // +1 HP per level above 1
+    damage: lvl - 1,   // +1 DMG per level above 1
+  };
+}
+
+export function getPokemonLevel(key) { return _pokemonLevels[key] || 1; }
+export function getAllPokemonLevels() { return { ..._pokemonLevels }; }
+
+export function getUpgradeCost(key) {
+  const currentLevel = getPokemonLevel(key);
+  if (currentLevel >= MAX_POKEMON_LEVEL) return null; // Max level
+  return UPGRADE_COSTS[currentLevel - 1];
+}
+
+export function upgradePokemon(key) {
+  const cost = getUpgradeCost(key);
+  if (cost === null) return { error: 'Already max level' };
+  if (_coins < cost) return { error: `Need ${cost} coins (you have ${_coins})` };
+  _coins -= cost;
+  _pokemonLevels[key] = (getPokemonLevel(key)) + 1;
+  saveState();
+  syncToServer();
+  return { success: true, newLevel: _pokemonLevels[key] };
+}
 const STATE_KEY = 'pokechess_shop';
 
 // Pre-process cosmetic images that need background removal.
@@ -287,8 +322,9 @@ function loadState() {
       _lastDailyReward = data.lastDailyReward || '';
       _ownedCosmetics = data.ownedCosmetics || [];
       _equippedCosmetic = data.equippedCosmetic || '';
+      _pokemonLevels = data.pokemonLevels || {};
     }
-  } catch { _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = []; _lastDailyReward = ''; _ownedCosmetics = []; _equippedCosmetic = ''; }
+  } catch { _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = []; _lastDailyReward = ''; _ownedCosmetics = []; _equippedCosmetic = ''; _pokemonLevels = {}; }
 }
 
 function saveState() {
@@ -300,6 +336,7 @@ function saveState() {
     lastDailyReward: _lastDailyReward,
     ownedCosmetics: _ownedCosmetics,
     equippedCosmetic: _equippedCosmetic,
+    pokemonLevels: _pokemonLevels,
   }));
 }
 
@@ -495,7 +532,7 @@ async function syncToServer() {
     await fetch(`${API_BASE}/shop/sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ coins: _coins, inventory: _inventory, battleCount: _battleCount, unlockedPokemon: _unlockedPokemon }),
+      body: JSON.stringify({ coins: _coins, inventory: _inventory, battleCount: _battleCount, unlockedPokemon: _unlockedPokemon, pokemonLevels: _pokemonLevels }),
     });
   } catch { /* silent */ }
 }
@@ -513,6 +550,7 @@ export async function loadFromServer() {
       if (data.inventory) _inventory = data.inventory;
       if (data.battleCount != null) _battleCount = data.battleCount;
       if (data.unlockedPokemon) _unlockedPokemon = data.unlockedPokemon;
+      if (data.pokemonLevels) _pokemonLevels = data.pokemonLevels;
       saveState();
     }
   } catch { /* silent */ }
@@ -578,6 +616,11 @@ export function openShop(onItemUse) {
     </div>
 
     <div class="shop-section">
+      <h3 class="shop-section-title">⬆️ Upgrades <span class="shop-section-hint">+1 HP & +1 DMG per level</span></h3>
+      <div class="shop-upgrades" id="shop-upgrades"></div>
+    </div>
+
+    <div class="shop-section">
       <h3 class="shop-section-title">🎨 Cosmetics <span class="shop-section-hint">Customize your Pokémon!</span></h3>
       <div class="shop-cosmetics" id="shop-cosmetics"></div>
     </div>
@@ -603,6 +646,7 @@ export function openShop(onItemUse) {
   requestAnimationFrame(() => overlay.classList.add('shop-overlay--show'));
 
   renderPokemonPacks();
+  renderUpgrades();
   renderCosmetics();
   renderCoinPacks();
   renderShopItems();
@@ -799,6 +843,98 @@ function renderInventory() {
   }
   container.appendChild(grid);
 }
+function renderUpgrades() {
+  const container = document.getElementById('shop-upgrades');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // Collect all Pokémon available to the player (default team + unlocked)
+  const upgradeablePokemon = new Map();
+
+  // Add default team Pokémon
+  for (const teamKey of ['scarlet', 'violet']) {
+    const pool = POKEMON_POOL[teamKey] || [];
+    for (const entry of pool) {
+      if (entry.requiredElo <= 0 || _unlockedPokemon.includes(entry.key)) {
+        const pkmn = POKEMON[entry.key];
+        if (pkmn && !upgradeablePokemon.has(entry.key)) {
+          upgradeablePokemon.set(entry.key, { key: entry.key, pkmn, team: teamKey });
+        }
+      }
+    }
+    const kings = KING_POOL[teamKey] || [];
+    for (const entry of kings) {
+      if (entry.requiredElo <= 0 || _unlockedPokemon.includes(entry.key)) {
+        const pkmn = POKEMON[entry.key];
+        if (pkmn && !upgradeablePokemon.has(entry.key)) {
+          upgradeablePokemon.set(entry.key, { key: entry.key, pkmn, team: teamKey, isKing: true });
+        }
+      }
+    }
+  }
+
+  if (upgradeablePokemon.size === 0) {
+    container.innerHTML = '<div class="shop-inv-empty">Unlock Pokémon first to upgrade them!</div>';
+    return;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'shop-upgrade-grid';
+
+  for (const [key, { pkmn }] of upgradeablePokemon) {
+    const level = getPokemonLevel(key);
+    const cost = getUpgradeCost(key);
+    const isMaxed = cost === null;
+    const bonus = getUpgradeBonus(level);
+    const canAfford = !isMaxed && _coins >= cost;
+
+    const card = document.createElement('div');
+    card.className = `shop-upgrade-card ${isMaxed ? 'shop-upgrade-card--max' : ''}`;
+
+    // Level pips
+    let pips = '';
+    for (let i = 1; i <= MAX_POKEMON_LEVEL; i++) {
+      pips += `<span class="shop-upgrade-pip ${i <= level ? 'shop-upgrade-pip--filled' : ''}"></span>`;
+    }
+
+    card.innerHTML = `
+      <img class="shop-upgrade-img" src="${pkmn.img || ''}" alt="${pkmn.name}" />
+      <div class="shop-upgrade-info">
+        <div class="shop-upgrade-name">${pkmn.name}</div>
+        <div class="shop-upgrade-level">Lv.${level} ${pips}</div>
+        <div class="shop-upgrade-stats">
+          ❤️${pkmn.hp + bonus.hp} <span class="shop-upgrade-bonus">${bonus.hp > 0 ? `(+${bonus.hp})` : ''}</span>
+          ⚔️${pkmn.damage + bonus.damage} <span class="shop-upgrade-bonus">${bonus.damage > 0 ? `(+${bonus.damage})` : ''}</span>
+        </div>
+      </div>
+      <button class="shop-upgrade-btn ${isMaxed ? 'shop-upgrade-btn--max' : canAfford ? '' : 'shop-upgrade-btn--locked'}" ${isMaxed ? 'disabled' : ''}>
+        ${isMaxed ? '★ MAX' : `⬆️ 🪙 ${cost}`}
+      </button>
+    `;
+
+    if (!isMaxed) {
+      card.querySelector('.shop-upgrade-btn').addEventListener('click', () => {
+        if (_coins < cost) {
+          showShopToast(`Need ${cost} coins for ${pkmn.name} upgrade (you have ${_coins})`, 'error');
+          return;
+        }
+        const res = upgradePokemon(key);
+        if (res.success) {
+          showShopToast(`⬆️ ${pkmn.name} upgraded to Level ${res.newLevel}!`, 'success');
+          updateCoinsDisplay();
+          renderUpgrades();
+        } else {
+          showShopToast(res.error, 'error');
+        }
+      });
+    }
+
+    grid.appendChild(card);
+  }
+
+  container.appendChild(grid);
+}
+
 async function renderPokemonShop() {
   const container = document.getElementById('shop-pokemon');
   if (!container) return;

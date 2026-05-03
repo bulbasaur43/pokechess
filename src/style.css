@@ -4911,6 +4911,107 @@ body {
   font-weight: 700;
 }
 
+/* ── Upgrade Grid ── */
+.shop-upgrade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.shop-upgrade-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+.shop-upgrade-card:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+.shop-upgrade-card--max {
+  border-color: rgba(251, 191, 36, 0.3);
+  background: rgba(251, 191, 36, 0.05);
+}
+.shop-upgrade-img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 3px rgba(255,255,255,0.15));
+}
+.shop-upgrade-info {
+  flex: 1;
+  min-width: 0;
+}
+.shop-upgrade-name {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.shop-upgrade-level {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  margin-top: 2px;
+}
+.shop-upgrade-pip {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.shop-upgrade-pip--filled {
+  background: #8b5cf6;
+  border-color: #a78bfa;
+  box-shadow: 0 0 4px rgba(139, 92, 246, 0.5);
+}
+.shop-upgrade-stats {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.6);
+  margin-top: 2px;
+}
+.shop-upgrade-bonus {
+  color: #4ade80;
+  font-weight: 600;
+  font-size: 0.68rem;
+}
+.shop-upgrade-btn {
+  padding: 6px 14px;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 8px;
+  background: rgba(139, 92, 246, 0.15);
+  color: #c4b5fd;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.shop-upgrade-btn:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: #8b5cf6;
+  transform: scale(1.05);
+}
+.shop-upgrade-btn--locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.shop-upgrade-btn--max {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #fbbf24;
+  cursor: default;
+}
+
 /* ── Pokémon Grid ── */
 .shop-pokemon-grid {
   display: flex;

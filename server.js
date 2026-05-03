@@ -964,6 +964,7 @@ function handleShopGet(req, res) {
     inventory: shop.inventory || {},
     battleCount: shop.battleCount || 0,
     unlockedPokemon: shop.unlockedPokemon || [],
+    pokemonLevels: shop.pokemonLevels || {},
   });
 }
 
@@ -976,6 +977,7 @@ function handleShopSync(req, res, body) {
   if (body.inventory) auth.user.shop.inventory = body.inventory;
   if (body.battleCount != null) auth.user.shop.battleCount = parseInt(body.battleCount) || 0;
   if (body.unlockedPokemon) auth.user.shop.unlockedPokemon = body.unlockedPokemon;
+  if (body.pokemonLevels) auth.user.shop.pokemonLevels = body.pokemonLevels;
   saveDB(db);
   sendJSON(res, 200, { ok: true });
 }
