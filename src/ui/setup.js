@@ -706,7 +706,7 @@ export function renderTitleScreen(onStart) {
       list.innerHTML = filtered.map(u => {
         const isBanned = u.bannedUntil && new Date(u.bannedUntil) > new Date();
         const banLabel = isBanned
-          ? `<span class="admin-ban-tag">🚫 Banned until ${new Date(u.bannedUntil).toLocaleDateString()}</span>`
+          ? `<span class="admin-ban-tag">🚫 Banned until ${new Date(u.bannedUntil).toLocaleDateString()}${u.banReason ? ` — "${u.banReason}"` : ''}</span>`
           : '';
         return `
           <div class="admin-user-card ${isBanned ? 'admin-user-card--banned' : ''}">
@@ -831,15 +831,46 @@ export function renderTitleScreen(onStart) {
         });
 
       } else if (action === 'ban') {
-        showAdminDialog(`Ban "${username}" for how many hours?`, {
-          input: true, placeholder: 'e.g. 24',
-          onConfirm: (hours) => {
-            if (!hours) return;
-            adminFetch('/admin/ban', { username, hours: parseInt(hours) }).then(data => {
-              showStatus(data.message || data.error, !!data.error);
-              if (data.success) refreshUsers();
-            });
-          }
+        // Custom two-input ban dialog
+        const existing = document.querySelector('.admin-dialog');
+        if (existing) existing.remove();
+        const dialog = document.createElement('div');
+        dialog.className = 'admin-dialog';
+        dialog.innerHTML = `
+          <div class="admin-dialog__content">
+            <div class="admin-dialog__msg">Ban "${username}"</div>
+            <input type="text" class="admin-input admin-dialog__input" id="ban-hours" placeholder="Hours (e.g. 24)" autofocus />
+            <input type="text" class="admin-input admin-dialog__input" id="ban-reason" placeholder="Reason (shown to player)" style="margin-top:6px" />
+            <div class="admin-dialog__btns">
+              <button class="btn btn--small btn--secondary admin-dialog__cancel">Cancel</button>
+              <button class="btn btn--small admin-dialog__ok">Ban</button>
+            </div>
+          </div>
+        `;
+        const panel = document.querySelector('.admin-panel');
+        if (panel) panel.appendChild(dialog);
+        else document.body.appendChild(dialog);
+        dialog.querySelector('#ban-hours').focus();
+
+        function closeBan() { dialog.remove(); }
+        dialog.querySelector('.admin-dialog__cancel').addEventListener('click', closeBan);
+        dialog.querySelector('.admin-dialog__ok').addEventListener('click', () => {
+          const hours = parseInt(dialog.querySelector('#ban-hours').value);
+          const reason = dialog.querySelector('#ban-reason').value.trim();
+          if (!hours || isNaN(hours)) return;
+          closeBan();
+          adminFetch('/admin/ban', { username, hours, reason: reason || undefined }).then(data => {
+            showStatus(data.message || data.error, !!data.error);
+            if (data.success) refreshUsers();
+          });
+        });
+        dialog.querySelector('#ban-hours').addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); dialog.querySelector('#ban-reason').focus(); }
+          if (e.key === 'Escape') closeBan();
+        });
+        dialog.querySelector('#ban-reason').addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); dialog.querySelector('.admin-dialog__ok').click(); }
+          if (e.key === 'Escape') closeBan();
         });
 
       } else if (action === 'unban') {

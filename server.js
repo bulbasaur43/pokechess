@@ -369,7 +369,8 @@ function handleLogin(req, res, body) {
     const banEnd = new Date(user.bannedUntil);
     if (banEnd > new Date()) {
       const remaining = Math.ceil((banEnd - new Date()) / (1000 * 60 * 60));
-      return sendJSON(res, 403, { error: `Account banned. ${remaining}h remaining. Expires: ${banEnd.toLocaleString()}` });
+      const reason = user.banReason ? `\nReason: ${user.banReason}` : '';
+      return sendJSON(res, 403, { error: `Account banned. ${remaining}h remaining.${reason}` });
     } else {
       // Ban expired — clear it
       delete user.bannedUntil;
@@ -578,6 +579,7 @@ function handleAdminListUsers(req, res, body) {
       wins: u.wins,
       losses: u.losses,
       bannedUntil: u.bannedUntil || null,
+      banReason: u.banReason || null,
       rank: rank.title,
       rankEmoji: rank.emoji,
       savedTeam: u.savedTeam || null,
@@ -653,6 +655,11 @@ function handleAdminBan(req, res, body) {
   const user = db.users[target];
   const banEnd = new Date(Date.now() + hours * 60 * 60 * 1000);
   user.bannedUntil = banEnd.toISOString();
+  if (body.reason) {
+    user.banReason = body.reason;
+  } else {
+    delete user.banReason;
+  }
 
   // Invalidate their sessions
   for (const [token, uname] of Object.entries(db.sessions)) {
@@ -670,6 +677,7 @@ function handleAdminUnban(req, res, body) {
   if (!target || !db.users[target]) return sendJSON(res, 404, { error: 'User not found' });
 
   delete db.users[target].bannedUntil;
+  delete db.users[target].banReason;
   saveDB(db);
 
   console.log(`✅ Admin unbanned ${db.users[target].displayName}`);
