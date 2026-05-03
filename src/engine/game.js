@@ -68,12 +68,11 @@ export function startGame(game, clockPreset = 'medium', options = {}) {
   const aiDifficulty = options.aiDifficulty ?? 'medium';
   const isAIGame = options.isAIGame ?? false;
   const teamPresets = options.teamPresets ?? {};
-  const upgradeLevels = options.upgradeLevels ?? {};
 
   return {
     ...game,
     phase: PHASES.PLAY,
-    board: initBoard(teamPresets, upgradeLevels),
+    board: initBoard(teamPresets),
     currentPlayer: 'white',
     turnCount: 1,
     capturedPieces: { white: [], black: [] },

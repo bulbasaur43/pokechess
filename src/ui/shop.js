@@ -639,10 +639,6 @@ export function openShop(onItemUse) {
       <div class="shop-pokemon" id="shop-pokemon"></div>
     </div>
 
-    <div class="shop-section">
-      <h3 class="shop-section-title">⬆️ Upgrades <span class="shop-section-hint">Power up owned Pokémon — bonuses scale with level!</span></h3>
-      <div class="shop-upgrades" id="shop-upgrades"></div>
-    </div>
   `;
 
   overlay.appendChild(panel);
@@ -650,7 +646,6 @@ export function openShop(onItemUse) {
   requestAnimationFrame(() => overlay.classList.add('shop-overlay--show'));
 
   renderPokemonPacks();
-  renderUpgrades();
   renderCosmetics();
   renderCoinPacks();
   renderShopItems();

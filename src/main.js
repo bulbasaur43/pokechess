@@ -13,7 +13,7 @@ import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect,
 import { reportGameResult, loadPlayerStats, getRankTitle } from './engine/elo.js';
 import { isLoggedIn, reportGameResultToServer } from './engine/auth.js';
 import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS, COLOR_TO_TEAM } from './engine/types.js';
-import { openShop, closeShop, consumeItem, incrementBattleCount, awardDailyCoins, SHOP_ITEMS, getAllPokemonLevels } from './ui/shop.js';
+import { openShop, closeShop, consumeItem, incrementBattleCount, awardDailyCoins, SHOP_ITEMS } from './ui/shop.js';
 
 let game = createGame();
 let clockInterval = null;
@@ -104,41 +104,11 @@ function startLocalOrAI(clockPreset, options) {
     teamPresets[aiTeam] = generateAITeam(aiTeam, aiDiff);
   }
 
-  // Build upgrade levels: player's from shop + AI's from difficulty
-  const upgLevels = { ...getAllPokemonLevels() };
-
-  if (gameMode === 'ai') {
-    // AI upgrade level scales with difficulty: 1-3=Lv1, 4-5=Lv2, 6=Lv3, 7-8=Lv4, 9=Lv5, 10=Lv6
-    const aiDiff = parseInt(options.aiDifficulty, 10) || 5;
-    const aiUpgradeLevel = aiDiff <= 3 ? 1 : aiDiff <= 5 ? 2 : aiDiff <= 6 ? 3 : aiDiff <= 8 ? 4 : aiDiff <= 9 ? 5 : 6;
-
-    if (aiUpgradeLevel > 1) {
-      const aiTeamKey = (options.playerColor === 'white' ? 'violet' : 'scarlet');
-      const aiTeamPreset = teamPresets[aiTeamKey];
-      if (aiTeamPreset) {
-        // Upgrade all AI back rank + pawn Pokémon
-        for (const key of aiTeamPreset.backRank) {
-          if (!upgLevels[key] || upgLevels[key] < aiUpgradeLevel) {
-            upgLevels[key] = aiUpgradeLevel;
-          }
-        }
-        if (aiTeamPreset.pawnPokemon) {
-          const pk = aiTeamPreset.pawnPokemon;
-          if (!upgLevels[pk] || upgLevels[pk] < aiUpgradeLevel) {
-            upgLevels[pk] = aiUpgradeLevel;
-          }
-        }
-      }
-    }
-  }
-
-  console.log('[Game] Starting with upgrade levels:', upgLevels);
   game = startGame(game, clockPreset, {
     playerColor: options.playerColor ?? 'white',
     aiDifficulty: options.aiDifficulty ?? 'medium',
     isAIGame: gameMode === 'ai',
     teamPresets,
-    upgradeLevels: upgLevels,
   });
   // For local mode, allow both colors
   if (gameMode === 'local') {

@@ -25,23 +25,8 @@ export const ROLE_KEYS = Object.keys(ROLES);
  * Create a piece with full Pokémon data
  * Role is determined by board position, NOT by the Pokémon's default role.
  */
-export function createPiece(color, roleKey, pokemonKey, id, upgradeLevels = {}) {
+export function createPiece(color, roleKey, pokemonKey, id) {
   const pkmn = POKEMON[pokemonKey];
-
-  // Calculate upgrade bonuses (progressive: each level gives more)
-  const level = upgradeLevels[pokemonKey] || 1;
-  const HP_TABLE =  [0, 1, 3, 5, 8, 12];
-  const DMG_TABLE = [0, 1, 2, 4, 6, 9];
-  const idx = Math.min(level, 6) - 1;
-  const hpBonus = HP_TABLE[idx] || 0;
-  const dmgBonus = DMG_TABLE[idx] || 0;
-
-  const baseHp = (pkmn?.hp ?? 5) + hpBonus;
-  const baseDmg = (pkmn?.damage ?? 2) + dmgBonus;
-  if (hpBonus > 0 || dmgBonus > 0) {
-    console.log(`[Upgrade] ${pokemonKey} Lv.${level}: base ${pkmn?.hp}/${pkmn?.damage} → ${baseHp}/${baseDmg} (+${hpBonus} HP, +${dmgBonus} DMG)`);
-  }
-
   const piece = {
     color,
     role: roleKey,
@@ -50,15 +35,13 @@ export function createPiece(color, roleKey, pokemonKey, id, upgradeLevels = {}) 
     id,
     hasMoved: false,
     bikeMode: false,
-    // HP-based combat stats (with upgrades applied)
-    hp: baseHp,
-    maxHp: baseHp,
-    damage: baseDmg,
+    // HP-based combat stats
+    hp: pkmn?.hp ?? 5,
+    maxHp: pkmn?.maxHp ?? 5,
+    damage: pkmn?.damage ?? 2,
     damageTier: pkmn?.damageTier ?? 'weak',
     // Status effects
     statusEffect: null,     // 'frozen' | 'stunned' | null
-    // Track upgrade level for display
-    upgradeLevel: level > 1 ? level : 0,
   };
   // True Kings get bike mode cooldown
   if (roleKey === 'TRUE_KING') {
@@ -82,7 +65,7 @@ export function createEmptyBoard() {
  * Roles are assigned by POSITION (BACK_RANK_ROLES), not by Pokémon data.
  * @param {object} presets - Optional { scarlet: preset, violet: preset } to override team rosters
  */
-export function initBoard(presets = {}, upgradeLevels = {}) {
+export function initBoard(presets = {}) {
   const board = createEmptyBoard();
   let id = 0;
 
@@ -102,19 +85,19 @@ export function initBoard(presets = {}, upgradeLevels = {}) {
   for (let col = 0; col < 8; col++) {
     const pokemonKey = violetConfig.backRank[col];
     const role = BACK_RANK_ROLES[col];
-    board[0][col] = createPiece('black', role, pokemonKey, `b${id++}`, upgradeLevels);
+    board[0][col] = createPiece('black', role, pokemonKey, `b${id++}`);
   }
 
   // ── Black front rank (row 1) ──
   for (let col = 0; col < 8; col++) {
-    const p = createPiece('black', violetConfig.pawnRole, violetConfig.pawnPokemon, `b${id++}`, upgradeLevels);
+    const p = createPiece('black', violetConfig.pawnRole, violetConfig.pawnPokemon, `b${id++}`);
     p.isPawn = true;
     board[1][col] = p;
   }
 
   // ── White front rank (row 6) ──
   for (let col = 0; col < 8; col++) {
-    const p = createPiece('white', scarletConfig.pawnRole, scarletConfig.pawnPokemon, `w${id++}`, upgradeLevels);
+    const p = createPiece('white', scarletConfig.pawnRole, scarletConfig.pawnPokemon, `w${id++}`);
     p.isPawn = true;
     board[6][col] = p;
   }
@@ -123,7 +106,7 @@ export function initBoard(presets = {}, upgradeLevels = {}) {
   for (let col = 0; col < 8; col++) {
     const pokemonKey = scarletConfig.backRank[col];
     const role = BACK_RANK_ROLES[col];
-    board[7][col] = createPiece('white', role, pokemonKey, `w${id++}`, upgradeLevels);
+    board[7][col] = createPiece('white', role, pokemonKey, `w${id++}`);
   }
 
   return board;
