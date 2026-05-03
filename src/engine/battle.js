@@ -56,10 +56,10 @@ export function resolveBattle(attacker, defender) {
     baseDamage *= CRIT_MULTIPLIER;
     result.messages.push('💥 CRITICAL HIT! Double damage!');
   }
-  // Obliterator: armed defender counter-kills the attacker on contact
-  if (defender.obliterator) {
-    result.obliteratorCounter = true;
-    result.messages.push('🗡️ OBLITERATOR! The defender strikes back — instant KO!');
+  // Obliterator: one-hit KO, then consume
+  if (attacker.obliterator) {
+    baseDamage = 9999;
+    result.messages.push('🗡️ OBLITERATOR! One-hit KO!');
     result.isObliterator = true;
   }
 
