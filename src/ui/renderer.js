@@ -832,7 +832,7 @@ function createPieceElement(piece, playerColor) {
     sword.style.bottom = '5%';
     sword.style.left = `${headData.headLeft - 32}%`;
     sword.style.top = 'auto';
-    sword.style.transform = 'rotate(-30deg)';
+    sword.style.transform = 'scaleX(-1) rotate(-30deg)';
     sword.style.zIndex = '5';
     wrap.appendChild(sword);
   }

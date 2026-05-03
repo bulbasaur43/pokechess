@@ -4906,8 +4906,8 @@ body {
   animation: obliteratorFloat 2.5s ease-in-out infinite, obliteratorCosmeticGlow 2s ease-in-out infinite !important;
 }
 @keyframes obliteratorFloat {
-  0%, 100% { transform: rotate(-30deg) translateY(0); }
-  50% { transform: rotate(-30deg) translateY(-4px); }
+  0%, 100% { transform: scaleX(-1) rotate(-30deg) translateY(0); }
+  50% { transform: scaleX(-1) rotate(-30deg) translateY(-4px); }
 }
 
 @media (max-width: 768px) {
