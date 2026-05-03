@@ -400,6 +400,7 @@ let _lastViewColor = null;
 
 // Rainbow trail state (cosmetic only)
 let _rainbowTrails = []; // { row, col, age }
+let _sparkleTrails = []; // { row, col, age }
 let _lastBoard = null;  // snapshot to detect moves
 
 /**
@@ -477,6 +478,26 @@ export function renderBoard(game, callbacks) {
       .filter(t => t.age <= 10);
   } else if (getEquippedCosmetic() !== 'RAINBOW') {
     _rainbowTrails = [];
+  }
+  // ── Sparkle trail detection ──
+  if (getEquippedCosmetic() === 'SPARKLE' && _lastBoard) {
+    const playerColor = game.onlineColor ?? game.playerColor ?? 'white';
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const prev = _lastBoard[r]?.[c];
+        const curr = game.board[r][c];
+        if (prev && prev.color === playerColor && (!curr || curr !== prev)) {
+          if (!_sparkleTrails.some(t => t.row === r && t.col === c)) {
+            _sparkleTrails.push({ row: r, col: c, age: 0 });
+          }
+        }
+      }
+    }
+    _sparkleTrails = _sparkleTrails
+      .map(t => ({ ...t, age: t.age + 1 }))
+      .filter(t => t.age <= 6);
+  } else if (getEquippedCosmetic() !== 'SPARKLE') {
+    _sparkleTrails = [];
   }
   // Snapshot board for next comparison
   _lastBoard = game.board.map(row => row.map(cell => cell));
@@ -557,6 +578,27 @@ export function renderBoard(game, callbacks) {
         if (trail) {
           cell.classList.add('cell--rainbow-trail');
           cell.style.setProperty('--rainbow-age', trail.age);
+        }
+      }
+
+      // Sparkle trail overlay (cosmetic — only when SPARKLE equipped)
+      if (getEquippedCosmetic() === 'SPARKLE') {
+        const trail = _sparkleTrails.find(t => t.row === row && t.col === col);
+        if (trail) {
+          cell.classList.add('cell--sparkle-trail');
+          const trailContainer = document.createElement('div');
+          trailContainer.className = 'cell__sparkle-trail';
+          const count = Math.max(2, 5 - trail.age);
+          for (let s = 0; s < count; s++) {
+            const sp = document.createElement('span');
+            sp.textContent = '✨';
+            sp.style.left = `${10 + Math.random() * 80}%`;
+            sp.style.top = `${10 + Math.random() * 80}%`;
+            sp.style.animationDelay = `${Math.random() * 0.5}s`;
+            sp.style.opacity = Math.max(0.1, 1 - trail.age * 0.15);
+            trailContainer.appendChild(sp);
+          }
+          cell.appendChild(trailContainer);
         }
       }
 

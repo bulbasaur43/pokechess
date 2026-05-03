@@ -4793,7 +4793,22 @@ body {
 
 /* ── Shiny Glow (cosmetic item) ── */
 .piece--shiny img {
-  filter: drop-shadow(0 0 6px gold) drop-shadow(0 0 12px rgba(255, 215, 0, 0.4)) !important;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))
+          drop-shadow(0 0 16px rgba(255, 200, 0, 0.5))
+          drop-shadow(0 0 24px rgba(255, 180, 0, 0.3)) !important;
+  animation: shinyPulse 2s ease-in-out infinite;
+}
+@keyframes shinyPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.7))
+            drop-shadow(0 0 14px rgba(255, 200, 0, 0.4))
+            drop-shadow(0 0 20px rgba(255, 180, 0, 0.2));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(255, 215, 0, 1))
+            drop-shadow(0 0 24px rgba(255, 200, 0, 0.7))
+            drop-shadow(0 0 36px rgba(255, 180, 0, 0.4));
+  }
 }
 
 /* ── Focus Sash indicator ── */
@@ -5389,6 +5404,29 @@ body {
   50% { opacity: 0.6; transform: scale(0.8) rotate(180deg); }
   75% { opacity: 1; transform: scale(1.1) rotate(270deg); }
   100% { opacity: 0; transform: scale(0.3) rotate(360deg); }
+}
+
+/* Sparkle trail — left behind on cells after piece moves */
+.cell--sparkle-trail {
+  position: relative;
+  overflow: visible;
+}
+.cell__sparkle-trail {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.cell__sparkle-trail span {
+  position: absolute;
+  font-size: 0.5rem;
+  animation: sparkleTrailFade 3s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes sparkleTrailFade {
+  0% { opacity: 1; transform: scale(1); }
+  60% { opacity: 0.6; transform: scale(0.9) rotate(180deg); }
+  100% { opacity: 0; transform: scale(0.2) rotate(360deg); }
 }
 
 /* Flame Aura — orange/red glow around sprite + rising fire particles */
