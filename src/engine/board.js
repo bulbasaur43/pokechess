@@ -28,10 +28,13 @@ export const ROLE_KEYS = Object.keys(ROLES);
 export function createPiece(color, roleKey, pokemonKey, id, upgradeLevels = {}) {
   const pkmn = POKEMON[pokemonKey];
 
-  // Calculate upgrade bonuses
+  // Calculate upgrade bonuses (progressive: each level gives more)
   const level = upgradeLevels[pokemonKey] || 1;
-  const hpBonus = level > 1 ? (level - 1) : 0;         // +1 HP per level above 1
-  const dmgBonus = level > 1 ? (level - 1) : 0;         // +1 DMG per level above 1
+  const HP_TABLE =  [0, 1, 3, 5, 8];
+  const DMG_TABLE = [0, 1, 2, 4, 6];
+  const idx = Math.min(level, 5) - 1;
+  const hpBonus = HP_TABLE[idx] || 0;
+  const dmgBonus = DMG_TABLE[idx] || 0;
 
   const baseHp = (pkmn?.hp ?? 5) + hpBonus;
   const baseDmg = (pkmn?.damage ?? 2) + dmgBonus;

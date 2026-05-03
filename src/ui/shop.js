@@ -233,13 +233,17 @@ let _pokemonLevels = {};    // { POKEMON_KEY: level (1-5) }
 const MAX_POKEMON_LEVEL = 5;
 const UPGRADE_COSTS = [150, 350, 750, 1500, 3000]; // Cost to go from level N to N+1
 
-/** Get upgrade bonus stats for a given level (1-5) */
+/** Get upgrade bonus stats for a given level (1-5). Each level gives more than the last. */
+// Cumulative bonuses: [L1, L2, L3, L4, L5]
+const UPGRADE_HP_TABLE =  [0, 1, 3, 5, 8];  // gained: +1, +2, +2, +3
+const UPGRADE_DMG_TABLE = [0, 1, 2, 4, 6];  // gained: +1, +1, +2, +2
+
 export function getUpgradeBonus(level) {
   if (!level || level <= 1) return { hp: 0, damage: 0 };
-  const lvl = Math.min(level, MAX_POKEMON_LEVEL);
+  const idx = Math.min(level, MAX_POKEMON_LEVEL) - 1;
   return {
-    hp: lvl - 1,      // +1 HP per level above 1
-    damage: lvl - 1,   // +1 DMG per level above 1
+    hp: UPGRADE_HP_TABLE[idx] || 0,
+    damage: UPGRADE_DMG_TABLE[idx] || 0,
   };
 }
 
