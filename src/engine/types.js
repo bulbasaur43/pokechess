@@ -108,7 +108,7 @@ export const POKEMON = {
   GOUGING_FIRE: { name: 'Gouging Fire', types: ['FIRE','DRAGON'],      team: 'scarlet', emoji: '🔥', img: SPRITE(1020), desc: 'Ancient Entei',         hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
   // Scarlet classics
   BULBASAUR:    { name: 'Bulbasaur',    types: ['GRASS','POISON'],     team: 'scarlet', emoji: '🌱', img: SPRITE(1),    desc: 'OP Ancient Seed',       hp: 12, maxHp: 12, damage: 5, damageTier: 'heavy' },
-  CHARIZARD:    { name: 'Charizard',    types: ['FIRE','FLYING'],      team: 'scarlet', emoji: '🔥', img: SPRITE(6),    desc: 'Flame Pokémon',         hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
+  CHARIZARD:    { name: 'Charizard',    types: ['FIRE','FLYING'],      team: 'scarlet', emoji: '🔥', img: SPRITE(6),    desc: 'Flame Pokémon',         hp: 4,  maxHp: 4,  damage: 1, damageTier: 'weak' },
   DRAGONITE:    { name: 'Dragonite',    types: ['DRAGON','FLYING'],    team: 'scarlet', emoji: '🐉', img: SPRITE(149),  desc: 'Dragon Pokémon',        hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
   GARCHOMP:     { name: 'Garchomp',     types: ['DRAGON','GROUND'],    team: 'scarlet', emoji: '🦈', img: SPRITE(445),  desc: 'Mach Pokémon',          hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
   BLAZIKEN:     { name: 'Blaziken',     types: ['FIRE','FIGHTING'],    team: 'scarlet', emoji: '🐔', img: SPRITE(257),  desc: 'Blaze Pokémon',         hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
@@ -151,7 +151,7 @@ export const POKEMON = {
   SYLVEON:      { name: 'Sylveon',      types: ['FAIRY','NORMAL'],     team: 'violet',  emoji: '🎀', img: SPRITE(700),  desc: 'Intertwining Pokémon',   hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
   DRAGAPULT:    { name: 'Dragapult',    types: ['DRAGON','GHOST'],     team: 'violet',  emoji: '🐉', img: SPRITE(887),  desc: 'Stealth Pokémon',       hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
   CHIEN_PAO:    { name: 'Chien-Pao',    types: ['DARK','ICE'],         team: 'violet',  emoji: '🐆', img: SPRITE(1002), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
-  ZAPDOS:       { name: 'Zapdos',       types: ['ELECTRIC','FLYING'],  team: 'scarlet', emoji: '⚡', img: SPRITE(145),  desc: 'Electric Pokémon',      hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
+  ZAPDOS:       { name: 'Zapdos',       types: ['ELECTRIC','FLYING'],  team: 'scarlet', emoji: '⚡', img: SPRITE(145),  desc: 'Electric Pokémon',      hp: 6,  maxHp: 6,  damage: 1, damageTier: 'weak' },
   BRAMBLEGHAST: { name: 'Brambleghast', types: ['GRASS','GHOST'],      team: 'violet',  emoji: '🌿', img: SPRITE(947),  desc: 'Tumbleweed Pokémon',    hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
   AUDINO:       { name: 'Audino',       types: ['NORMAL','FAIRY'],     team: 'violet',  emoji: '👂', img: SPRITE(531),  desc: 'Hearing Pokémon',       hp: 8,  maxHp: 8,  damage: 1, damageTier: 'weak' },
   MIMIKYU:      { name: 'Mimikyu',      types: ['GHOST','FAIRY'],      team: 'violet',  emoji: '👻', img: SPRITE(778),  desc: 'Disguise Pokémon',      hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
