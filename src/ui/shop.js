@@ -460,7 +460,9 @@ export function isItemReady(itemId) {
   const item = SHOP_ITEMS[itemId];
   if (!item) return false;
   if (item.cooldownBattles <= 0) return true;
-  return (_battleCount - (entry.lastUsedBattle || 0)) >= item.cooldownBattles;
+  // Never used yet — always ready
+  if (!entry.lastUsedBattle) return true;
+  return (_battleCount - entry.lastUsedBattle) >= item.cooldownBattles;
 }
 
 export function getCooldownRemaining(itemId) {
@@ -468,7 +470,8 @@ export function getCooldownRemaining(itemId) {
   if (!entry) return 0;
   const item = SHOP_ITEMS[itemId];
   if (!item || item.cooldownBattles <= 0) return 0;
-  return Math.max(0, item.cooldownBattles - (_battleCount - (entry.lastUsedBattle || 0)));
+  if (!entry.lastUsedBattle) return 0;
+  return Math.max(0, item.cooldownBattles - (_battleCount - entry.lastUsedBattle));
 }
 
 export function consumeItem(itemId) {
