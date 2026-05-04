@@ -818,21 +818,21 @@ function createPieceElement(piece, playerColor) {
     }
   }
 
-  // Obliterator weapon overlay — floating and glowing alongside
+  // Obliterator weapon overlay — floating alongside on the right
   if (piece.obliterator) {
-    const headData = (piece.pokemon && POKEMON_HEAD_MAP[piece.pokemon]) || DEFAULT_HEAD;
     const sword = document.createElement('img');
     sword.className = 'piece__obliterator-sword piece__cosmetic--obliterator piece__obliterator-float';
     sword.src = '/assets/cosmetics/one_hit_obliterator.png';
     sword.alt = 'Obliterator';
     sword.draggable = false;
     sword.style.position = 'absolute';
-    sword.style.width = '50%';
+    sword.style.width = '45%';
     sword.style.height = 'auto';
-    sword.style.bottom = '10%';
-    sword.style.left = `${headData.headLeft - 38}%`;
+    sword.style.right = '-18%';
+    sword.style.bottom = '15%';
+    sword.style.left = 'auto';
     sword.style.top = 'auto';
-    sword.style.transform = 'scaleX(-1) rotate(-30deg)';
+    sword.style.transform = 'rotate(15deg)';
     sword.style.zIndex = '5';
     wrap.appendChild(sword);
   }
