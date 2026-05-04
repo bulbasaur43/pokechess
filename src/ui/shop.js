@@ -171,7 +171,7 @@ export const SHOP_ITEMS = {
     useDescription: 'Click a piece to give Leftovers',
     color: '#86efac',
     usesPerPurchase: 10,
-    cooldownBattles: 3,
+    cooldownBattles: 0,
   },
   SMOKE_BALL: {
     id: 'SMOKE_BALL',
@@ -182,7 +182,7 @@ export const SHOP_ITEMS = {
     useDescription: 'Click a piece to protect',
     color: '#94a3b8',
     usesPerPurchase: 10,
-    cooldownBattles: 3,
+    cooldownBattles: 0,
   },
   DESTINY_BOND: {
     id: 'DESTINY_BOND',
@@ -193,7 +193,7 @@ export const SHOP_ITEMS = {
     useDescription: 'Click a piece to bind',
     color: '#a855f7',
     usesPerPurchase: 10,
-    cooldownBattles: 3,
+    cooldownBattles: 0,
   },
   OBLITERATOR: {
     id: 'OBLITERATOR',
