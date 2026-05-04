@@ -284,7 +284,7 @@ const STATE_KEY = 'pokechess_shop';
 // Per-asset config: 'dark' removes near-black, 'light' removes near-white.
 const BG_REMOVAL_CONFIG = {
   MASTER_SWORD: 'dark',
-  ONE_HIT_OBLITERATOR: 'light',
+  ONE_HIT_OBLITERATOR: 'grey',
   LINKS_HAT: 'light',
 };
 
@@ -317,6 +317,15 @@ const BG_REMOVAL_CONFIG = {
             d[i + 3] = 0;
           } else if (r > 200 && g > 200 && b > 200) {
             d[i + 3] = Math.min(d[i + 3], Math.round((255 - (r + g + b) / 3) / 55 * 255));
+          }
+        } else if (mode === 'grey') {
+          // Remove grey/light background (obliterator)
+          const avg = (r + g + b) / 3;
+          const spread = Math.abs(r - avg) + Math.abs(g - avg) + Math.abs(b - avg);
+          if (avg > 160 && spread < 30) {
+            d[i + 3] = 0;
+          } else if (avg > 140 && spread < 40) {
+            d[i + 3] = Math.min(d[i + 3], Math.round((160 - avg) / 20 * 255));
           }
         }
       }
