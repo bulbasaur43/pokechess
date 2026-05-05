@@ -118,7 +118,7 @@ export const POKEMON = {
   INCINEROAR:   { name: 'Incineroar',   types: ['FIRE','DARK'],        team: 'violet',  emoji: '🐯', img: SPRITE(727),  desc: 'Heel Pokémon',          hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
   MAGCARGO:     { name: 'Magcargo',     types: ['FIRE','ROCK'],        team: 'scarlet', emoji: '🐌', img: SPRITE(219),  desc: 'Lava Pokémon',          hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
   COMFEY:       { name: 'Comfey',       types: ['FAIRY'],              team: 'scarlet', emoji: '🌼', img: SPRITE(764),  desc: 'Posy Picker Pokémon',   hp: 8,  maxHp: 8,  damage: 1, damageTier: 'weak' },
-  BELLIBOLT:    { name: 'Bellibolt',    types: ['ELECTRIC'],           team: 'scarlet', emoji: '🔋', img: SPRITE(938),  desc: 'EleFrog Pokémon',       hp: 9,  maxHp: 9,  damage: 2, damageTier: 'weak' },
+  BELLIBOLT:    { name: 'Bellibolt',    types: ['ELECTRIC'],           team: 'scarlet', emoji: '🔋', img: SPRITE(939),  desc: 'EleFrog Pokémon',       hp: 9,  maxHp: 9,  damage: 2, damageTier: 'weak' },
   ARCANINE:     { name: 'Arcanine',     types: ['FIRE'],               team: 'scarlet', emoji: '🐕', img: SPRITE(59),   desc: 'Legendary Pokémon',     hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
   TYRANITAR:    { name: 'Tyranitar',    types: ['ROCK','DARK'],        team: 'scarlet', emoji: '🦖', img: SPRITE(248),  desc: 'Armor Pokémon',         hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
   SKELEDIRGE:   { name: 'Skeledirge',   types: ['FIRE','GHOST'],       team: 'scarlet', emoji: '🐊', img: SPRITE(911),  desc: 'Singer Pokémon',        hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
