@@ -256,7 +256,7 @@ let _unlockedHiddenItems = [];  // hidden item IDs unlocked via achievements
 
 // ─── Upgrade System ─────────────────────────────────────────────────
 const MAX_POKEMON_LEVEL = 4;
-const UPGRADE_COSTS = [500, 1500, 3000]; // Cost for levels 2, 3, 4
+const UPGRADE_COSTS = [150, 300, 500]; // Cost for levels 2, 3, 4
 
 // True Kings that can be upgraded
 const UPGRADEABLE_KINGS = new Set();
