@@ -179,10 +179,7 @@ function startOnlineMatch(clockPreset, options) {
     findMatch(options.preferredTeam, clockPreset, options.teamPresets);
   }).catch(() => {
     removeSearchingOverlay();
-    showStatusToast('⚠️ Could not connect to server. Start server with: node server.js', 'default');
-    // Fall back to AI
-    gameMode = 'ai';
-    startLocalOrAI(clockPreset, { ...options, isAIGame: true });
+    showStatusToast('⚠️ Could not connect to server. Try again later.', 'error');
   });
 }
 
