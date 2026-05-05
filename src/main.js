@@ -510,12 +510,25 @@ function handleCellClick(row, col, isLegalMove, moveData) {
 
   // Select piece — in local mode, any current player's piece; otherwise only your color
   const piece = game.board[row]?.[col];
-  if (piece && piece.color === game.currentPlayer) {
-    // In AI/online, can only select your color
-    if (gameMode !== 'local') {
-      const myColor = gameMode === 'online' ? game.onlineColor : game.playerColor;
-      if (piece.color !== myColor) return;
+  if (piece) {
+    // Determine which color this player controls
+    const myColor = gameMode === 'online' ? game.onlineColor
+                  : gameMode === 'ai' ? game.playerColor
+                  : game.currentPlayer; // local: whoever's turn it is
+
+    // Only allow selecting your own pieces
+    if (piece.color !== myColor) {
+      // Clicked opponent piece — deselect any current selection
+      if (game.selectedPiece) {
+        game = deselectPiece(game);
+        renderAll();
+      }
+      return;
     }
+
+    // Must be your turn to select
+    if (piece.color !== game.currentPlayer) return;
+
     if (game.selectedPiece?.row === row && game.selectedPiece?.col === col) {
       game = deselectPiece(game);
     } else {
