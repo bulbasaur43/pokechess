@@ -26,7 +26,7 @@ export const ROLE_KEYS = Object.keys(ROLES);
  * Create a piece with full Pokémon data
  * Role is determined by board position, NOT by the Pokémon's default role.
  */
-export function createPiece(color, roleKey, pokemonKey, id) {
+export function createPiece(color, roleKey, pokemonKey, id, overrideLevel) {
   const pkmn = POKEMON[pokemonKey];
   const piece = {
     color,
@@ -44,9 +44,9 @@ export function createPiece(color, roleKey, pokemonKey, id) {
     // Status effects
     statusEffect: null,     // 'frozen' | 'stunned' | null
   };
-  // Apply True King upgrade bonuses
+  // Apply upgrade bonuses (use override level for AI mirroring, else check shop)
   try {
-    const level = getPokemonLevel(pokemonKey);
+    const level = overrideLevel || getPokemonLevel(pokemonKey);
     if (level > 1) {
       const bonus = getUpgradeBonus(level);
       piece.hp += bonus.hp;
@@ -80,6 +80,9 @@ export function initBoard(presets = {}) {
   const board = createEmptyBoard();
   let id = 0;
 
+  // AI upgrade mirroring: { pokemonKey: level } for the AI's team
+  const aiLevels = presets.aiUpgradeLevels || null;
+
   // Resolve team configs (preset overrides > defaults)
   const violetConfig = {
     backRank: presets.violet?.backRank ?? TEAMS.violet.backRank,
@@ -92,23 +95,37 @@ export function initBoard(presets = {}) {
     pawnRole: presets.scarlet?.pawnRole ?? TEAMS.scarlet.pawnRole ?? 'PAWN',
   };
 
+  // Helper: get override level for AI pieces
+  const getAILevel = (pokemonKey, color, playerColor) => {
+    if (!aiLevels || color === playerColor) return undefined;
+    // Mirror: find the player's upgrade count, apply same number to this AI pokemon
+    const playerUpgradeCount = Object.values(aiLevels).filter(l => l > 1).length;
+    // Give AI the same level as any upgraded player pokemon (simple: mirror per-key if available, else use count-based approach)
+    return aiLevels[pokemonKey] || (playerUpgradeCount > 0 ? 2 : undefined);
+  };
+
+  const playerColor = presets.playerColor || 'white';
+
   // ── Black / Violet back rank (row 0) ──
   for (let col = 0; col < 8; col++) {
     const pokemonKey = violetConfig.backRank[col];
     const role = BACK_RANK_ROLES[col];
-    board[0][col] = createPiece('black', role, pokemonKey, `b${id++}`);
+    const lvl = getAILevel(pokemonKey, 'black', playerColor);
+    board[0][col] = createPiece('black', role, pokemonKey, `b${id++}`, lvl);
   }
 
   // ── Black front rank (row 1) ──
   for (let col = 0; col < 8; col++) {
-    const p = createPiece('black', violetConfig.pawnRole, violetConfig.pawnPokemon, `b${id++}`);
+    const lvl = getAILevel(violetConfig.pawnPokemon, 'black', playerColor);
+    const p = createPiece('black', violetConfig.pawnRole, violetConfig.pawnPokemon, `b${id++}`, lvl);
     p.isPawn = true;
     board[1][col] = p;
   }
 
   // ── White front rank (row 6) ──
   for (let col = 0; col < 8; col++) {
-    const p = createPiece('white', scarletConfig.pawnRole, scarletConfig.pawnPokemon, `w${id++}`);
+    const lvl = getAILevel(scarletConfig.pawnPokemon, 'white', playerColor);
+    const p = createPiece('white', scarletConfig.pawnRole, scarletConfig.pawnPokemon, `w${id++}`, lvl);
     p.isPawn = true;
     board[6][col] = p;
   }
@@ -117,7 +134,8 @@ export function initBoard(presets = {}) {
   for (let col = 0; col < 8; col++) {
     const pokemonKey = scarletConfig.backRank[col];
     const role = BACK_RANK_ROLES[col];
-    board[7][col] = createPiece('white', role, pokemonKey, `w${id++}`);
+    const lvl = getAILevel(pokemonKey, 'white', playerColor);
+    board[7][col] = createPiece('white', role, pokemonKey, `w${id++}`, lvl);
   }
 
   return board;

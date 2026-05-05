@@ -6,6 +6,7 @@
 
 import { initBoard, movePiece, removePiece, promotePawn, trueKingExists, cloneBoard, getPiece, ROLES } from './board.js';
 import { getLegalMoves } from './moves.js';
+import { getAllPokemonLevels } from '../ui/shop.js';
 import { resolveBattle, getBattlePreview } from './battle.js';
 import { POKEMON, TEAMS, COLOR_TO_TEAM, ABILITIES, getTypeMultiplier } from './types.js';
 
@@ -69,10 +70,18 @@ export function startGame(game, clockPreset = 'medium', options = {}) {
   const isAIGame = options.isAIGame ?? false;
   const teamPresets = options.teamPresets ?? {};
 
+  // For AI games, mirror the player's upgrade levels to the AI team
+  const boardPresets = { ...teamPresets, playerColor };
+  if (isAIGame) {
+    try {
+      boardPresets.aiUpgradeLevels = getAllPokemonLevels();
+    } catch { /* shop may not be loaded */ }
+  }
+
   return {
     ...game,
     phase: PHASES.PLAY,
-    board: initBoard(teamPresets),
+    board: initBoard(boardPresets),
     currentPlayer: 'white',
     turnCount: 1,
     capturedPieces: { white: [], black: [] },

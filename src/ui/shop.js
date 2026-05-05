@@ -255,20 +255,12 @@ let _pokemonLevels = {};    // { POKEMON_KEY: level (1-5) }
 let _unlockedHiddenItems = [];  // hidden item IDs unlocked via achievements
 
 // ─── Upgrade System ─────────────────────────────────────────────────
-const MAX_POKEMON_LEVEL = 4;
-const UPGRADE_COSTS = [150, 300, 500]; // Cost for levels 2, 3, 4
+const MAX_POKEMON_LEVEL = 2;
+const UPGRADE_COSTS = [200]; // Cost for level 2 (one upgrade per Pokémon)
 
-// True Kings that can be upgraded
-const UPGRADEABLE_KINGS = new Set();
-for (const teamKey of Object.keys(KING_POOL)) {
-  for (const entry of KING_POOL[teamKey]) {
-    UPGRADEABLE_KINGS.add(entry.key);
-  }
-}
-
-/** Get upgrade bonus stats for a given level (1-4). Each level gives +1 HP and +1 damage. */
-const UPGRADE_HP_TABLE =  [0, 1, 2, 3];  // cumulative
-const UPGRADE_DMG_TABLE = [0, 1, 2, 3];  // cumulative
+/** Get upgrade bonus stats for a given level. Level 2 gives +1 HP and +1 damage. */
+const UPGRADE_HP_TABLE =  [0, 1];  // cumulative
+const UPGRADE_DMG_TABLE = [0, 1];  // cumulative
 
 export function getUpgradeBonus(level) {
   if (!level || level <= 1) return { hp: 0, damage: 0 };
@@ -452,12 +444,13 @@ export function getUnlockedPokemon() { return [..._unlockedPokemon]; }
 
 // Trade: remove a Pokémon you're giving away, add the one you receive
 export function executeTrade(giveKey, receiveKey) {
+  // Remove the given pokemon (if in unlocked list)
   const idx = _unlockedPokemon.indexOf(giveKey);
-  if (idx === -1) return false; // don't own it
-  _unlockedPokemon.splice(idx, 1);
-  if (!_unlockedPokemon.includes(receiveKey)) {
-    _unlockedPokemon.push(receiveKey);
+  if (idx !== -1) {
+    _unlockedPokemon.splice(idx, 1);
   }
+  // Always add the received pokemon (even if already owned — it's a trade dupe)
+  _unlockedPokemon.push(receiveKey);
   saveState();
   syncToServer();
   return true;
@@ -939,27 +932,41 @@ function renderUpgrades() {
   if (!container) return;
   container.innerHTML = '';
 
-  // Show only True King Pokémon
-  const kings = [];
+  // Show ALL unlocked Pokémon for upgrade
+  const upgradeList = [];
+  for (const key of _unlockedPokemon) {
+    const pkmn = POKEMON[key];
+    if (pkmn && !upgradeList.find(k => k.key === key)) {
+      upgradeList.push({ key, pkmn });
+    }
+  }
+  // Also include any default team Pokémon (kings, etc.)
   for (const teamKey of ['scarlet', 'violet']) {
     const pool = KING_POOL[teamKey] || [];
     for (const entry of pool) {
       const pkmn = POKEMON[entry.key];
-      if (pkmn && !kings.find(k => k.key === entry.key)) {
-        kings.push({ key: entry.key, pkmn, team: teamKey });
+      if (pkmn && !upgradeList.find(k => k.key === entry.key)) {
+        upgradeList.push({ key: entry.key, pkmn });
+      }
+    }
+    const regularPool = POKEMON_POOL[teamKey] || [];
+    for (const entry of regularPool) {
+      const pkmn = POKEMON[entry.key];
+      if (pkmn && !upgradeList.find(k => k.key === entry.key)) {
+        upgradeList.push({ key: entry.key, pkmn });
       }
     }
   }
 
-  if (kings.length === 0) {
-    container.innerHTML = '<div class="shop-inv-empty">No True Kings available!</div>';
+  if (upgradeList.length === 0) {
+    container.innerHTML = '<div class="shop-inv-empty">No Pokémon available to upgrade!</div>';
     return;
   }
 
   const grid = document.createElement('div');
   grid.className = 'shop-upgrade-grid';
 
-  for (const { key, pkmn } of kings) {
+  for (const { key, pkmn } of upgradeList) {
     const level = getPokemonLevel(key);
     const cost = getUpgradeCost(key);
     const isMaxed = cost === null;
@@ -969,17 +976,11 @@ function renderUpgrades() {
     const card = document.createElement('div');
     card.className = `shop-upgrade-card ${isMaxed ? 'shop-upgrade-card--max' : ''}`;
 
-    // Level pips (3 max)
-    let pips = '';
-    for (let i = 2; i <= MAX_POKEMON_LEVEL; i++) {
-      pips += `<span class="shop-upgrade-pip ${i <= level ? 'shop-upgrade-pip--filled' : ''}"></span>`;
-    }
-
     card.innerHTML = `
       <img class="shop-upgrade-img" src="${pkmn.img || ''}" alt="${pkmn.name}" />
       <div class="shop-upgrade-info">
         <div class="shop-upgrade-name">${pkmn.name}</div>
-        <div class="shop-upgrade-level">Lv.${level} ${pips}</div>
+        <div class="shop-upgrade-level">${isMaxed ? '★ Upgraded' : 'Not Upgraded'}</div>
         <div class="shop-upgrade-stats">
           ❤️${pkmn.hp + bonus.hp} <span class="shop-upgrade-bonus">${bonus.hp > 0 ? `(+${bonus.hp})` : ''}</span>
           ⚔️${pkmn.damage + bonus.damage} <span class="shop-upgrade-bonus">${bonus.damage > 0 ? `(+${bonus.damage})` : ''}</span>
