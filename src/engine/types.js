@@ -273,13 +273,13 @@ export const KING_POOL = {
   scarlet: [
     { key: 'KORAIDON',  requiredElo: 0 },
     { key: 'BULBASAUR', requiredElo: 2000 },
-    { key: 'MIRAIDON',  requiredElo: 1500 },
+    { key: 'MIRAIDON',  requiredElo: 1000 },
     { key: 'PIKACHU',   requiredElo: 2000 },
   ],
   violet: [
     { key: 'MIRAIDON', requiredElo: 0 },
     { key: 'PIKACHU',  requiredElo: 2000 },
-    { key: 'KORAIDON', requiredElo: 1500 },
+    { key: 'KORAIDON', requiredElo: 1000 },
     { key: 'BULBASAUR', requiredElo: 2000 },
   ],
 };
