@@ -941,6 +941,16 @@ export function renderTitleScreen(onStart) {
     });
   }
 
+  // Periodically refresh profile to pick up ELO changes
+  const profileRefreshInterval = setInterval(() => {
+    if (!document.getElementById('live-counter')) {
+      clearInterval(profileRefreshInterval);
+      return;
+    }
+    if (document.hidden || !isLoggedIn()) return;
+    refreshProfile().then(() => populateRatingBadge()).catch(() => {});
+  }, 15000);
+
   // ── Live Player Counter ──
   async function updateLiveCounter() {
     const el = document.getElementById('live-counter-text');
@@ -968,7 +978,7 @@ export function renderTitleScreen(onStart) {
     }
     if (document.hidden) return; // Don't poll when tab is in background
     updateLiveCounter();
-  }, 10000);
+  }, 5000);
 }
 
 function renderAuthSection() {
@@ -1247,6 +1257,41 @@ async function showLeaderboard() {
   `;
 
   document.getElementById('lb-close')?.addEventListener('click', hideLeaderboard);
+
+  // Auto-refresh leaderboard every 5 seconds while open
+  const lbRefreshInterval = setInterval(async () => {
+    const ol = document.getElementById('leaderboard-overlay');
+    if (!ol || !ol.classList.contains('leaderboard-overlay--show')) {
+      clearInterval(lbRefreshInterval);
+      return;
+    }
+    if (document.hidden) return;
+    try {
+      const freshLeaders = await getLeaderboard();
+      const freshRows = freshLeaders.length === 0
+        ? '<div class="leaderboard-empty">No players yet — be the first!</div>'
+        : freshLeaders.map((p, i) => {
+            const rank = getRankTitle(p.rating);
+            const isMe = currentUser && p.username.toLowerCase() === currentUser.toLowerCase();
+            const medal = medals[i] || `<span class="lb-rank-num">${i + 1}</span>`;
+            const wr = p.gamesPlayed > 0 ? Math.round((p.wins / p.gamesPlayed) * 100) : 0;
+            return `
+              <div class="lb-row ${isMe ? 'lb-row--me' : ''} ${i < 3 ? 'lb-row--top' : ''}">
+                <div class="lb-row__pos">${medal}</div>
+                <div class="lb-row__player">
+                  <span class="lb-row__name">${p.username}</span>
+                  <span class="lb-row__rank-badge" style="color:${rank.color}">${rank.emoji} ${rank.title}</span>
+                </div>
+                <div class="lb-row__rating">${p.rating}</div>
+                <div class="lb-row__record">${p.wins}W ${p.losses}L</div>
+                <div class="lb-row__wr">${wr}%</div>
+              </div>
+            `;
+          }).join('');
+      const rowsContainer = ol.querySelector('.lb-rows');
+      if (rowsContainer) rowsContainer.innerHTML = freshRows;
+    } catch { /* ignore refresh errors */ }
+  }, 5000);
 }
 
 function hideLeaderboard() {
