@@ -1124,7 +1124,8 @@ export function buyPokemonBox() {
     if (!result) continue;
     const isDuplicate = _unlockedPokemon.includes(result.key);
     if (isDuplicate) {
-      const refund = Math.floor(PACK_COST / 2);
+      // Refund full per-slot cost for duplicates
+      const refund = Math.floor(BOX_COST / 5);
       _coins += refund;
     } else {
       _unlockedPokemon.push(result.key);
@@ -1445,7 +1446,7 @@ function showBoxSummary(results) {
 
   const newCount = results.filter(r => !r.isDuplicate).length;
   const dupeCount = results.length - newCount;
-  const refundTotal = dupeCount * Math.floor(PACK_COST / 2);
+  const refundTotal = dupeCount * Math.floor(BOX_COST / 5);
 
   overlay.innerHTML = `
     <div class="box-summary-panel">
