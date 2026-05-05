@@ -1099,12 +1099,16 @@ async function renderPokemonShop() {
 
     const cost = getPokemonCoinCost(entry.requiredElo, !!entry.packOnly);
     const canAfford = _coins >= cost;
+    const { tier } = getPackWeight(entry.requiredElo);
+    const tierColor = TIER_COLORS[tier] || '#9ca3af';
+    const tierLabel = TIER_LABELS[tier] || '';
 
     const card = document.createElement('button');
     card.className = `shop-pkmn-card ${canAfford ? '' : 'shop-pkmn-card--locked'} ${entry.packOnly ? 'shop-pkmn-card--pack' : ''}`;
     card.title = `${pkmn.name} — \ud83e\ude99 ${cost} coins${entry.packOnly ? ' (Pack Exclusive — 2x price)' : ''}`;
     card.innerHTML = `
       ${entry.packOnly ? '<div class="shop-pkmn-badge">📦 Pack Exclusive</div>' : ''}
+      <div class="shop-pkmn-rarity" style="color: ${tierColor}">${tierLabel} ${tier.toUpperCase()}</div>
       <img class="shop-pkmn-img" src="${pkmn.img || ''}" alt="${pkmn.name}" />
       <div class="shop-pkmn-name">${pkmn.name}</div>
       <div class="shop-pkmn-stats">\u2764\ufe0f${pkmn.hp} \u2694\ufe0f${pkmn.damage}</div>

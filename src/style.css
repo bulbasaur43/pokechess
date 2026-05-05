@@ -5190,6 +5190,14 @@ body {
   display: inline-block;
 }
 
+.shop-pkmn-rarity {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
 .shop-pkmn-card--pack {
   border-color: rgba(251, 191, 36, 0.2);
 }
