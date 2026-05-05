@@ -837,7 +837,7 @@ function renderCoinPacks() {
         showShopToast(result.error, 'error');
       } else {
         showShopToast(`🪙 +${pack.coins} PokéCoins added!`, 'success');
-        renderShopCoins();
+        updateCoinsDisplay();
         renderShopItems();
         renderPokemonPacks();
       }
@@ -1266,9 +1266,10 @@ function renderPokemonPacks() {
   container.appendChild(section);
 }
 
-function showPackRipOpen(result, isDuplicate, options = {}, refundAmount = 0) {
+function showPackRipOpen(result, isDuplicate, options, refundAmount = 0) {
   const tierColor = TIER_COLORS[result.tier] || '#fff';
-  const { packIndex, totalPacks, onComplete } = options;
+  const opts = options || {};
+  const { packIndex, totalPacks, onComplete } = opts;
   const showCounter = typeof packIndex === 'number';
 
   const overlay = document.createElement('div');
@@ -1538,7 +1539,7 @@ function showBoxSummary(results) {
     });
     overlay.classList.remove('pack-reveal-overlay--show');
     setTimeout(() => overlay.remove(), 300);
-    renderShopCoins();
+    updateCoinsDisplay();
     renderPokemonPacks();
   }
 
@@ -1595,7 +1596,7 @@ function showPackReveal(result, isDuplicate, refundAmount = 0) {
   function closeReveal() {
     overlay.classList.remove('pack-reveal-overlay--show');
     setTimeout(() => overlay.remove(), 300);
-    renderShopCoins();
+    updateCoinsDisplay();
     renderPokemonPacks();
   }
 
