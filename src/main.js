@@ -132,9 +132,12 @@ function startOnlineMatch(clockPreset, options) {
     },
     onMatchFound: (msg) => {
       removeSearchingOverlay();
+      // Use the player's custom team presets from the setup screen
+      const teamPresets = options.teamPresets ? { ...options.teamPresets } : {};
       game = startGame(game, clockPreset, {
         playerColor: msg.yourColor,
         isAIGame: false,
+        teamPresets,
       });
       game.isOnline = true;
       game.onlineColor = msg.yourColor;
