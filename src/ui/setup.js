@@ -1315,11 +1315,6 @@ function openTradeUI() {
     alert('Log in to trade Pokémon!');
     return;
   }
-  const unlocked = getUnlockedPokemon();
-  if (unlocked.length === 0) {
-    alert('You have no unlocked Pokémon to trade! Open packs in the shop first.');
-    return;
-  }
 
   const overlay = document.getElementById('trade-overlay');
   if (!overlay) return;
@@ -1328,7 +1323,9 @@ function openTradeUI() {
   let partnerName = '';
   let partnerPokemon = [];
   let myOffer = null;
+  let myCoins = 0;
   let partnerOffer = null;
+  let partnerCoins = 0;
   let iConfirmed = false;
   let partnerConfirmed = false;
 
@@ -1354,6 +1351,7 @@ function openTradeUI() {
     if (tradeState === 'done') return;
 
     const myPokemon = getUnlockedPokemon();
+    const playerCoins = getCoins();
     const renderGrid = (pokemon, side, selected) => {
       return pokemon.map(key => {
         const pkmn = POKEMON[key];
@@ -1372,6 +1370,10 @@ function openTradeUI() {
     const partnerOfferPkmn = partnerOffer ? POKEMON[partnerOffer] : null;
     const myOfferPkmn = myOffer ? POKEMON[myOffer] : null;
 
+    // Check if the current offer has something (pokemon or coins)
+    const hasMyOffer = myOffer || myCoins > 0;
+    const hasPartnerOffer = partnerOffer || partnerCoins > 0;
+
     overlay.innerHTML = `
       <div class="trade-panel trade-panel--wide">
         <button class="trade-close" id="trade-close">✕</button>
@@ -1386,6 +1388,13 @@ function openTradeUI() {
                 <span class="trade-offer__name">${myOfferPkmn.name}</span>
               ` : '<span class="trade-offer__empty">Select a Pokémon below</span>'}
             </div>
+            <div class="trade-coin-offer">
+              <label class="trade-coin-label">🪙 Coins to offer:</label>
+              <div class="trade-coin-input-row">
+                <input type="range" id="trade-coin-slider" min="0" max="${playerCoins}" step="10" value="${myCoins}" class="trade-coin-slider" />
+                <span class="trade-coin-display" id="trade-coin-display">${myCoins}</span>
+              </div>
+            </div>
           </div>
 
           <div class="trade-arrow">⇄</div>
@@ -1398,6 +1407,7 @@ function openTradeUI() {
                 <span class="trade-offer__name">${partnerOfferPkmn.name}</span>
               ` : '<span class="trade-offer__empty">Waiting for offer...</span>'}
             </div>
+            ${partnerCoins > 0 ? `<div class="trade-coin-partner">🪙 +${partnerCoins} coins</div>` : ''}
           </div>
         </div>
 
@@ -1407,7 +1417,7 @@ function openTradeUI() {
         </div>
 
         <div class="trade-actions">
-          ${myOffer && partnerOffer && !iConfirmed ? `<button class="btn btn--start trade-confirm-btn" id="trade-confirm">✅ Confirm Trade</button>` : ''}
+          ${hasMyOffer && hasPartnerOffer && !iConfirmed ? `<button class="btn btn--start trade-confirm-btn" id="trade-confirm">✅ Confirm Trade</button>` : ''}
           <button class="btn btn--small trade-cancel-btn" id="trade-cancel">Cancel Trade</button>
         </div>
 
@@ -1435,12 +1445,29 @@ function openTradeUI() {
       renderTradePanel();
     });
 
+    // Coin slider
+    const slider = document.getElementById('trade-coin-slider');
+    const coinDisplay = document.getElementById('trade-coin-display');
+    if (slider) {
+      slider.addEventListener('input', () => {
+        myCoins = parseInt(slider.value) || 0;
+        if (coinDisplay) coinDisplay.textContent = myCoins;
+      });
+      slider.addEventListener('change', () => {
+        myCoins = parseInt(slider.value) || 0;
+        iConfirmed = false;
+        partnerConfirmed = false;
+        sendTradeOffer(myOffer, myCoins);
+        renderTradePanel();
+      });
+    }
+
     overlay.querySelectorAll('.trade-pkmn[data-side="mine"]').forEach(btn => {
       btn.addEventListener('click', () => {
         myOffer = btn.dataset.key;
         iConfirmed = false;
         partnerConfirmed = false;
-        sendTradeOffer(myOffer);
+        sendTradeOffer(myOffer, myCoins);
         renderTradePanel();
       });
     });
@@ -1467,13 +1494,16 @@ function openTradeUI() {
       partnerName = msg.partnerName;
       partnerPokemon = msg.partnerPokemon || [];
       myOffer = null;
+      myCoins = 0;
       partnerOffer = null;
+      partnerCoins = 0;
       iConfirmed = false;
       partnerConfirmed = false;
       renderTradePanel();
     },
     onTradeOfferReceived: (msg) => {
-      partnerOffer = msg.pokemonKey;
+      partnerOffer = msg.pokemonKey || null;
+      partnerCoins = msg.coins || 0;
       iConfirmed = false;
       partnerConfirmed = false;
       renderTradePanel();
@@ -1484,23 +1514,44 @@ function openTradeUI() {
     },
     onTradeConfirmed: (msg) => {
       // Trade executed! Update local data
-      executeTrade(msg.youGave, msg.youReceived);
-      const gaveName = POKEMON[msg.youGave]?.name || msg.youGave;
-      const gotName = POKEMON[msg.youReceived]?.name || msg.youReceived;
+      executeTrade(msg.youGave, msg.youReceived, msg.coinsGave || 0, msg.coinsReceived || 0);
+      const gaveName = msg.youGave ? (POKEMON[msg.youGave]?.name || msg.youGave) : null;
+      const gotName = msg.youReceived ? (POKEMON[msg.youReceived]?.name || msg.youReceived) : null;
+      const coinsGave = msg.coinsGave || 0;
+      const coinsReceived = msg.coinsReceived || 0;
+
+      let gaveHtml = '';
+      if (gaveName) {
+        gaveHtml += `<img class="trade-result__img" src="${POKEMON[msg.youGave]?.img || ''}" alt="${gaveName}" />
+          <span class="trade-result__name">${gaveName}</span>`;
+      }
+      if (coinsGave > 0) {
+        gaveHtml += `<span class="trade-result__coins">🪙 ${coinsGave}</span>`;
+      }
+      if (!gaveName && coinsGave <= 0) gaveHtml = '<span class="trade-result__name">Nothing</span>';
+
+      let gotHtml = '';
+      if (gotName) {
+        gotHtml += `<img class="trade-result__img" src="${POKEMON[msg.youReceived]?.img || ''}" alt="${gotName}" />
+          <span class="trade-result__name">${gotName}</span>`;
+      }
+      if (coinsReceived > 0) {
+        gotHtml += `<span class="trade-result__coins">🪙 ${coinsReceived}</span>`;
+      }
+      if (!gotName && coinsReceived <= 0) gotHtml = '<span class="trade-result__name">Nothing</span>';
+
       overlay.innerHTML = `
         <div class="trade-panel">
           <h2 class="trade-title">🎉 Trade Complete!</h2>
           <div class="trade-result">
             <div class="trade-result__item trade-result__gave">
               <span class="trade-result__label">You gave</span>
-              <img class="trade-result__img" src="${POKEMON[msg.youGave]?.img || ''}" alt="${gaveName}" />
-              <span class="trade-result__name">${gaveName}</span>
+              ${gaveHtml}
             </div>
             <div class="trade-arrow">→</div>
             <div class="trade-result__item trade-result__got">
               <span class="trade-result__label">You received</span>
-              <img class="trade-result__img" src="${POKEMON[msg.youReceived]?.img || ''}" alt="${gotName}" />
-              <span class="trade-result__name">${gotName}</span>
+              ${gotHtml}
             </div>
           </div>
           <button class="btn btn--start" id="trade-done">Continue</button>
@@ -1517,7 +1568,9 @@ function openTradeUI() {
       partnerName = '';
       partnerPokemon = [];
       myOffer = null;
+      myCoins = 0;
       partnerOffer = null;
+      partnerCoins = 0;
       // Re-search
       findTrade(getUsername(), getUnlockedPokemon());
       renderTradePanel();
@@ -1527,7 +1580,9 @@ function openTradeUI() {
       partnerName = '';
       partnerPokemon = [];
       myOffer = null;
+      myCoins = 0;
       partnerOffer = null;
+      partnerCoins = 0;
       findTrade(getUsername(), getUnlockedPokemon());
       renderTradePanel();
     },

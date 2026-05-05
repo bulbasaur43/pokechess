@@ -903,6 +903,7 @@ function handleFindTrade(ws, msg) {
     tradeRooms.set(tradeId, {
       player1: p1, player2: p2,
       offer1: null, offer2: null,
+      coins1: 0, coins2: 0,
       confirmed1: false, confirmed2: false,
     });
     console.log(`🔄 Trade: ${p1.tradeUsername} <-> ${p2.tradeUsername} in ${tradeId}`);
@@ -928,15 +929,24 @@ function handleTradeOffer(ws, msg) {
   const trade = tradeRooms.get(ws.tradeRoomId);
   if (!trade) return;
   const isP1 = trade.player1 === ws;
-  if (isP1) trade.offer1 = msg.pokemonKey;
-  else trade.offer2 = msg.pokemonKey;
+  if (isP1) {
+    trade.offer1 = msg.pokemonKey || null;
+    trade.coins1 = Math.max(0, Math.floor(msg.coins || 0));
+  } else {
+    trade.offer2 = msg.pokemonKey || null;
+    trade.coins2 = Math.max(0, Math.floor(msg.coins || 0));
+  }
   // Reset confirmations when offer changes
   trade.confirmed1 = false;
   trade.confirmed2 = false;
   // Notify partner of the offer
   const partner = isP1 ? trade.player2 : trade.player1;
   if (partner && partner.readyState === 1) {
-    partner.send(JSON.stringify({ type: 'trade_offer_received', pokemonKey: msg.pokemonKey }));
+    partner.send(JSON.stringify({
+      type: 'trade_offer_received',
+      pokemonKey: msg.pokemonKey || null,
+      coins: isP1 ? trade.coins1 : trade.coins2,
+    }));
   }
 }
 
@@ -947,16 +957,20 @@ function handleTradeConfirm(ws) {
   if (isP1) trade.confirmed1 = true;
   else trade.confirmed2 = true;
 
-  // If both confirmed and both have offers, execute trade
-  if (trade.confirmed1 && trade.confirmed2 && trade.offer1 && trade.offer2) {
-    console.log(`✅ Trade executed: ${trade.player1.tradeUsername} gives ${trade.offer1}, ${trade.player2.tradeUsername} gives ${trade.offer2}`);
+  // If both confirmed and both have offers (pokemon or coins), execute trade
+  const hasOffer1 = trade.offer1 || trade.coins1 > 0;
+  const hasOffer2 = trade.offer2 || trade.coins2 > 0;
+  if (trade.confirmed1 && trade.confirmed2 && hasOffer1 && hasOffer2) {
+    console.log(`✅ Trade: ${trade.player1.tradeUsername} gives ${trade.offer1 || 'nothing'}+${trade.coins1}c, ${trade.player2.tradeUsername} gives ${trade.offer2 || 'nothing'}+${trade.coins2}c`);
     trade.player1.send(JSON.stringify({
       type: 'trade_confirmed',
       youGave: trade.offer1, youReceived: trade.offer2,
+      coinsGave: trade.coins1, coinsReceived: trade.coins2,
     }));
     trade.player2.send(JSON.stringify({
       type: 'trade_confirmed',
       youGave: trade.offer2, youReceived: trade.offer1,
+      coinsGave: trade.coins2, coinsReceived: trade.coins1,
     }));
     // Clean up
     trade.player1.tradeRoomId = null;

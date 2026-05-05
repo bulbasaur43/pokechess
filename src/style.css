@@ -6413,6 +6413,40 @@ body {
 .trade-offer__name { font-size: 13px; font-weight: 600; margin-top: 6px; }
 .trade-offer__empty { color: #64748b; font-size: 12px; }
 
+.trade-coin-offer {
+  margin-top: 10px;
+  text-align: center;
+}
+.trade-coin-label {
+  font-size: 12px; color: #94a3b8;
+  display: block; margin-bottom: 4px;
+}
+.trade-coin-input-row {
+  display: flex; align-items: center; gap: 8px;
+  justify-content: center;
+}
+.trade-coin-slider {
+  width: 120px; accent-color: #f59e0b;
+  cursor: pointer;
+}
+.trade-coin-display {
+  font-size: 14px; font-weight: 700;
+  color: #f59e0b; min-width: 36px;
+  text-align: center;
+}
+.trade-coin-partner {
+  margin-top: 8px; text-align: center;
+  font-size: 14px; font-weight: 700;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 6px; padding: 4px 10px;
+}
+.trade-result__coins {
+  display: block; font-size: 15px;
+  font-weight: 700; color: #f59e0b;
+  margin-top: 4px;
+}
+
 .trade-arrow {
   font-size: 28px; color: #818cf8;
   font-weight: 700; flex-shrink: 0;

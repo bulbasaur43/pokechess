@@ -139,11 +139,12 @@ export function findTrade(username, unlockedPokemon) {
   }));
 }
 
-export function sendTradeOffer(pokemonKey) {
+export function sendTradeOffer(pokemonKey, coins) {
   if (!ws || ws.readyState !== 1) return;
   ws.send(JSON.stringify({
     type: 'trade_offer',
-    pokemonKey,
+    pokemonKey: pokemonKey || null,
+    coins: coins || 0,
   }));
 }
 

@@ -457,15 +457,21 @@ export function unlockPokemon(key, cost) {
 
 export function getUnlockedPokemon() { return [..._unlockedPokemon]; }
 
-// Trade: remove a Pokémon you're giving away, add the one you receive
-export function executeTrade(giveKey, receiveKey) {
+// Trade: remove a Pokémon you're giving away, add the one you receive, handle coins
+export function executeTrade(giveKey, receiveKey, coinsGave = 0, coinsReceived = 0) {
   // Remove the given pokemon (if in unlocked list)
-  const idx = _unlockedPokemon.indexOf(giveKey);
-  if (idx !== -1) {
-    _unlockedPokemon.splice(idx, 1);
+  if (giveKey) {
+    const idx = _unlockedPokemon.indexOf(giveKey);
+    if (idx !== -1) {
+      _unlockedPokemon.splice(idx, 1);
+    }
   }
   // Always add the received pokemon (even if already owned — it's a trade dupe)
-  _unlockedPokemon.push(receiveKey);
+  if (receiveKey) {
+    _unlockedPokemon.push(receiveKey);
+  }
+  // Handle coin transfer
+  _coins = Math.max(0, _coins - (coinsGave || 0) + (coinsReceived || 0));
   saveState();
   syncToServer();
   return true;
@@ -504,7 +510,7 @@ export function isHiddenItemUnlocked(itemId) {
 export function awardDailyCoins() {
   const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
   if (_lastDailyReward === today) return null; // already claimed today
-  const earned = Math.floor(Math.random() * 3) + 1; // 1-3
+  const earned = Math.floor(Math.random() * 10) + 1; // 1-10
   _coins += earned;
   _lastDailyReward = today;
   saveState();
