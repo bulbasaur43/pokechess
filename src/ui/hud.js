@@ -22,7 +22,10 @@ export function renderHUD(game, callbacks) {
   if (game.phase === PHASES.PLAY) {
     const team = TEAMS[COLOR_TO_TEAM[game.currentPlayer]];
     const isPlayerTurn = !game.isAIGame || game.currentPlayer === game.playerColor;
-    const turnLabel = isPlayerTurn ? 'Your Turn' : '🤖 AI Turn';
+    let turnLabel = isPlayerTurn ? 'Your Turn' : '🤖 AI Turn';
+    if (game.isOnline) {
+      turnLabel = game.currentPlayer === game.onlineColor ? 'Your Turn' : `${game.opponentName || 'Opponent'}'s Turn`;
+    }
     turn.innerHTML = `
       <div class="hud__turn-indicator">
         <span class="hud__turn-dot" style="background:${team.color}"></span>
@@ -64,13 +67,26 @@ export function renderHUD(game, callbacks) {
     const wUrgent = wTime < 60000 ? 'clock--urgent' : '';
     const bUrgent = bTime < 60000 ? 'clock--urgent' : '';
 
+    // Show player names in online mode
+    let wLabel = whiteTeam.name;
+    let bLabel = blackTeam.name;
+    if (game.isOnline) {
+      if (game.onlineColor === 'white') {
+        wLabel = `You (${whiteTeam.name})`;
+        bLabel = `${game.opponentName || 'Opponent'}`;
+      } else {
+        wLabel = `${game.opponentName || 'Opponent'}`;
+        bLabel = `You (${blackTeam.name})`;
+      }
+    }
+
     clock.innerHTML = `
       <div class="clock__row ${game.currentPlayer === 'white' ? 'clock--active' : ''} ${wUrgent}">
-        <span class="clock__label" style="color:${whiteTeam.color}">${whiteTeam.name}</span>
+        <span class="clock__label" style="color:${whiteTeam.color}">${wLabel}</span>
         <span class="clock__time">${formatTime(wTime)}</span>
       </div>
       <div class="clock__row ${game.currentPlayer === 'black' ? 'clock--active' : ''} ${bUrgent}">
-        <span class="clock__label" style="color:${blackTeam.color}">${blackTeam.name}</span>
+        <span class="clock__label" style="color:${blackTeam.color}">${bLabel}</span>
         <span class="clock__time">${formatTime(bTime)}</span>
       </div>
     `;

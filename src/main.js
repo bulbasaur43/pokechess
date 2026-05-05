@@ -11,7 +11,7 @@ import { renderHUD } from './ui/hud.js';
 import { getAIMove } from './engine/ai.js';
 import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect, isConnected } from './engine/online.js';
 import { reportGameResult, loadPlayerStats, getRankTitle } from './engine/elo.js';
-import { isLoggedIn, reportGameResultToServer } from './engine/auth.js';
+import { isLoggedIn, reportGameResultToServer, getUsername } from './engine/auth.js';
 import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS, COLOR_TO_TEAM } from './engine/types.js';
 import { openShop, closeShop, consumeItem, incrementBattleCount, awardDailyCoins, SHOP_ITEMS } from './ui/shop.js';
 
@@ -21,6 +21,7 @@ let aiThinking = false;
 let gameMode = 'ai'; // 'ai' | 'online' | 'local'
 let eloReported = false; // Track if we've already reported ELO for this game
 let processingMove = false; // Block input during opponent's move animation
+let animatingBattle = false; // Block input during battle animations
 let opponentMoveQueue = []; // Queue for incoming opponent moves
 let activeItem = null; // Currently selected item to use
 
@@ -149,9 +150,10 @@ function startOnlineMatch(clockPreset, options) {
       });
       game.isOnline = true;
       game.onlineColor = msg.yourColor;
+      game.opponentName = msg.opponentName || 'Unknown';
       startClock();
       renderGameView();
-      showStatusToast(`Match found! You are ${msg.yourColor === 'white' ? 'Team Scarlet' : 'Team Violet'}`, 'default');
+      showStatusToast(`Match found! Playing vs ${game.opponentName}`, 'default');
     },
     onOpponentMove: (msg) => {
       // Queue the move and process sequentially
@@ -176,7 +178,7 @@ function startOnlineMatch(clockPreset, options) {
       removeSearchingOverlay();
     },
   }).then(() => {
-    findMatch(options.preferredTeam, clockPreset, options.teamPresets);
+    findMatch(options.preferredTeam, clockPreset, options.teamPresets, getUsername() || 'Guest');
   }).catch(() => {
     removeSearchingOverlay();
     showStatusToast('⚠️ Could not connect to server. Try again later.', 'error');
@@ -334,11 +336,12 @@ function renderAll() {
 // ─── Battle inline ──────────────────────────────────────────────────
 
 function handleBattleInline(battleResult, targetRow, targetCol, callback) {
+  animatingBattle = true;
   playAttackEffect(targetRow, targetCol, battleResult);
   showDamageNumber(targetRow, targetCol, battleResult.damageDealt, battleResult.isCritical);
   if (battleResult.outcome === 'kill') showStatusToast(battleResult.message, 'kill');
   else if (battleResult.isCritical) showStatusToast('💥 CRITICAL HIT!', 'crit');
-  setTimeout(() => { renderAll(); callback?.(); }, 500);
+  setTimeout(() => { animatingBattle = false; renderAll(); callback?.(); }, 500);
 }
 
 // ─── Can the current human player act? ──────────────────────────────
@@ -347,6 +350,7 @@ function canPlayerAct() {
   if (game.phase !== PHASES.PLAY) return false;
   if (aiThinking) return false;
   if (processingMove) return false;
+  if (animatingBattle) return false;
   if (gameMode === 'local') return true; // Both can play
   if (gameMode === 'ai') return game.currentPlayer === game.playerColor;
   if (gameMode === 'online') return game.currentPlayer === game.onlineColor;

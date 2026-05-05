@@ -760,8 +760,10 @@ function handleFindMatch(ws, msg) {
   const preferredTeam = msg.team || 'scarlet';
   const timePreset = msg.timePreset || 'medium';
   const teamPresets = msg.teamPresets || {};
+  const username = msg.username || 'Unknown';
 
-  if (waitingPlayer && waitingPlayer.readyState === 1) {
+  if (waitingPlayer && waitingPlayer.readyState === 1 && waitingPlayer !== ws) {
+    ws.matchUsername = username;
     const roomId = `room_${++roomCounter}`;
 
     let whiteWs, blackWs;
@@ -783,16 +785,18 @@ function handleFindMatch(ws, msg) {
       moves: [],
     });
 
-    console.log(`🎮 Match: ${whiteWs.id} vs ${blackWs.id} in ${roomId}`);
+    console.log(`🎮 Match: ${whiteWs.matchUsername || whiteWs.id} vs ${blackWs.matchUsername || username} in ${roomId}`);
 
-    // Send each player the opponent's team presets so both boards match
+    // Send each player the opponent's team presets and name so both boards match
     whiteWs.send(JSON.stringify({
       type: 'match_found', roomId, yourColor: 'white', timePreset,
       opponentTeamPresets: blackWs.teamPresets || {},
+      opponentName: blackWs.matchUsername || 'Unknown',
     }));
     blackWs.send(JSON.stringify({
       type: 'match_found', roomId, yourColor: 'black', timePreset,
       opponentTeamPresets: whiteWs.teamPresets || {},
+      opponentName: whiteWs.matchUsername || 'Unknown',
     }));
 
     waitingPlayer = null;
@@ -800,9 +804,10 @@ function handleFindMatch(ws, msg) {
     ws.preferredTeam = preferredTeam;
     ws.timePreset = timePreset;
     ws.teamPresets = teamPresets;
+    ws.matchUsername = username;
     waitingPlayer = ws;
     ws.send(JSON.stringify({ type: 'searching' }));
-    console.log(`🔍 ${ws.id} searching...`);
+    console.log(`🔍 ${username} searching...`);
   }
 }
 
