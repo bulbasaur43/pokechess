@@ -268,14 +268,19 @@ export const POKEMON_POOL = {
 };
 
 // ─── King Pool (alternative TRUE_KING Pokémon) ──────────────────────
+// All True Kings are available on both teams
 export const KING_POOL = {
   scarlet: [
     { key: 'KORAIDON',  requiredElo: 0 },
     { key: 'BULBASAUR', requiredElo: 2000 },
+    { key: 'MIRAIDON',  requiredElo: 1500 },
+    { key: 'PIKACHU',   requiredElo: 2000 },
   ],
   violet: [
     { key: 'MIRAIDON', requiredElo: 0 },
     { key: 'PIKACHU',  requiredElo: 2000 },
+    { key: 'KORAIDON', requiredElo: 1500 },
+    { key: 'BULBASAUR', requiredElo: 2000 },
   ],
 };
 

@@ -242,13 +242,20 @@ let _equippedCosmetic = ''; // currently active cosmetic ID
 let _pokemonLevels = {};    // { POKEMON_KEY: level (1-5) }
 
 // ─── Upgrade System ─────────────────────────────────────────────────
-const MAX_POKEMON_LEVEL = 6;
-const UPGRADE_COSTS = [150, 350, 750, 1500, 3000]; // Cost for each of the 5 upgrades
+const MAX_POKEMON_LEVEL = 4;
+const UPGRADE_COSTS = [500, 1500, 3000]; // Cost for levels 2, 3, 4
 
-/** Get upgrade bonus stats for a given level (1-6). Each level gives more than the last. */
-// Cumulative bonuses: [L1, L2, L3, L4, L5, L6]
-const UPGRADE_HP_TABLE =  [0, 1, 3, 5, 8, 12];  // gained: +1, +2, +2, +3, +4
-const UPGRADE_DMG_TABLE = [0, 1, 2, 4, 6, 9];   // gained: +1, +1, +2, +2, +3
+// True Kings that can be upgraded
+const UPGRADEABLE_KINGS = new Set();
+for (const teamKey of Object.keys(KING_POOL)) {
+  for (const entry of KING_POOL[teamKey]) {
+    UPGRADEABLE_KINGS.add(entry.key);
+  }
+}
+
+/** Get upgrade bonus stats for a given level (1-4). Each level gives +1 HP and +1 damage. */
+const UPGRADE_HP_TABLE =  [0, 1, 2, 3];  // cumulative
+const UPGRADE_DMG_TABLE = [0, 1, 2, 3];  // cumulative
 
 export function getUpgradeBonus(level) {
   if (!level || level <= 1) return { hp: 0, damage: 0 };
@@ -663,6 +670,10 @@ export function openShop(onItemUse) {
       <h3 class="shop-section-title">🐾 Pokémon <span class="shop-section-hint">Unlock without ELO requirement</span></h3>
       <div class="shop-pokemon" id="shop-pokemon"></div>
     </div>
+    <div class="shop-section">
+      <h3 class="shop-section-title">👑 True King Upgrades <span class="shop-section-hint">+1 HP & +1 DMG per level (max 3)</span></h3>
+      <div class="shop-upgrades" id="shop-upgrades"></div>
+    </div>
 
   `;
 
@@ -675,6 +686,7 @@ export function openShop(onItemUse) {
   renderCoinPacks();
   renderShopItems();
   renderPokemonShop();
+  renderUpgrades();
   renderInventory();
 
   document.getElementById('shop-close').addEventListener('click', closeShop);
@@ -872,40 +884,27 @@ function renderUpgrades() {
   if (!container) return;
   container.innerHTML = '';
 
-  // Collect all Pokémon available to the player (default team + unlocked)
-  const upgradeablePokemon = new Map();
-
-  // Add default team Pokémon
+  // Show only True King Pokémon
+  const kings = [];
   for (const teamKey of ['scarlet', 'violet']) {
-    const pool = POKEMON_POOL[teamKey] || [];
+    const pool = KING_POOL[teamKey] || [];
     for (const entry of pool) {
-      if (entry.requiredElo <= 0 || _unlockedPokemon.includes(entry.key)) {
-        const pkmn = POKEMON[entry.key];
-        if (pkmn && !upgradeablePokemon.has(entry.key)) {
-          upgradeablePokemon.set(entry.key, { key: entry.key, pkmn, team: teamKey });
-        }
-      }
-    }
-    const kings = KING_POOL[teamKey] || [];
-    for (const entry of kings) {
-      if (entry.requiredElo <= 0 || _unlockedPokemon.includes(entry.key)) {
-        const pkmn = POKEMON[entry.key];
-        if (pkmn && !upgradeablePokemon.has(entry.key)) {
-          upgradeablePokemon.set(entry.key, { key: entry.key, pkmn, team: teamKey, isKing: true });
-        }
+      const pkmn = POKEMON[entry.key];
+      if (pkmn && !kings.find(k => k.key === entry.key)) {
+        kings.push({ key: entry.key, pkmn, team: teamKey });
       }
     }
   }
 
-  if (upgradeablePokemon.size === 0) {
-    container.innerHTML = '<div class="shop-inv-empty">Unlock Pokémon first to upgrade them!</div>';
+  if (kings.length === 0) {
+    container.innerHTML = '<div class="shop-inv-empty">No True Kings available!</div>';
     return;
   }
 
   const grid = document.createElement('div');
   grid.className = 'shop-upgrade-grid';
 
-  for (const [key, { pkmn }] of upgradeablePokemon) {
+  for (const { key, pkmn } of kings) {
     const level = getPokemonLevel(key);
     const cost = getUpgradeCost(key);
     const isMaxed = cost === null;
@@ -915,9 +914,9 @@ function renderUpgrades() {
     const card = document.createElement('div');
     card.className = `shop-upgrade-card ${isMaxed ? 'shop-upgrade-card--max' : ''}`;
 
-    // Level pips
+    // Level pips (3 max)
     let pips = '';
-    for (let i = 1; i <= MAX_POKEMON_LEVEL; i++) {
+    for (let i = 2; i <= MAX_POKEMON_LEVEL; i++) {
       pips += `<span class="shop-upgrade-pip ${i <= level ? 'shop-upgrade-pip--filled' : ''}"></span>`;
     }
 
