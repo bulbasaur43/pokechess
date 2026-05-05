@@ -2,6 +2,7 @@
  * Bulbasaur Minigames Module
  * Three canvas-based minigames accessible from the title logo
  */
+import { unlockHiddenItem, isHiddenItemUnlocked } from './shop.js';
 
 // Preload Bulbasaur sprite from PokeAPI official artwork
 const BULBA_IMG = new Image();
@@ -348,15 +349,30 @@ function startShooterGame(canvas) {
     ctx.fillText('↑↓ move • Mouse aims • Auto-fires!', 10, H - 10);
 
     if (gameOver) {
+      // Check for hidden item unlock
+      let justUnlocked = false;
+      if (score >= 100 && !isHiddenItemUnlocked('RAZOR_LEAF')) {
+        justUnlocked = unlockHiddenItem('RAZOR_LEAF');
+      }
+
       ctx.fillStyle = 'rgba(0,0,0,0.6)';
       ctx.fillRect(0, 0, W, H);
       ctx.fillStyle = '#fbbf24';
       ctx.font = 'bold 28px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('Game Over!', W / 2, H / 2 - 15);
+      ctx.fillText('Game Over!', W / 2, H / 2 - 30);
       ctx.font = '16px monospace';
       ctx.fillStyle = '#fff';
-      ctx.fillText(`Score: ${score} — Click to retry`, W / 2, H / 2 + 15);
+      ctx.fillText(`Score: ${score} — Click to retry`, W / 2, H / 2);
+
+      if (justUnlocked || (score >= 100 && isHiddenItemUnlocked('RAZOR_LEAF'))) {
+        ctx.fillStyle = '#4ade80';
+        ctx.font = 'bold 18px monospace';
+        ctx.fillText('🍃 SECRET UNLOCKED: Razor Leaf Storm! 🍃', W / 2, H / 2 + 30);
+        ctx.font = '13px monospace';
+        ctx.fillStyle = 'rgba(74, 222, 128, 0.8)';
+        ctx.fillText('Check the shop for your new item!', W / 2, H / 2 + 50);
+      }
       ctx.textAlign = 'left';
     }
   }

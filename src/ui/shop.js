@@ -200,11 +200,23 @@ export const SHOP_ITEMS = {
     name: 'Obliterator',
     emoji: '🗡️',
     coinCost: 1000,
-    description: 'One piece instantly KOs its next target',
-    useDescription: 'Click a piece to arm with one-hit power',
-    color: '#3b82f6',
-    usesPerPurchase: 10,
+    description: 'Next attack is a guaranteed one-hit KO',
+    useDescription: 'Click a piece to arm',
+    color: '#22d3ee',
+    usesPerPurchase: 1,
     cooldownBattles: 0,
+  },
+  RAZOR_LEAF: {
+    id: 'RAZOR_LEAF',
+    name: 'Razor Leaf Storm',
+    emoji: '🍃',
+    coinCost: 300,
+    description: 'Deal 3 damage to ALL adjacent enemies',
+    useDescription: 'Click a piece to unleash the storm',
+    color: '#4ade80',
+    usesPerPurchase: 3,
+    cooldownBattles: 0,
+    hidden: true,
   },
 };
 
@@ -240,6 +252,7 @@ let _lastDailyReward = '';
 let _ownedCosmetics = [];   // cosmetic IDs owned
 let _equippedCosmetic = ''; // currently active cosmetic ID
 let _pokemonLevels = {};    // { POKEMON_KEY: level (1-5) }
+let _unlockedHiddenItems = [];  // hidden item IDs unlocked via achievements
 
 // ─── Upgrade System ─────────────────────────────────────────────────
 const MAX_POKEMON_LEVEL = 4;
@@ -356,8 +369,9 @@ function loadState() {
       _ownedCosmetics = data.ownedCosmetics || [];
       _equippedCosmetic = data.equippedCosmetic || '';
       _pokemonLevels = data.pokemonLevels || {};
+      _unlockedHiddenItems = data.unlockedHiddenItems || [];
     }
-  } catch { _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = []; _lastDailyReward = ''; _ownedCosmetics = []; _equippedCosmetic = ''; _pokemonLevels = {}; }
+  } catch { _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = []; _lastDailyReward = ''; _ownedCosmetics = []; _equippedCosmetic = ''; _pokemonLevels = {}; _unlockedHiddenItems = []; }
 }
 
 function saveState() {
@@ -370,6 +384,7 @@ function saveState() {
     ownedCosmetics: _ownedCosmetics,
     equippedCosmetic: _equippedCosmetic,
     pokemonLevels: _pokemonLevels,
+    unlockedHiddenItems: _unlockedHiddenItems,
   }));
 }
 
@@ -438,6 +453,17 @@ export function getUnlockedPokemon() { return [..._unlockedPokemon]; }
 // ─── Public API ─────────────────────────────────────────────────────
 
 export function getCoins() { return _coins; }
+
+// Hidden item unlocks (via achievements like minigame scores)
+export function unlockHiddenItem(itemId) {
+  if (_unlockedHiddenItems.includes(itemId)) return false;
+  _unlockedHiddenItems.push(itemId);
+  saveState();
+  return true;
+}
+export function isHiddenItemUnlocked(itemId) {
+  return _unlockedHiddenItems.includes(itemId);
+}
 
 /** Call after completing a game — awards 1-3 coins once per day */
 export function awardDailyCoins() {
@@ -799,6 +825,8 @@ function renderShopItems() {
   container.innerHTML = '';
 
   for (const item of Object.values(SHOP_ITEMS)) {
+    // Hide secret items until unlocked
+    if (item.hidden && !_unlockedHiddenItems.includes(item.id)) continue;
     const owned = _inventory[item.id]?.uses || 0;
     const canAfford = _coins >= item.coinCost;
 

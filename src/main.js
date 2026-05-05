@@ -648,7 +648,7 @@ function applyItemToCell(itemId, row, col) {
   }
 
   // Check if this item was already used on this piece (for piece-targeting items)
-  const pieceTargetItems = ['MAX_POTION','X_ATTACK','X_DEFENSE','FOCUS_SASH','LEFTOVERS','SMOKE_BALL','DESTINY_BOND','OBLITERATOR'];
+  const pieceTargetItems = ['MAX_POTION','X_ATTACK','X_DEFENSE','FOCUS_SASH','LEFTOVERS','SMOKE_BALL','DESTINY_BOND','OBLITERATOR','RAZOR_LEAF'];
   if (pieceTargetItems.includes(itemId) && piece) {
     const applied = piece.appliedItems || [];
     if (applied.includes(itemId)) {
@@ -704,6 +704,29 @@ function applyItemToCell(itemId, row, col) {
       if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
       game.board[row][col] = { ...piece, obliterator: true, appliedItems: [...(piece.appliedItems || []), itemId] };
       showStatusToast(`🗡️ ${POKEMON[piece.pokemon]?.name || 'Piece'} armed with the Obliterator! Next attack is a one-hit KO!`, 'buff');
+      break;
+    }
+    case 'RAZOR_LEAF': {
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
+      const RAZOR_DMG = 3;
+      let hits = 0;
+      const dirs = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+      for (const [dr, dc] of dirs) {
+        const nr = row + dr, nc = col + dc;
+        if (nr < 0 || nr > 7 || nc < 0 || nc > 7) continue;
+        const target = game.board[nr]?.[nc];
+        if (target && target.color !== piece.color) {
+          const newHp = Math.max(0, target.hp - RAZOR_DMG);
+          if (newHp <= 0) {
+            game.capturedPieces[target.color].push(target);
+            game.board[nr][nc] = null;
+          } else {
+            game.board[nr][nc] = { ...target, hp: newHp };
+          }
+          hits++;
+        }
+      }
+      showStatusToast(`🍃 Razor Leaf Storm! Hit ${hits} enemies for ${RAZOR_DMG} damage each!`, 'buff');
       break;
     }
     case 'QUICK_CLAW': {
