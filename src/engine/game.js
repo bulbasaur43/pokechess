@@ -223,10 +223,25 @@ export function executeMove(game, toRow, toCol) {
         newGame.board[toRow][toCol] = { ...newGame.board[toRow][toCol], obliterator: false };
       }
 
+      // Destiny Bond: attacker is dragged down too
+      if (battleResult.destinyBondTriggered && newGame.board[toRow]?.[toCol]) {
+        const atkPiece = newGame.board[toRow][toCol];
+        newGame.capturedPieces[atkPiece.color].push(atkPiece);
+        newGame.board[toRow][toCol] = null;
+      }
+
       // True King killed → game over
       if (defender.role === 'TRUE_KING') {
         newGame.phase = PHASES.GAME_OVER;
         newGame.winner = attacker.color;
+        newGame.clockRunning = false;
+        return { game: newGame, battleResult };
+      }
+
+      // If destiny bond killed the attacker's True King, game over for attacker
+      if (battleResult.destinyBondTriggered && attacker.role === 'TRUE_KING') {
+        newGame.phase = PHASES.GAME_OVER;
+        newGame.winner = defender.color;
         newGame.clockRunning = false;
         return { game: newGame, battleResult };
       }

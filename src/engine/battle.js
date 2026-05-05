@@ -88,6 +88,11 @@ export function resolveBattle(attacker, defender) {
     result.outcome = 'kill';
     result.message = `${atkName} defeats ${defName}!`;
     result.messages.push(`💀 ${defName} eliminated!`);
+    // Destiny Bond: if the defender had it, the attacker dies too
+    if (defender.destinyBond) {
+      result.destinyBondTriggered = true;
+      result.messages.push(`💀 Destiny Bond! ${atkName} is dragged down too!`);
+    }
   } else {
     // Damage — defender survives
     result.outcome = 'damage';
