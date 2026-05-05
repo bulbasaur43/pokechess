@@ -450,6 +450,19 @@ export function unlockPokemon(key, cost) {
 
 export function getUnlockedPokemon() { return [..._unlockedPokemon]; }
 
+// Trade: remove a Pokémon you're giving away, add the one you receive
+export function executeTrade(giveKey, receiveKey) {
+  const idx = _unlockedPokemon.indexOf(giveKey);
+  if (idx === -1) return false; // don't own it
+  _unlockedPokemon.splice(idx, 1);
+  if (!_unlockedPokemon.includes(receiveKey)) {
+    _unlockedPokemon.push(receiveKey);
+  }
+  saveState();
+  syncToServer();
+  return true;
+}
+
 // ─── Public API ─────────────────────────────────────────────────────
 
 export function getCoins() { return _coins; }

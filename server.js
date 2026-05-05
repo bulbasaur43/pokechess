@@ -728,6 +728,18 @@ wss.on('connection', (ws) => {
       case 'resign':
         handleResign(ws);
         break;
+      case 'find_trade':
+        handleFindTrade(ws, msg);
+        break;
+      case 'trade_offer':
+        handleTradeOffer(ws, msg);
+        break;
+      case 'trade_confirm':
+        handleTradeConfirm(ws);
+        break;
+      case 'trade_cancel':
+        handleTradeCancel(ws);
+        break;
       case 'ping':
         ws.send(JSON.stringify({ type: 'pong' }));
         break;
@@ -826,6 +838,20 @@ function handleResign(ws) {
 
 function handleDisconnect(ws) {
   if (waitingPlayer === ws) waitingPlayer = null;
+  if (waitingTrader === ws) waitingTrader = null;
+  // Trade room disconnect
+  if (ws.tradeRoomId) {
+    const trade = tradeRooms.get(ws.tradeRoomId);
+    if (trade) {
+      const partner = trade.player1 === ws ? trade.player2 : trade.player1;
+      if (partner && partner.readyState === 1) {
+        partner.send(JSON.stringify({ type: 'trade_partner_disconnected' }));
+        partner.tradeRoomId = null;
+      }
+      tradeRooms.delete(ws.tradeRoomId);
+    }
+    ws.tradeRoomId = null;
+  }
   const room = rooms.get(ws.roomId);
   if (room) {
     const opponent = room.white === ws ? room.black : room.white;
@@ -852,6 +878,108 @@ setInterval(() => {
     ws.ping();
   });
 }, 30000);
+
+// ─── Trade System ───────────────────────────────────────────────────
+
+let waitingTrader = null;
+const tradeRooms = new Map();
+let tradeRoomCounter = 0;
+
+function handleFindTrade(ws, msg) {
+  ws.tradeUsername = msg.username || 'Unknown';
+  ws.tradeUnlocked = msg.unlockedPokemon || [];
+
+  if (waitingTrader && waitingTrader.readyState === 1 && waitingTrader !== ws) {
+    const tradeId = `trade_${++tradeRoomCounter}`;
+    const p1 = waitingTrader;
+    const p2 = ws;
+    p1.tradeRoomId = tradeId;
+    p2.tradeRoomId = tradeId;
+    tradeRooms.set(tradeId, {
+      player1: p1, player2: p2,
+      offer1: null, offer2: null,
+      confirmed1: false, confirmed2: false,
+    });
+    console.log(`🔄 Trade: ${p1.tradeUsername} <-> ${p2.tradeUsername} in ${tradeId}`);
+    p1.send(JSON.stringify({
+      type: 'trade_matched', tradeId,
+      partnerName: p2.tradeUsername,
+      partnerPokemon: p2.tradeUnlocked,
+    }));
+    p2.send(JSON.stringify({
+      type: 'trade_matched', tradeId,
+      partnerName: p1.tradeUsername,
+      partnerPokemon: p1.tradeUnlocked,
+    }));
+    waitingTrader = null;
+  } else {
+    waitingTrader = ws;
+    ws.send(JSON.stringify({ type: 'trade_searching' }));
+    console.log(`🔍 ${ws.tradeUsername} searching for trade...`);
+  }
+}
+
+function handleTradeOffer(ws, msg) {
+  const trade = tradeRooms.get(ws.tradeRoomId);
+  if (!trade) return;
+  const isP1 = trade.player1 === ws;
+  if (isP1) trade.offer1 = msg.pokemonKey;
+  else trade.offer2 = msg.pokemonKey;
+  // Reset confirmations when offer changes
+  trade.confirmed1 = false;
+  trade.confirmed2 = false;
+  // Notify partner of the offer
+  const partner = isP1 ? trade.player2 : trade.player1;
+  if (partner && partner.readyState === 1) {
+    partner.send(JSON.stringify({ type: 'trade_offer_received', pokemonKey: msg.pokemonKey }));
+  }
+}
+
+function handleTradeConfirm(ws) {
+  const trade = tradeRooms.get(ws.tradeRoomId);
+  if (!trade) return;
+  const isP1 = trade.player1 === ws;
+  if (isP1) trade.confirmed1 = true;
+  else trade.confirmed2 = true;
+
+  // If both confirmed and both have offers, execute trade
+  if (trade.confirmed1 && trade.confirmed2 && trade.offer1 && trade.offer2) {
+    console.log(`✅ Trade executed: ${trade.player1.tradeUsername} gives ${trade.offer1}, ${trade.player2.tradeUsername} gives ${trade.offer2}`);
+    trade.player1.send(JSON.stringify({
+      type: 'trade_confirmed',
+      youGave: trade.offer1, youReceived: trade.offer2,
+    }));
+    trade.player2.send(JSON.stringify({
+      type: 'trade_confirmed',
+      youGave: trade.offer2, youReceived: trade.offer1,
+    }));
+    // Clean up
+    trade.player1.tradeRoomId = null;
+    trade.player2.tradeRoomId = null;
+    tradeRooms.delete(ws.tradeRoomId);
+  } else {
+    // Notify partner that this player confirmed
+    const partner = isP1 ? trade.player2 : trade.player1;
+    if (partner && partner.readyState === 1) {
+      partner.send(JSON.stringify({ type: 'trade_partner_confirmed' }));
+    }
+  }
+}
+
+function handleTradeCancel(ws) {
+  if (waitingTrader === ws) { waitingTrader = null; }
+  const trade = tradeRooms.get(ws.tradeRoomId);
+  if (trade) {
+    const partner = trade.player1 === ws ? trade.player2 : trade.player1;
+    if (partner && partner.readyState === 1) {
+      partner.send(JSON.stringify({ type: 'trade_cancelled' }));
+      partner.tradeRoomId = null;
+    }
+    tradeRooms.delete(ws.tradeRoomId);
+  }
+  ws.tradeRoomId = null;
+  ws.send(JSON.stringify({ type: 'trade_cancelled' }));
+}
 
 // ─── Shop Handlers (PokéCoins system) ───────────────────────────────
 

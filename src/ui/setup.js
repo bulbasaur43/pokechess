@@ -7,8 +7,9 @@ import { TEAMS, POKEMON, POKEMON_POOL, KING_POOL, BACK_RANK_ROLES, ABILITIES } f
 import { AI_DIFFICULTIES } from '../engine/ai.js';
 import { loadPlayerStats, getRankTitle, getWinRate } from '../engine/elo.js';
 import { isLoggedIn, getUsername, login, signup, logout, refreshProfile, getLeaderboard, saveTeam, loadTeam } from '../engine/auth.js';
-import { isPokemonUnlocked, openShop, getCoins, initShop } from './shop.js';
+import { isPokemonUnlocked, openShop, getCoins, initShop, getUnlockedPokemon, executeTrade } from './shop.js';
 import { openMinigames } from './minigames.js';
+import { connectToServer, findTrade, sendTradeOffer, confirmTrade, cancelTrade, disconnect } from '../engine/online.js';
 
 export function renderTitleScreen(onStart) {
   const app = document.getElementById('app');
@@ -147,6 +148,7 @@ export function renderTitleScreen(onStart) {
       <div class="title-btn-row">
         <button class="btn btn--leaderboard" id="btn-leaderboard">🏆 Leaderboard</button>
         <button class="btn btn--pokedex" id="btn-pokedex">📖 Pokédex</button>
+        <button class="btn btn--trade" id="btn-trade">🔄 Trade</button>
       </div>
 
       <!-- Leaderboard Overlay -->
@@ -175,6 +177,7 @@ export function renderTitleScreen(onStart) {
         <button class="btn btn--admin" id="btn-admin">🔒 Admin</button>
       </div>
       <div class="admin-overlay" id="admin-overlay"></div>
+      <div class="trade-overlay" id="trade-overlay"></div>
     </div>
   `;
 
@@ -490,6 +493,9 @@ export function renderTitleScreen(onStart) {
 
   // Pokédex button
   document.getElementById('btn-pokedex')?.addEventListener('click', showPokedex);
+
+  // Trade button
+  document.getElementById('btn-trade')?.addEventListener('click', openTradeUI);
 
   // Logo click → Minigames
   document.querySelector('.title-screen__logo-img')?.addEventListener('click', openMinigames);
@@ -1300,4 +1306,242 @@ function hideLeaderboard() {
     overlay.classList.remove('leaderboard-overlay--show');
     overlay.innerHTML = '';
   }
+}
+
+// ─── Trade UI ─────────────────────────────────────────────────────────
+
+function openTradeUI() {
+  if (!isLoggedIn()) {
+    alert('Log in to trade Pokémon!');
+    return;
+  }
+  const unlocked = getUnlockedPokemon();
+  if (unlocked.length === 0) {
+    alert('You have no unlocked Pokémon to trade! Open packs in the shop first.');
+    return;
+  }
+
+  const overlay = document.getElementById('trade-overlay');
+  if (!overlay) return;
+
+  let tradeState = 'searching'; // 'searching' | 'trading' | 'done'
+  let partnerName = '';
+  let partnerPokemon = [];
+  let myOffer = null;
+  let partnerOffer = null;
+  let iConfirmed = false;
+  let partnerConfirmed = false;
+
+  function renderTradePanel() {
+    if (tradeState === 'searching') {
+      overlay.innerHTML = `
+        <div class="trade-panel">
+          <button class="trade-close" id="trade-close">✕</button>
+          <h2 class="trade-title">🔄 Pokémon Trading</h2>
+          <div class="trade-searching">
+            <div class="searching-overlay__spinner"></div>
+            <p>Looking for a trade partner...</p>
+            <button class="btn btn--small trade-cancel-btn" id="trade-cancel-search">Cancel</button>
+          </div>
+        </div>
+      `;
+      overlay.classList.add('trade-overlay--show');
+      document.getElementById('trade-close')?.addEventListener('click', closeTrade);
+      document.getElementById('trade-cancel-search')?.addEventListener('click', closeTrade);
+      return;
+    }
+
+    if (tradeState === 'done') return;
+
+    const myPokemon = getUnlockedPokemon();
+    const renderGrid = (pokemon, side, selected) => {
+      return pokemon.map(key => {
+        const pkmn = POKEMON[key];
+        if (!pkmn) return '';
+        const isSelected = key === selected;
+        return `
+          <button class="trade-pkmn ${isSelected ? 'trade-pkmn--selected' : ''}"
+                  data-side="${side}" data-key="${key}" ${side === 'partner' ? 'disabled' : ''}>
+            <img class="trade-pkmn__img" src="${pkmn.img || ''}" alt="${pkmn.name}" />
+            <span class="trade-pkmn__name">${pkmn.name}</span>
+          </button>
+        `;
+      }).join('');
+    };
+
+    const partnerOfferPkmn = partnerOffer ? POKEMON[partnerOffer] : null;
+    const myOfferPkmn = myOffer ? POKEMON[myOffer] : null;
+
+    overlay.innerHTML = `
+      <div class="trade-panel trade-panel--wide">
+        <button class="trade-close" id="trade-close">✕</button>
+        <h2 class="trade-title">🔄 Trading with ${partnerName}</h2>
+
+        <div class="trade-exchange">
+          <div class="trade-side">
+            <h3 class="trade-side__title">Your Offer</h3>
+            <div class="trade-offer-slot ${myOffer ? 'trade-offer-slot--filled' : ''}">
+              ${myOfferPkmn ? `
+                <img class="trade-offer__img" src="${myOfferPkmn.img}" alt="${myOfferPkmn.name}" />
+                <span class="trade-offer__name">${myOfferPkmn.name}</span>
+              ` : '<span class="trade-offer__empty">Select a Pokémon below</span>'}
+            </div>
+          </div>
+
+          <div class="trade-arrow">⇄</div>
+
+          <div class="trade-side">
+            <h3 class="trade-side__title">${partnerName}'s Offer</h3>
+            <div class="trade-offer-slot ${partnerOffer ? 'trade-offer-slot--filled' : ''}">
+              ${partnerOfferPkmn ? `
+                <img class="trade-offer__img" src="${partnerOfferPkmn.img}" alt="${partnerOfferPkmn.name}" />
+                <span class="trade-offer__name">${partnerOfferPkmn.name}</span>
+              ` : '<span class="trade-offer__empty">Waiting for offer...</span>'}
+            </div>
+          </div>
+        </div>
+
+        <div class="trade-status">
+          ${iConfirmed ? '✅ You confirmed' : ''}
+          ${partnerConfirmed ? `✅ ${partnerName} confirmed` : ''}
+        </div>
+
+        <div class="trade-actions">
+          ${myOffer && partnerOffer && !iConfirmed ? `<button class="btn btn--start trade-confirm-btn" id="trade-confirm">✅ Confirm Trade</button>` : ''}
+          <button class="btn btn--small trade-cancel-btn" id="trade-cancel">Cancel Trade</button>
+        </div>
+
+        <div class="trade-collections">
+          <div class="trade-collection">
+            <h4>Your Pokémon</h4>
+            <div class="trade-grid">${renderGrid(myPokemon, 'mine', myOffer)}</div>
+          </div>
+          <div class="trade-collection">
+            <h4>${partnerName}'s Pokémon</h4>
+            <div class="trade-grid">${renderGrid(partnerPokemon, 'partner', partnerOffer)}</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    overlay.classList.add('trade-overlay--show');
+
+    // Wire events
+    document.getElementById('trade-close')?.addEventListener('click', closeTrade);
+    document.getElementById('trade-cancel')?.addEventListener('click', closeTrade);
+    document.getElementById('trade-confirm')?.addEventListener('click', () => {
+      iConfirmed = true;
+      confirmTrade();
+      renderTradePanel();
+    });
+
+    overlay.querySelectorAll('.trade-pkmn[data-side="mine"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        myOffer = btn.dataset.key;
+        iConfirmed = false;
+        partnerConfirmed = false;
+        sendTradeOffer(myOffer);
+        renderTradePanel();
+      });
+    });
+  }
+
+  function closeTrade() {
+    cancelTrade();
+    disconnect();
+    overlay.classList.remove('trade-overlay--show');
+    overlay.innerHTML = '';
+    tradeState = 'done';
+  }
+
+  // Connect and start searching
+  renderTradePanel();
+
+  connectToServer({
+    onTradeSearching: () => {
+      tradeState = 'searching';
+      renderTradePanel();
+    },
+    onTradeMatched: (msg) => {
+      tradeState = 'trading';
+      partnerName = msg.partnerName;
+      partnerPokemon = msg.partnerPokemon || [];
+      myOffer = null;
+      partnerOffer = null;
+      iConfirmed = false;
+      partnerConfirmed = false;
+      renderTradePanel();
+    },
+    onTradeOfferReceived: (msg) => {
+      partnerOffer = msg.pokemonKey;
+      iConfirmed = false;
+      partnerConfirmed = false;
+      renderTradePanel();
+    },
+    onTradePartnerConfirmed: () => {
+      partnerConfirmed = true;
+      renderTradePanel();
+    },
+    onTradeConfirmed: (msg) => {
+      // Trade executed! Update local data
+      executeTrade(msg.youGave, msg.youReceived);
+      const gaveName = POKEMON[msg.youGave]?.name || msg.youGave;
+      const gotName = POKEMON[msg.youReceived]?.name || msg.youReceived;
+      overlay.innerHTML = `
+        <div class="trade-panel">
+          <h2 class="trade-title">🎉 Trade Complete!</h2>
+          <div class="trade-result">
+            <div class="trade-result__item trade-result__gave">
+              <span class="trade-result__label">You gave</span>
+              <img class="trade-result__img" src="${POKEMON[msg.youGave]?.img || ''}" alt="${gaveName}" />
+              <span class="trade-result__name">${gaveName}</span>
+            </div>
+            <div class="trade-arrow">→</div>
+            <div class="trade-result__item trade-result__got">
+              <span class="trade-result__label">You received</span>
+              <img class="trade-result__img" src="${POKEMON[msg.youReceived]?.img || ''}" alt="${gotName}" />
+              <span class="trade-result__name">${gotName}</span>
+            </div>
+          </div>
+          <button class="btn btn--start" id="trade-done">Continue</button>
+        </div>
+      `;
+      document.getElementById('trade-done')?.addEventListener('click', () => {
+        disconnect();
+        overlay.classList.remove('trade-overlay--show');
+        overlay.innerHTML = '';
+      });
+    },
+    onTradeCancelled: () => {
+      tradeState = 'searching';
+      partnerName = '';
+      partnerPokemon = [];
+      myOffer = null;
+      partnerOffer = null;
+      // Re-search
+      findTrade(getUsername(), getUnlockedPokemon());
+      renderTradePanel();
+    },
+    onTradePartnerDisconnected: () => {
+      tradeState = 'searching';
+      partnerName = '';
+      partnerPokemon = [];
+      myOffer = null;
+      partnerOffer = null;
+      findTrade(getUsername(), getUnlockedPokemon());
+      renderTradePanel();
+    },
+    onDisconnected: () => {
+      if (tradeState !== 'done') {
+        overlay.classList.remove('trade-overlay--show');
+        overlay.innerHTML = '';
+      }
+    },
+  }).then(() => {
+    findTrade(getUsername(), getUnlockedPokemon());
+  }).catch(() => {
+    overlay.classList.remove('trade-overlay--show');
+    overlay.innerHTML = '';
+    alert('Could not connect to server. Try again later.');
+  });
 }

@@ -51,6 +51,27 @@ export function connectToServer(cbs) {
         case 'search_cancelled':
           callbacks.onSearchCancelled?.();
           break;
+        case 'trade_searching':
+          callbacks.onTradeSearching?.();
+          break;
+        case 'trade_matched':
+          callbacks.onTradeMatched?.(msg);
+          break;
+        case 'trade_offer_received':
+          callbacks.onTradeOfferReceived?.(msg);
+          break;
+        case 'trade_confirmed':
+          callbacks.onTradeConfirmed?.(msg);
+          break;
+        case 'trade_partner_confirmed':
+          callbacks.onTradePartnerConfirmed?.();
+          break;
+        case 'trade_cancelled':
+          callbacks.onTradeCancelled?.();
+          break;
+        case 'trade_partner_disconnected':
+          callbacks.onTradePartnerDisconnected?.();
+          break;
       }
     };
 
@@ -104,4 +125,33 @@ export function disconnect() {
 
 export function isConnected() {
   return ws && ws.readyState === 1;
+}
+
+// ─── Trade Functions ────────────────────────────────────────────────
+
+export function findTrade(username, unlockedPokemon) {
+  if (!ws || ws.readyState !== 1) return;
+  ws.send(JSON.stringify({
+    type: 'find_trade',
+    username,
+    unlockedPokemon,
+  }));
+}
+
+export function sendTradeOffer(pokemonKey) {
+  if (!ws || ws.readyState !== 1) return;
+  ws.send(JSON.stringify({
+    type: 'trade_offer',
+    pokemonKey,
+  }));
+}
+
+export function confirmTrade() {
+  if (!ws || ws.readyState !== 1) return;
+  ws.send(JSON.stringify({ type: 'trade_confirm' }));
+}
+
+export function cancelTrade() {
+  if (!ws || ws.readyState !== 1) return;
+  ws.send(JSON.stringify({ type: 'trade_cancel' }));
 }
