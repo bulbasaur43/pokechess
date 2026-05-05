@@ -203,7 +203,7 @@ export const SHOP_ITEMS = {
     description: 'Next attack is a guaranteed one-hit KO',
     useDescription: 'Click a piece to arm',
     color: '#22d3ee',
-    usesPerPurchase: 1,
+    usesPerPurchase: 3,
     cooldownBattles: 0,
   },
   RAZOR_LEAF: {
