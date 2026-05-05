@@ -150,10 +150,13 @@ function startOnlineMatch(clockPreset, options) {
       });
       game.isOnline = true;
       game.onlineColor = msg.yourColor;
-      game.opponentName = msg.opponentName || 'Unknown';
+      game.opponentName = msg.opponentName || null;
       startClock();
       renderGameView();
-      showStatusToast(`Match found! Playing vs ${game.opponentName}`, 'default');
+      const oppDisplay = game.opponentName && game.opponentName !== 'Unknown' && game.opponentName !== 'Guest'
+        ? game.opponentName
+        : (msg.yourColor === 'white' ? 'Team Violet' : 'Team Scarlet');
+      showStatusToast(`Match found! Playing vs ${oppDisplay}`, 'default');
     },
     onOpponentMove: (msg) => {
       // Queue the move and process sequentially

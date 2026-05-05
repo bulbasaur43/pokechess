@@ -71,11 +71,13 @@ export function renderHUD(game, callbacks) {
     let wLabel = whiteTeam.name;
     let bLabel = blackTeam.name;
     if (game.isOnline) {
+      const oppName = game.opponentName && game.opponentName !== 'Unknown' && game.opponentName !== 'Guest'
+        ? game.opponentName : null;
       if (game.onlineColor === 'white') {
         wLabel = `You (${whiteTeam.name})`;
-        bLabel = `${game.opponentName || 'Opponent'}`;
+        bLabel = oppName || blackTeam.name;
       } else {
-        wLabel = `${game.opponentName || 'Opponent'}`;
+        wLabel = oppName || whiteTeam.name;
         bLabel = `You (${blackTeam.name})`;
       }
     }
