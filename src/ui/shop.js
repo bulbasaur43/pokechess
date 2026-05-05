@@ -1189,7 +1189,7 @@ export function buyPokemonBox() {
     if (!isDuplicate) {
       _unlockedPokemon.push(result.key);
     }
-    const refundAmount = Math.floor(BOX_COST / 5);
+    const refundAmount = 25; // Per-dupe refund (box cost is 200)
     results.push({ result, isDuplicate, refundAmount });
   }
   saveState();
@@ -1486,7 +1486,7 @@ function showBoxSummary(results) {
   overlay.className = 'pack-reveal-overlay';
 
   const dupes = results.filter(r => r.isDuplicate);
-  const refundPerDupe = Math.floor(BOX_COST / 5);
+  const refundPerDupe = 25;
 
   let cardsHtml = '';
   for (let i = 0; i < results.length; i++) {
