@@ -699,6 +699,22 @@ function applySpecialAbilities(game, row, col, fromRow, fromCol) {
     }
   }
 
+  // Razor Leaf Storm: bonus AOE damage to all adjacent enemies on ability trigger
+  if (piece.razorLeaf && piece.razorLeafDmg) {
+    const rlDmg = piece.razorLeafDmg;
+    for (const [dr, dc] of ADJACENT_DIRS) {
+      const r = row + dr, c = col + dc;
+      if (r < 0 || r > 7 || c < 0 || c > 7) continue;
+      const target = newBoard[r]?.[c];
+      if (target && target.color !== piece.color) {
+        const newHp = Math.max(0, target.hp - rlDmg);
+        if (newHp <= 0) { newBoard[r][c] = null; }
+        else { newBoard[r][c] = { ...target, hp: newHp }; }
+        affected.push({ row: r, col: c, name: target.pokemon, damage: rlDmg });
+      }
+    }
+  }
+
   const newGame = { ...game, board: newBoard };
 
   // Report ability if anything happened

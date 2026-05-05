@@ -708,25 +708,10 @@ function applyItemToCell(itemId, row, col) {
     }
     case 'RAZOR_LEAF': {
       if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
-      const RAZOR_DMG = 3;
-      let hits = 0;
-      const dirs = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
-      for (const [dr, dc] of dirs) {
-        const nr = row + dr, nc = col + dc;
-        if (nr < 0 || nr > 7 || nc < 0 || nc > 7) continue;
-        const target = game.board[nr]?.[nc];
-        if (target && target.color !== piece.color) {
-          const newHp = Math.max(0, target.hp - RAZOR_DMG);
-          if (newHp <= 0) {
-            game.capturedPieces[target.color].push(target);
-            game.board[nr][nc] = null;
-          } else {
-            game.board[nr][nc] = { ...target, hp: newHp };
-          }
-          hits++;
-        }
-      }
-      showStatusToast(`🍃 Razor Leaf Storm! Hit ${hits} enemies for ${RAZOR_DMG} damage each!`, 'buff');
+      const bonusDmg = piece.pokemon === 'BULBASAUR' ? 2 : 1;
+      game.board[row][col] = { ...piece, razorLeaf: true, razorLeafDmg: bonusDmg, appliedItems: [...(piece.appliedItems || []), itemId] };
+      const pokeName = POKEMON[piece.pokemon]?.name || 'Piece';
+      showStatusToast(`🍃 ${pokeName} gained Razor Leaf Storm! +${bonusDmg} AOE damage on abilities!`, 'buff');
       break;
     }
     case 'QUICK_CLAW': {
