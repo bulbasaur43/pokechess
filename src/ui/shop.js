@@ -255,16 +255,29 @@ let _pokemonLevels = {};    // { POKEMON_KEY: level (1-5) }
 let _unlockedHiddenItems = [];  // hidden item IDs unlocked via achievements
 
 // ─── Upgrade System ─────────────────────────────────────────────────
-const MAX_POKEMON_LEVEL = 2;
-const UPGRADE_COSTS = [200]; // Cost for level 2 (one upgrade per Pokémon)
+const MAX_KING_LEVEL = 4;
+const MAX_REGULAR_LEVEL = 2;
+const KING_UPGRADE_COSTS = [150, 300, 500]; // Cost for levels 2, 3, 4
+const REGULAR_UPGRADE_COSTS = [200]; // Cost for level 2
 
-/** Get upgrade bonus stats for a given level. Level 2 gives +1 HP and +1 damage. */
-const UPGRADE_HP_TABLE =  [0, 1];  // cumulative
-const UPGRADE_DMG_TABLE = [0, 1];  // cumulative
+// True Kings that get extra upgrades
+const TRUE_KING_KEYS = new Set();
+for (const teamKey of Object.keys(KING_POOL)) {
+  for (const entry of KING_POOL[teamKey]) {
+    TRUE_KING_KEYS.add(entry.key);
+  }
+}
+
+function isTrueKing(key) { return TRUE_KING_KEYS.has(key); }
+function getMaxLevel(key) { return isTrueKing(key) ? MAX_KING_LEVEL : MAX_REGULAR_LEVEL; }
+
+/** Get upgrade bonus stats for a given level. Each level gives +1 HP and +1 damage. */
+const UPGRADE_HP_TABLE =  [0, 1, 2, 3];  // cumulative
+const UPGRADE_DMG_TABLE = [0, 1, 2, 3];  // cumulative
 
 export function getUpgradeBonus(level) {
   if (!level || level <= 1) return { hp: 0, damage: 0 };
-  const idx = Math.min(level, MAX_POKEMON_LEVEL) - 1;
+  const idx = Math.min(level, MAX_KING_LEVEL) - 1;
   return {
     hp: UPGRADE_HP_TABLE[idx] || 0,
     damage: UPGRADE_DMG_TABLE[idx] || 0,
@@ -276,8 +289,10 @@ export function getAllPokemonLevels() { return { ..._pokemonLevels }; }
 
 export function getUpgradeCost(key) {
   const currentLevel = getPokemonLevel(key);
-  if (currentLevel >= MAX_POKEMON_LEVEL) return null; // Max level
-  return UPGRADE_COSTS[currentLevel - 1];
+  const maxLvl = getMaxLevel(key);
+  if (currentLevel >= maxLvl) return null; // Max level
+  const costs = isTrueKing(key) ? KING_UPGRADE_COSTS : REGULAR_UPGRADE_COSTS;
+  return costs[currentLevel - 1];
 }
 
 export function upgradePokemon(key) {
@@ -976,11 +991,24 @@ function renderUpgrades() {
     const card = document.createElement('div');
     card.className = `shop-upgrade-card ${isMaxed ? 'shop-upgrade-card--max' : ''}`;
 
+    const isKing = isTrueKing(key);
+    const maxLvl = getMaxLevel(key);
+    let levelLabel;
+    if (isKing) {
+      let pips = '';
+      for (let i = 2; i <= maxLvl; i++) {
+        pips += `<span class="shop-upgrade-pip ${i <= level ? 'shop-upgrade-pip--filled' : ''}"></span>`;
+      }
+      levelLabel = `👑 Lv.${level} ${pips}`;
+    } else {
+      levelLabel = isMaxed ? '★ Upgraded' : 'Not Upgraded';
+    }
+
     card.innerHTML = `
       <img class="shop-upgrade-img" src="${pkmn.img || ''}" alt="${pkmn.name}" />
       <div class="shop-upgrade-info">
         <div class="shop-upgrade-name">${pkmn.name}</div>
-        <div class="shop-upgrade-level">${isMaxed ? '★ Upgraded' : 'Not Upgraded'}</div>
+        <div class="shop-upgrade-level">${levelLabel}</div>
         <div class="shop-upgrade-stats">
           ❤️${pkmn.hp + bonus.hp} <span class="shop-upgrade-bonus">${bonus.hp > 0 ? `(+${bonus.hp})` : ''}</span>
           ⚔️${pkmn.damage + bonus.damage} <span class="shop-upgrade-bonus">${bonus.damage > 0 ? `(+${bonus.damage})` : ''}</span>
