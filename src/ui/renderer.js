@@ -772,12 +772,21 @@ function createPieceElement(piece, playerColor) {
           cosEl.style.left = `${headData.headLeft + ox}%`;
           cosEl.style.transform = `translate(-50%, -50%) rotate(${extraRot}deg)`;
         } else if (cosmetic.position === 'aura') {
-          // Sword: held at front-left, angled diagonally blade-up
-          cosEl.style.bottom = `${5 + oy}%`;
-          cosEl.style.left = `${headData.headLeft - 15 + ox}%`;
-          cosEl.style.top = 'auto';
-          cosEl.style.right = 'auto';
-          cosEl.style.transform = `translateX(-50%) rotate(${-35 + extraRot}deg)`;
+          if (cosmeticId === 'ONE_HIT_OBLITERATOR') {
+            // Obliterator cosmetic: floating to the right of the Pokémon
+            cosEl.style.right = `${-20 + ox}%`;
+            cosEl.style.bottom = `${15 + oy}%`;
+            cosEl.style.top = 'auto';
+            cosEl.style.left = 'auto';
+            cosEl.style.transform = `rotate(${15 + extraRot}deg)`;
+           } else {
+            // Sword: held at front-left, angled diagonally blade-up
+            cosEl.style.bottom = `${5 + oy}%`;
+            cosEl.style.left = `${headData.headLeft - 15 + ox}%`;
+            cosEl.style.top = 'auto';
+            cosEl.style.right = 'auto';
+            cosEl.style.transform = `translateX(-50%) rotate(${-35 + extraRot}deg)`;
+          }
         } else if (cosmetic.position === 'bottom') {
           // Feet items (pokeball)
           cosEl.style.bottom = `${2 + oy}%`;
@@ -818,24 +827,7 @@ function createPieceElement(piece, playerColor) {
     }
   }
 
-  // Obliterator weapon overlay — floating alongside on the right
-  if (piece.obliterator) {
-    const sword = document.createElement('img');
-    sword.className = 'piece__obliterator-sword piece__cosmetic--obliterator piece__obliterator-float';
-    sword.src = '/assets/cosmetics/one_hit_obliterator.png';
-    sword.alt = 'Obliterator';
-    sword.draggable = false;
-    sword.style.position = 'absolute';
-    sword.style.width = '45%';
-    sword.style.height = 'auto';
-    sword.style.right = '-18%';
-    sword.style.bottom = '15%';
-    sword.style.left = 'auto';
-    sword.style.top = 'auto';
-    sword.style.transform = 'rotate(15deg)';
-    sword.style.zIndex = '5';
-    wrap.appendChild(sword);
-  }
+  // (Obliterator item indicator is rendered next to the HP bar below)
 
   el.appendChild(wrap);
 
