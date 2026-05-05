@@ -257,7 +257,7 @@ let _unlockedHiddenItems = [];  // hidden item IDs unlocked via achievements
 // ─── Upgrade System ─────────────────────────────────────────────────
 const MAX_KING_LEVEL = 4;
 const MAX_REGULAR_LEVEL = 2;
-const KING_UPGRADE_COSTS = [150, 300, 500]; // Cost for levels 2, 3, 4
+const KING_UPGRADE_COSTS = [150, 300, 750]; // Cost for levels 2, 3, 4
 const REGULAR_UPGRADE_COSTS = [200]; // Cost for level 2
 
 // True Kings that get extra upgrades
