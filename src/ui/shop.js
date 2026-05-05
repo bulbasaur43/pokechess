@@ -463,6 +463,20 @@ export function executeTrade(giveKey, receiveKey) {
   return true;
 }
 
+// Dupe choice: refund coins for a duplicate
+export function refundDupe(amount) {
+  _coins += amount;
+  saveState();
+  syncToServer();
+}
+
+// Dupe choice: keep the duplicate (adds extra copy for trading)
+export function keepDupe(key) {
+  _unlockedPokemon.push(key);
+  saveState();
+  syncToServer();
+}
+
 // ─── Public API ─────────────────────────────────────────────────────
 
 export function getCoins() { return _coins; }
@@ -1116,16 +1130,13 @@ export function buyPokemonPack() {
   if (!result) return { error: 'No Pokémon available' };
   _coins -= PACK_COST;
   const isDuplicate = _unlockedPokemon.includes(result.key);
-  if (isDuplicate) {
-    // Refund half cost for duplicates
-    const refund = Math.floor(PACK_COST / 2);
-    _coins += refund;
-  } else {
+  if (!isDuplicate) {
     _unlockedPokemon.push(result.key);
   }
+  // Dupes: no auto-refund — player chooses to keep or refund in UI
   saveState();
   syncToServer();
-  return { success: true, result, isDuplicate };
+  return { success: true, result, isDuplicate, refundAmount: Math.floor(PACK_COST / 2) };
 }
 
 export function buyPokemonBox() {
@@ -1136,14 +1147,11 @@ export function buyPokemonBox() {
     const result = rollPack();
     if (!result) continue;
     const isDuplicate = _unlockedPokemon.includes(result.key);
-    if (isDuplicate) {
-      // Refund full per-slot cost for duplicates
-      const refund = Math.floor(BOX_COST / 5);
-      _coins += refund;
-    } else {
+    if (!isDuplicate) {
       _unlockedPokemon.push(result.key);
     }
-    results.push({ result, isDuplicate });
+    const refundAmount = Math.floor(BOX_COST / 5);
+    results.push({ result, isDuplicate, refundAmount });
   }
   saveState();
   syncToServer();
@@ -1197,7 +1205,7 @@ function renderPokemonPacks() {
     updateCoinsDisplay();
     renderPokemonPacks();
     renderPokemonShop();
-    showPackRipOpen(res.result, res.isDuplicate);
+    showPackRipOpen(res.result, res.isDuplicate, null, res.refundAmount);
   });
 
   section.appendChild(packCard);
@@ -1258,7 +1266,7 @@ function renderPokemonPacks() {
   container.appendChild(section);
 }
 
-function showPackRipOpen(result, isDuplicate, options = {}) {
+function showPackRipOpen(result, isDuplicate, options = {}, refundAmount = 0) {
   const tierColor = TIER_COLORS[result.tier] || '#fff';
   const { packIndex, totalPacks, onComplete } = options;
   const showCounter = typeof packIndex === 'number';
@@ -1349,7 +1357,7 @@ function showPackRipOpen(result, isDuplicate, options = {}) {
         if (onComplete) {
           onComplete();
         } else {
-          showPackReveal(result, isDuplicate);
+          showPackReveal(result, isDuplicate, refundAmount);
         }
       }, 300);
     }, 1400);
@@ -1437,20 +1445,28 @@ function showBoxSummary(results) {
   const overlay = document.createElement('div');
   overlay.className = 'pack-reveal-overlay';
 
+  const dupes = results.filter(r => r.isDuplicate);
+  const refundPerDupe = Math.floor(BOX_COST / 5);
+
   let cardsHtml = '';
-  for (const { result, isDuplicate } of results) {
+  for (let i = 0; i < results.length; i++) {
+    const { result, isDuplicate } = results[i];
     const pkmn = result.pkmn;
     const tierColor = TIER_COLORS[result.tier] || '#fff';
     const tierLabel = TIER_LABELS[result.tier] || '';
     cardsHtml += `
-      <div class="box-summary-card" style="--tier-color: ${tierColor}">
+      <div class="box-summary-card" style="--tier-color: ${tierColor}" data-idx="${i}">
         <div class="box-summary-glow"></div>
         <img class="box-summary-img" src="${pkmn.img || ''}" alt="${pkmn.name}" />
         <div class="box-summary-name">${pkmn.name}</div>
         <div class="box-summary-tier">${tierLabel} ${result.tier.toUpperCase()}</div>
         <div class="box-summary-stats">\u2764\ufe0f${pkmn.hp} \u2694\ufe0f${pkmn.damage}</div>
         ${isDuplicate
-        ? '<div class="box-summary-dupe">DUPE \ud83d\udcb0</div>'
+        ? `<div class="box-summary-dupe">DUPE</div>
+           <div class="box-dupe-btns">
+             <button class="box-dupe-btn box-dupe-btn--keep" data-idx="${i}">🔄 Keep</button>
+             <button class="box-dupe-btn box-dupe-btn--refund" data-idx="${i}">🪙 Refund</button>
+           </div>`
         : '<div class="box-summary-new">\u2728 NEW</div>'
       }
       </div>
@@ -1458,14 +1474,19 @@ function showBoxSummary(results) {
   }
 
   const newCount = results.filter(r => !r.isDuplicate).length;
-  const dupeCount = results.length - newCount;
-  const refundTotal = dupeCount * Math.floor(BOX_COST / 5);
+  const dupeCount = dupes.length;
 
   overlay.innerHTML = `
     <div class="box-summary-panel">
       <div class="box-summary-title">\ud83d\udce6 Box Results</div>
-      <div class="box-summary-subtitle">${newCount} new \u2022 ${dupeCount} dupes${refundTotal > 0 ? ` \u2022 \ud83e\ude99${refundTotal} refunded` : ''}</div>
+      <div class="box-summary-subtitle">${newCount} new \u2022 ${dupeCount} dupes</div>
       <div class="box-summary-grid">${cardsHtml}</div>
+      ${dupeCount > 0 ? `
+        <div class="box-bulk-actions">
+          <button class="btn pack-dupe-btn pack-dupe-btn--keep" id="box-keep-all">🔄 Keep All Dupes</button>
+          <button class="btn pack-dupe-btn pack-dupe-btn--refund" id="box-refund-all">🪙 Refund All (${refundPerDupe * dupeCount} coins)</button>
+        </div>
+      ` : ''}
       <button class="pack-reveal-close">Continue</button>
     </div>
   `;
@@ -1473,25 +1494,77 @@ function showBoxSummary(results) {
   document.body.appendChild(overlay);
   requestAnimationFrame(() => overlay.classList.add('pack-reveal-overlay--show'));
 
-  overlay.querySelector('.pack-reveal-close').addEventListener('click', () => {
+  // Track which dupes have been decided
+  const decided = new Set();
+
+  function updateCard(idx, action) {
+    if (decided.has(idx)) return;
+    decided.add(idx);
+    const { result, isDuplicate } = results[idx];
+    if (!isDuplicate) return;
+    const card = overlay.querySelector(`.box-summary-card[data-idx="${idx}"]`);
+    const btns = card?.querySelector('.box-dupe-btns');
+    if (action === 'keep') {
+      keepDupe(result.key);
+      if (btns) btns.innerHTML = '<div class="box-dupe-decided">🔄 Kept</div>';
+    } else {
+      refundDupe(results[idx].refundAmount || refundPerDupe);
+      if (btns) btns.innerHTML = '<div class="box-dupe-decided">🪙 Refunded</div>';
+    }
+  }
+
+  // Per-card buttons
+  overlay.querySelectorAll('.box-dupe-btn--keep').forEach(btn => {
+    btn.addEventListener('click', () => updateCard(parseInt(btn.dataset.idx), 'keep'));
+  });
+  overlay.querySelectorAll('.box-dupe-btn--refund').forEach(btn => {
+    btn.addEventListener('click', () => updateCard(parseInt(btn.dataset.idx), 'refund'));
+  });
+
+  // Bulk actions
+  document.getElementById('box-keep-all')?.addEventListener('click', () => {
+    results.forEach((r, i) => { if (r.isDuplicate) updateCard(i, 'keep'); });
+  });
+  document.getElementById('box-refund-all')?.addEventListener('click', () => {
+    results.forEach((r, i) => { if (r.isDuplicate) updateCard(i, 'refund'); });
+  });
+
+  function closeBox() {
+    // Auto-refund any undecided dupes
+    results.forEach((r, i) => {
+      if (r.isDuplicate && !decided.has(i)) {
+        refundDupe(r.refundAmount || refundPerDupe);
+      }
+    });
     overlay.classList.remove('pack-reveal-overlay--show');
     setTimeout(() => overlay.remove(), 300);
-  });
+    renderShopCoins();
+    renderPokemonPacks();
+  }
+
+  overlay.querySelector('.pack-reveal-close').addEventListener('click', closeBox);
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) {
-      overlay.classList.remove('pack-reveal-overlay--show');
-      setTimeout(() => overlay.remove(), 300);
-    }
+    if (e.target === overlay) closeBox();
   });
 }
 
-function showPackReveal(result, isDuplicate) {
+function showPackReveal(result, isDuplicate, refundAmount = 0) {
   const pkmn = result.pkmn;
   const tierColor = TIER_COLORS[result.tier] || '#fff';
   const tierLabel = TIER_LABELS[result.tier] || '';
 
   const overlay = document.createElement('div');
   overlay.className = 'pack-reveal-overlay';
+
+  const dupeHtml = isDuplicate
+    ? `<div class="pack-reveal-dupe">Already owned!</div>
+       <div class="pack-dupe-choice">
+         <button class="btn pack-dupe-btn pack-dupe-btn--keep" data-action="keep">🔄 Keep for Trading</button>
+         <button class="btn pack-dupe-btn pack-dupe-btn--refund" data-action="refund">🪙 Refund ${refundAmount} coins</button>
+       </div>`
+    : `<div class="pack-reveal-new">✨ NEW POKÉMON UNLOCKED! ✨</div>
+       <button class="pack-reveal-close">Continue</button>`;
+
   overlay.innerHTML = `
     <div class="pack-reveal-card">
       <div class="pack-reveal-glow" style="--tier-color: ${tierColor}"></div>
@@ -1501,11 +1574,7 @@ function showPackReveal(result, isDuplicate) {
       <div class="pack-reveal-tier" style="color: ${tierColor}">${tierLabel} ${result.tier.toUpperCase()}</div>
       <div class="pack-reveal-types">${pkmn.types.join(' / ')}</div>
       <div class="pack-reveal-stats">❤️ ${pkmn.hp} HP  ⚔️ ${pkmn.damage} DMG</div>
-      ${isDuplicate
-      ? `<div class="pack-reveal-dupe">Already owned! 🪙 ${Math.floor(PACK_COST / 2)} refunded</div>`
-      : `<div class="pack-reveal-new">✨ NEW POKÉMON UNLOCKED! ✨</div>`
-    }
-      <button class="pack-reveal-close">Continue</button>
+      ${dupeHtml}
     </div>
   `;
   document.body.appendChild(overlay);
@@ -1523,16 +1592,34 @@ function showPackReveal(result, isDuplicate) {
     sparkleContainer.appendChild(s);
   }
 
-  overlay.querySelector('.pack-reveal-close').addEventListener('click', () => {
+  function closeReveal() {
     overlay.classList.remove('pack-reveal-overlay--show');
     setTimeout(() => overlay.remove(), 300);
-  });
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) {
-      overlay.classList.remove('pack-reveal-overlay--show');
-      setTimeout(() => overlay.remove(), 300);
-    }
-  });
+    renderShopCoins();
+    renderPokemonPacks();
+  }
+
+  // New Pokémon: simple continue
+  overlay.querySelector('.pack-reveal-close')?.addEventListener('click', closeReveal);
+
+  // Dupe choice: keep or refund
+  if (isDuplicate) {
+    overlay.querySelector('[data-action="keep"]')?.addEventListener('click', () => {
+      keepDupe(result.key);
+      showShopToast(`🔄 Kept duplicate ${pkmn.name} for trading!`, 'success');
+      closeReveal();
+    });
+    overlay.querySelector('[data-action="refund"]')?.addEventListener('click', () => {
+      refundDupe(refundAmount);
+      showShopToast(`🪙 Refunded ${refundAmount} coins`, 'success');
+      closeReveal();
+    });
+  } else {
+    // Non-dupe: can also close by clicking overlay
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeReveal();
+    });
+  }
 }
 
 function showShopToast(message, type) {
