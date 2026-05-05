@@ -774,8 +774,8 @@ function createPieceElement(piece, playerColor) {
         } else if (cosmetic.position === 'aura') {
           if (cosmeticId === 'ONE_HIT_OBLITERATOR') {
             // Obliterator cosmetic: floating to the right of the Pokémon
-            cosEl.style.right = `${8 + ox}%`;
-            cosEl.style.bottom = `${15 + oy}%`;
+            cosEl.style.right = `${2 + ox}%`;
+            cosEl.style.bottom = `${8 + oy}%`;
             cosEl.style.top = 'auto';
             cosEl.style.left = 'auto';
             cosEl.style.transform = `rotate(${15 + extraRot}deg)`;
