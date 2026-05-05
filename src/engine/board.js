@@ -4,6 +4,7 @@
  */
 
 import { POKEMON, TEAMS, COLOR_TO_TEAM, BACK_RANK_ROLES } from './types.js';
+import { getPokemonLevel, getUpgradeBonus } from '../ui/shop.js';
 
 // ─── Piece Roles ────────────────────────────────────────────────────
 
@@ -35,14 +36,24 @@ export function createPiece(color, roleKey, pokemonKey, id) {
     id,
     hasMoved: false,
     bikeMode: false,
-    // HP-based combat stats
-    hp: pkmn?.hp ?? 5,
-    maxHp: pkmn?.maxHp ?? 5,
-    damage: pkmn?.damage ?? 2,
+    // HP-based combat stats (with upgrade bonuses)
+    hp: (pkmn?.hp ?? 5),
+    maxHp: (pkmn?.maxHp ?? 5),
+    damage: (pkmn?.damage ?? 2),
     damageTier: pkmn?.damageTier ?? 'weak',
     // Status effects
     statusEffect: null,     // 'frozen' | 'stunned' | null
   };
+  // Apply True King upgrade bonuses
+  try {
+    const level = getPokemonLevel(pokemonKey);
+    if (level > 1) {
+      const bonus = getUpgradeBonus(level);
+      piece.hp += bonus.hp;
+      piece.maxHp += bonus.hp;
+      piece.damage += bonus.damage;
+    }
+  } catch { /* shop module may not be loaded in tests */ }
   // True Kings get bike mode cooldown
   if (roleKey === 'TRUE_KING') {
     piece.bikeCooldown = 0;
