@@ -132,8 +132,16 @@ function startOnlineMatch(clockPreset, options) {
     },
     onMatchFound: (msg) => {
       removeSearchingOverlay();
-      // Use the player's custom team presets from the setup screen
+      // Merge player's team presets with opponent's team presets from the server
       const teamPresets = options.teamPresets ? { ...options.teamPresets } : {};
+      const opponentPresets = msg.opponentTeamPresets || {};
+      // Determine which team is the opponent's
+      const opponentTeamKey = msg.yourColor === 'white' ? 'violet' : 'scarlet';
+      const playerTeamKey = msg.yourColor === 'white' ? 'scarlet' : 'violet';
+      // If opponent sent their team data, use it for their side
+      if (opponentPresets[opponentTeamKey]) {
+        teamPresets[opponentTeamKey] = opponentPresets[opponentTeamKey];
+      }
       game = startGame(game, clockPreset, {
         playerColor: msg.yourColor,
         isAIGame: false,
@@ -168,7 +176,7 @@ function startOnlineMatch(clockPreset, options) {
       removeSearchingOverlay();
     },
   }).then(() => {
-    findMatch(options.preferredTeam, clockPreset);
+    findMatch(options.preferredTeam, clockPreset, options.teamPresets);
   }).catch(() => {
     removeSearchingOverlay();
     showStatusToast('⚠️ Could not connect to server. Start server with: node server.js', 'default');

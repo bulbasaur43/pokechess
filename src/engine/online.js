@@ -66,12 +66,13 @@ export function connectToServer(cbs) {
   });
 }
 
-export function findMatch(team, timePreset) {
+export function findMatch(team, timePreset, teamPresets) {
   if (!ws || ws.readyState !== 1) return;
   ws.send(JSON.stringify({
     type: 'find_match',
     team,
     timePreset,
+    teamPresets: teamPresets || {},
   }));
 }
 

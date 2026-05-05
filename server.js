@@ -747,6 +747,7 @@ wss.on('connection', (ws) => {
 function handleFindMatch(ws, msg) {
   const preferredTeam = msg.team || 'scarlet';
   const timePreset = msg.timePreset || 'medium';
+  const teamPresets = msg.teamPresets || {};
 
   if (waitingPlayer && waitingPlayer.readyState === 1) {
     const roomId = `room_${++roomCounter}`;
@@ -772,13 +773,21 @@ function handleFindMatch(ws, msg) {
 
     console.log(`🎮 Match: ${whiteWs.id} vs ${blackWs.id} in ${roomId}`);
 
-    whiteWs.send(JSON.stringify({ type: 'match_found', roomId, yourColor: 'white', timePreset }));
-    blackWs.send(JSON.stringify({ type: 'match_found', roomId, yourColor: 'black', timePreset }));
+    // Send each player the opponent's team presets so both boards match
+    whiteWs.send(JSON.stringify({
+      type: 'match_found', roomId, yourColor: 'white', timePreset,
+      opponentTeamPresets: blackWs.teamPresets || {},
+    }));
+    blackWs.send(JSON.stringify({
+      type: 'match_found', roomId, yourColor: 'black', timePreset,
+      opponentTeamPresets: whiteWs.teamPresets || {},
+    }));
 
     waitingPlayer = null;
   } else {
     ws.preferredTeam = preferredTeam;
     ws.timePreset = timePreset;
+    ws.teamPresets = teamPresets;
     waitingPlayer = ws;
     ws.send(JSON.stringify({ type: 'searching' }));
     console.log(`🔍 ${ws.id} searching...`);
