@@ -428,6 +428,23 @@ function loadState() {
       _unlockedHiddenItems = data.unlockedHiddenItems || [];
     }
   } catch { _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = []; _lastDailyReward = ''; _ownedCosmetics = []; _equippedCosmetic = ''; _pokemonLevels = {}; _unlockedHiddenItems = []; }
+
+  // Restore any pending trade results that might have been overwritten
+  try {
+    const pending = JSON.parse(localStorage.getItem('pokechess_trade_pending') || '[]');
+    if (pending.length > 0) {
+      let changed = false;
+      for (const key of pending) {
+        if (key && !_unlockedPokemon.includes(key)) {
+          _unlockedPokemon.push(key);
+          changed = true;
+        }
+      }
+      if (changed) saveState();
+      // Clear pending after restoring
+      localStorage.removeItem('pokechess_trade_pending');
+    }
+  } catch {}
 }
 
 function saveState() {
@@ -517,16 +534,24 @@ export async function executeTrade(giveKey, receiveKey, coinsGave = 0, coinsRece
       _unlockedPokemon.splice(idx, 1);
     }
   }
-  // Always add the received pokemon (even if already owned — it's a trade dupe)
-  if (receiveKey) {
-    if (!_unlockedPokemon.includes(receiveKey)) {
-      _unlockedPokemon.push(receiveKey);
-    }
+  // Always add the received pokemon
+  if (receiveKey && !_unlockedPokemon.includes(receiveKey)) {
+    _unlockedPokemon.push(receiveKey);
   }
   // Handle coin transfer
   _coins = Math.max(0, _coins - (coinsGave || 0) + (coinsReceived || 0));
   console.log('[Trade] after:', [..._unlockedPokemon], 'coins:', _coins);
+
+  // Save to main state
   saveState();
+
+  // Also save trade result to a backup key so it can never be lost
+  try {
+    const pending = JSON.parse(localStorage.getItem('pokechess_trade_pending') || '[]');
+    if (receiveKey) pending.push(receiveKey);
+    localStorage.setItem('pokechess_trade_pending', JSON.stringify(pending));
+  } catch {}
+
   await syncToServer();
   return true;
 }
