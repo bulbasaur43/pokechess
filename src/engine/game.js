@@ -634,6 +634,9 @@ function applySpecialAbilities(game, row, col, fromRow, fromCol) {
   else if (ability.targets === 'radius_2_enemies') targets = radius2Enemies;
   else if (ability.targets === 'self') targets = [];
 
+  // Filter out targets immune to abilities (Smoke Ball / Shadow Cloak)
+  targets = targets.filter(t => !t.target.smokeBall && !t.target.shadowCloak);
+
   // Apply effects
   if (ability.effect === 'damage') {
     for (const t of targets) {
@@ -861,6 +864,29 @@ function tickStatusDamage(board) {
         } else {
           newBoard[r][c] = { ...p, paralyzeTick: tick };
         }
+      }
+
+      // Toxic Orb: 1 damage per turn, counts down
+      const cur = newBoard[r][c];
+      if (cur && cur.toxicOrb > 0) {
+        const newHp = cur.hp - 1;
+        if (newHp <= 0) {
+          newBoard[r][c] = null;
+        } else {
+          newBoard[r][c] = { ...cur, hp: newHp, toxicOrb: cur.toxicOrb - 1 };
+        }
+      }
+
+      // Agility Band: tick down
+      const cur2 = newBoard[r][c];
+      if (cur2 && cur2.agilityBand > 0) {
+        newBoard[r][c] = { ...cur2, agilityBand: cur2.agilityBand - 1 };
+      }
+
+      // Smoke Ball: tick down
+      const cur3 = newBoard[r][c];
+      if (cur3 && cur3.smokeBall > 0) {
+        newBoard[r][c] = { ...cur3, smokeBall: cur3.smokeBall - 1 };
       }
     }
   }
