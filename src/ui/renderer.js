@@ -895,6 +895,33 @@ function createPieceElement(piece, playerColor) {
     el.appendChild(intimIcon);
   }
 
+  // ── Item effect indicators ──
+  const itemIcons = [];
+  if (piece.focusSash) itemIcons.push({ emoji: '🛡️', title: 'Focus Sash' });
+  if (piece.leftovers) itemIcons.push({ emoji: '🍎', title: 'Leftovers' });
+  if (piece.destinyBond) itemIcons.push({ emoji: '💀', title: 'Destiny Bond' });
+  if (piece.wideLens) itemIcons.push({ emoji: '🔍', title: 'Wide Lens (2x ability)' });
+  if (piece.lifeOrb) itemIcons.push({ emoji: '🔮', title: 'Life Orb (+3 DMG, -2 HP/atk)' });
+  if (piece.shieldDust) itemIcons.push({ emoji: '🛡', title: 'Shield Dust (status immune)' });
+  if (piece.shadowCloak) itemIcons.push({ emoji: '🌑', title: 'Shadow Cloak (ability immune)' });
+  if (piece.smokeBall) itemIcons.push({ emoji: '💨', title: `Smoke Ball (${piece.smokeBall} turns)` });
+  if (piece.agilityBand) itemIcons.push({ emoji: '💨', title: `Agility Band (${piece.agilityBand} turns)` });
+  if (piece.razorLeaf) itemIcons.push({ emoji: '🍃', title: 'Razor Leaf Storm' });
+  if (piece.toxicOrb) itemIcons.push({ emoji: '☠️', title: `Toxic (${piece.toxicOrb} turns)` });
+
+  if (itemIcons.length > 0) {
+    const itemBar = document.createElement('div');
+    itemBar.className = 'piece__item-bar';
+    for (const icon of itemIcons) {
+      const badge = document.createElement('span');
+      badge.className = 'piece__item-badge';
+      badge.textContent = icon.emoji;
+      badge.title = icon.title;
+      itemBar.appendChild(badge);
+    }
+    el.appendChild(itemBar);
+  }
+
   return el;
 }
 

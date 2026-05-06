@@ -658,6 +658,11 @@ function handleOpenShop() {
 
 function handleItemUse(itemId) {
   if (game.phase !== PHASES.PLAY) return;
+  // Block items in online matches to prevent desync
+  if (gameMode === 'online') {
+    showStatusToast('❌ Items are disabled in online matches!', 'error');
+    return;
+  }
   // Set active item — next cell click will apply it
   activeItem = itemId;
   showStatusToast(`${SHOP_ITEMS[itemId]?.emoji} Select a target... (ESC to cancel)`, 'item');
