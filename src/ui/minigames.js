@@ -152,7 +152,8 @@ function startShooterGame(canvas) {
   let keys = {};
   let mouseX = W / 2, mouseY = H / 2;
   let shootTimer = 0;
-  const SHOOT_INTERVAL = 8; // Auto-shoot every 8 frames (~7.5 shots/sec)
+  const hasLeafBlaster = isHiddenItemUnlocked('LEAF_BLASTER');
+  const SHOOT_INTERVAL = hasLeafBlaster ? 3 : 8; // 20/sec with Leaf Blaster, ~7.5/sec default
   const LEAF_SPEED = 8;
 
   // Get mouse/touch position relative to canvas
@@ -387,6 +388,20 @@ function startShooterGame(canvas) {
         ctx.font = '13px monospace';
         ctx.fillStyle = 'rgba(74, 222, 128, 0.8)';
         ctx.fillText('Check the shop for your new item!', W / 2, H / 2 + 50);
+      }
+
+      // Leaf Blaster unlock at score 150
+      let blasterUnlocked = false;
+      if (score >= 150 && !isHiddenItemUnlocked('LEAF_BLASTER')) {
+        blasterUnlocked = unlockHiddenItem('LEAF_BLASTER');
+      }
+      if (blasterUnlocked || (score >= 150 && isHiddenItemUnlocked('LEAF_BLASTER'))) {
+        ctx.fillStyle = '#22c55e';
+        ctx.font = 'bold 16px monospace';
+        ctx.fillText('🌿 SECRET UNLOCKED: Leaf Blaster! 🌿', W / 2, H / 2 + 70);
+        ctx.font = '12px monospace';
+        ctx.fillStyle = 'rgba(34, 197, 94, 0.8)';
+        ctx.fillText('Bulbasaur now fires 20 leaves/sec!', W / 2, H / 2 + 88);
       }
 
       // Toxic Orb unlock at score 200

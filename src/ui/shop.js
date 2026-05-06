@@ -254,6 +254,19 @@ export const SHOP_ITEMS = {
     cooldownBattles: 0,
     hidden: true,
   },
+  LEAF_BLASTER: {
+    id: 'LEAF_BLASTER',
+    name: 'Leaf Blaster',
+    emoji: '🌿',
+    coinCost: 0,
+    description: 'Bulbasaur fires 20 leaves/sec in the Shooter minigame!',
+    useDescription: 'Automatically active in Leaf Shooter',
+    color: '#22c55e',
+    usesPerPurchase: 999,
+    cooldownBattles: 0,
+    hidden: true,
+    minigameOnly: true,
+  },
 };
 
 // ─── Cosmetics ──────────────────────────────────────────────────────
