@@ -392,10 +392,10 @@ function startShooterGame(canvas) {
 
       // Leaf Blaster unlock at score 150
       let blasterUnlocked = false;
-      if (score >= 150 && !isHiddenItemUnlocked('LEAF_BLASTER')) {
+      if (score >= 50 && !isHiddenItemUnlocked('LEAF_BLASTER')) {
         blasterUnlocked = unlockHiddenItem('LEAF_BLASTER');
       }
-      if (blasterUnlocked || (score >= 150 && isHiddenItemUnlocked('LEAF_BLASTER'))) {
+      if (blasterUnlocked || (score >= 50 && isHiddenItemUnlocked('LEAF_BLASTER'))) {
         ctx.fillStyle = '#22c55e';
         ctx.font = 'bold 16px monospace';
         ctx.fillText('🌿 SECRET UNLOCKED: Leaf Blaster! 🌿', W / 2, H / 2 + 70);
