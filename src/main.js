@@ -783,6 +783,69 @@ function applyItemToCell(itemId, row, col) {
     case 'REVIVE': {
       return cancelItem('Use Revive from captured pieces list!');
     }
+    case 'WIDE_LENS': {
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
+      game.board[row][col] = { ...piece, wideLens: true, appliedItems: [...(piece.appliedItems || []), itemId] };
+      showStatusToast(`🔍 ${POKEMON[piece.pokemon]?.name || 'Piece'} got Wide Lens! Ability damage doubled!`, 'buff');
+      break;
+    }
+    case 'LIFE_ORB': {
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
+      game.board[row][col] = { ...piece, lifeOrb: true, damage: piece.damage + 3, appliedItems: [...(piece.appliedItems || []), itemId] };
+      showStatusToast(`🔮 ${POKEMON[piece.pokemon]?.name || 'Piece'} powered by Life Orb! +3 DMG but costs 2 HP per attack!`, 'buff');
+      break;
+    }
+    case 'SHIELD_DUST': {
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
+      game.board[row][col] = { ...piece, shieldDust: true, appliedItems: [...(piece.appliedItems || []), itemId] };
+      showStatusToast(`🛡️ ${POKEMON[piece.pokemon]?.name || 'Piece'} is immune to status effects!`, 'buff');
+      break;
+    }
+    case 'CHOICE_SCARF': {
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
+      if (!window._choiceScarfFirst) {
+        window._choiceScarfFirst = { row, col };
+        showStatusToast(`🧣 Now click the second friendly piece to swap with!`, 'buff');
+        return true; // Don't consume yet
+      } else {
+        const first = window._choiceScarfFirst;
+        const piece1 = game.board[first.row][first.col];
+        if (!piece1 || piece1.color !== playerColor) {
+          window._choiceScarfFirst = null;
+          return cancelItem('First piece is gone! Try again.');
+        }
+        // Swap positions
+        game.board[first.row][first.col] = piece;
+        game.board[row][col] = piece1;
+        window._choiceScarfFirst = null;
+        showStatusToast(`🧣 Swapped ${POKEMON[piece1.pokemon]?.name} and ${POKEMON[piece.pokemon]?.name}!`, 'buff');
+        break;
+      }
+    }
+    case 'EJECT_BUTTON': {
+      if (!window._ejectPiece) {
+        if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
+        window._ejectPiece = { row, col };
+        showStatusToast(`🔘 Now click an empty square to teleport to!`, 'buff');
+        return true; // Don't consume yet
+      } else {
+        if (piece) {
+          window._ejectPiece = null;
+          return cancelItem('That square is occupied! Try again.');
+        }
+        const src = window._ejectPiece;
+        const srcPiece = game.board[src.row][src.col];
+        if (!srcPiece) {
+          window._ejectPiece = null;
+          return cancelItem('Piece is gone! Try again.');
+        }
+        game.board[row][col] = srcPiece;
+        game.board[src.row][src.col] = null;
+        window._ejectPiece = null;
+        showStatusToast(`🔘 ${POKEMON[srcPiece.pokemon]?.name} teleported!`, 'buff');
+        break;
+      }
+    }
     default:
       return cancelItem('Item not yet implemented');
   }

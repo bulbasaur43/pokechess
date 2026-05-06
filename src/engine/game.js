@@ -232,6 +232,18 @@ export function executeMove(game, toRow, toCol) {
         newGame.board[toRow][toCol] = { ...newGame.board[toRow][toCol], obliterator: false };
       }
 
+      // Life Orb recoil: attacker loses 2 HP per attack
+      if (attacker.lifeOrb && newGame.board[toRow]?.[toCol]) {
+        const orbPiece = newGame.board[toRow][toCol];
+        const orbHp = orbPiece.hp - 2;
+        if (orbHp <= 0) {
+          newGame.capturedPieces[orbPiece.color].push(orbPiece);
+          newGame.board[toRow][toCol] = null;
+        } else {
+          newGame.board[toRow][toCol] = { ...orbPiece, hp: orbHp };
+        }
+      }
+
       // Destiny Bond: attacker is dragged down too
       if (battleResult.destinyBondTriggered && newGame.board[toRow]?.[toCol]) {
         const atkPiece = newGame.board[toRow][toCol];
@@ -638,16 +650,19 @@ function applySpecialAbilities(game, row, col, fromRow, fromCol) {
   targets = targets.filter(t => !t.target.smokeBall && !t.target.shadowCloak);
 
   // Apply effects
+  // Wide Lens: double ability damage
+  const abilityDamage = piece.wideLens ? ability.damage * 2 : ability.damage;
+
   if (ability.effect === 'damage') {
     for (const t of targets) {
-      const newHp = Math.max(0, t.target.hp - ability.damage);
+      const newHp = Math.max(0, t.target.hp - abilityDamage);
       if (newHp <= 0) { newBoard[t.r][t.c] = null; }
       else { newBoard[t.r][t.c] = { ...t.target, hp: newHp }; }
-      affected.push({ row: t.r, col: t.c, name: t.target.pokemon, damage: ability.damage });
+      affected.push({ row: t.r, col: t.c, name: t.target.pokemon, damage: abilityDamage });
     }
   } else if (ability.effect === 'status') {
     for (const t of targets) {
-      if (!t.target.statusEffect) {
+      if (!t.target.statusEffect && !t.target.shieldDust) {
         newBoard[t.r][t.c] = { ...t.target, statusEffect: ability.status };
         affected.push({ row: t.r, col: t.c, name: t.target.pokemon });
       }
@@ -662,10 +677,11 @@ function applySpecialAbilities(game, row, col, fromRow, fromCol) {
   } else if (ability.effect === 'drain') {
     // Damage targets + heal self
     for (const t of targets) {
-      const newHp = Math.max(0, t.target.hp - ability.damage);
+      const drainDmg = piece.wideLens ? ability.damage * 2 : ability.damage;
+      const newHp = Math.max(0, t.target.hp - drainDmg);
       if (newHp <= 0) { newBoard[t.r][t.c] = null; }
       else { newBoard[t.r][t.c] = { ...t.target, hp: newHp }; }
-      affected.push({ row: t.r, col: t.c, name: t.target.pokemon, damage: ability.damage });
+      affected.push({ row: t.r, col: t.c, name: t.target.pokemon, damage: drainDmg });
     }
     // Heal (or self-damage if negative, e.g. Gengar Curse)
     const healAmt = ability.heal ?? 0;
@@ -704,7 +720,7 @@ function applySpecialAbilities(game, row, col, fromRow, fromCol) {
 
     for (const t of bonusTargets) {
       const cur = newBoard[t.r][t.c];
-      if (cur && !cur.statusEffect) {
+      if (cur && !cur.statusEffect && !cur.shieldDust) {
         newBoard[t.r][t.c] = { ...cur, statusEffect: ability.bonusStatus };
         affected.push({ row: t.r, col: t.c, name: cur.pokemon });
       }
