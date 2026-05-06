@@ -507,7 +507,7 @@ export function unlockPokemon(key, cost) {
 export function getUnlockedPokemon() { return [..._unlockedPokemon]; }
 
 // Trade: remove a Pokémon you're giving away, add the one you receive, handle coins
-export function executeTrade(giveKey, receiveKey, coinsGave = 0, coinsReceived = 0) {
+export async function executeTrade(giveKey, receiveKey, coinsGave = 0, coinsReceived = 0) {
   console.log('[Trade] executing:', { giveKey, receiveKey, coinsGave, coinsReceived });
   console.log('[Trade] before:', [..._unlockedPokemon]);
   // Remove the given pokemon (if in unlocked list)
@@ -519,13 +519,15 @@ export function executeTrade(giveKey, receiveKey, coinsGave = 0, coinsReceived =
   }
   // Always add the received pokemon (even if already owned — it's a trade dupe)
   if (receiveKey) {
-    _unlockedPokemon.push(receiveKey);
+    if (!_unlockedPokemon.includes(receiveKey)) {
+      _unlockedPokemon.push(receiveKey);
+    }
   }
   // Handle coin transfer
   _coins = Math.max(0, _coins - (coinsGave || 0) + (coinsReceived || 0));
   console.log('[Trade] after:', [..._unlockedPokemon], 'coins:', _coins);
   saveState();
-  syncToServer();
+  await syncToServer();
   return true;
 }
 
@@ -701,11 +703,15 @@ export async function loadFromServer() {
     });
     if (res.ok) {
       const data = await res.json();
-      if (data.coins != null) _coins = data.coins;
+      if (data.coins != null) _coins = Math.max(_coins, data.coins);
       if (data.inventory) _inventory = data.inventory;
-      if (data.battleCount != null) _battleCount = data.battleCount;
-      if (data.unlockedPokemon) _unlockedPokemon = data.unlockedPokemon;
-      if (data.pokemonLevels) _pokemonLevels = data.pokemonLevels;
+      if (data.battleCount != null) _battleCount = Math.max(_battleCount, data.battleCount);
+      // Merge unlocked pokemon: keep local + add any from server (union, never lose trades)
+      if (data.unlockedPokemon) {
+        const merged = new Set([..._unlockedPokemon, ...data.unlockedPokemon]);
+        _unlockedPokemon = [...merged];
+      }
+      if (data.pokemonLevels) _pokemonLevels = { ..._pokemonLevels, ...data.pokemonLevels };
       saveState();
     }
   } catch { /* silent */ }
