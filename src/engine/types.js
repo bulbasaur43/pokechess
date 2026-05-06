@@ -151,7 +151,7 @@ export const POKEMON = {
   SYLVEON:      { name: 'Sylveon',      types: ['FAIRY','NORMAL'],     team: 'violet',  emoji: '🎀', img: SPRITE(700),  desc: 'Intertwining Pokémon',   hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
   DRAGAPULT:    { name: 'Dragapult',    types: ['DRAGON','GHOST'],     team: 'violet',  emoji: '🐉', img: SPRITE(887),  desc: 'Stealth Pokémon',       hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
   CHIEN_PAO:    { name: 'Chien-Pao',    types: ['DARK','ICE'],         team: 'violet',  emoji: '🐆', img: SPRITE(1002), desc: 'Ruinous Pokémon',       hp: 7,  maxHp: 7,  damage: 5, damageTier: 'heavy' },
-  ZAPDOS:       { name: 'Zapdos',       types: ['ELECTRIC','FLYING'],  team: 'scarlet', emoji: '⚡', img: SPRITE(145),  desc: 'Electric Pokémon',      hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
+  ZAPDOS:       { name: 'Zapdos',       types: ['ELECTRIC','FLYING'],  team: 'scarlet', emoji: '⚡', img: SPRITE(145),  desc: 'Electric Pokémon',      hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   BRAMBLEGHAST: { name: 'Brambleghast', types: ['GRASS','GHOST'],      team: 'violet',  emoji: '🌿', img: SPRITE(947),  desc: 'Tumbleweed Pokémon',    hp: 7,  maxHp: 7,  damage: 2, damageTier: 'weak' },
   AUDINO:       { name: 'Audino',       types: ['NORMAL','FAIRY'],     team: 'violet',  emoji: '👂', img: SPRITE(531),  desc: 'Hearing Pokémon',       hp: 8,  maxHp: 8,  damage: 1, damageTier: 'weak' },
   MIMIKYU:      { name: 'Mimikyu',      types: ['GHOST','FAIRY'],      team: 'violet',  emoji: '👻', img: SPRITE(778),  desc: 'Disguise Pokémon',      hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
