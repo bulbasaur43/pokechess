@@ -55,9 +55,9 @@ const API_BASE = isDev
 // ─── Coin Packs (buy with real money) ───────────────────────────────
 
 export const COIN_PACKS = [
-  { id: 'pack_150', coins: 150, price: 99, priceLabel: '$0.99', bonus: '' },
-  { id: 'pack_600', coins: 600, price: 299, priceLabel: '$2.99', bonus: '🔥 Best Value' },
-  { id: 'pack_1500', coins: 1500, price: 499, priceLabel: '$4.99', bonus: '💎 Premium' },
+  { id: 'pack_100', coins: 100, price: 99, priceLabel: '$0.99', bonus: '' },
+  { id: 'pack_500', coins: 500, price: 299, priceLabel: '$2.99', bonus: '🔥 Best Value' },
+  { id: 'pack_1200', coins: 1200, price: 499, priceLabel: '$4.99', bonus: '💎 Premium' },
 ];
 
 // ─── Shop Items (cost PokéCoins) ────────────────────────────────────
