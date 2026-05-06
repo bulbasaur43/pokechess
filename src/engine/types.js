@@ -160,7 +160,7 @@ export const POKEMON = {
   KINGAMBIT:    { name: 'Kingambit',    types: ['DARK','STEEL'],       team: 'violet',  emoji: '♚', img: SPRITE(983),  desc: 'Big Boss Pokémon',      hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
   HATTERENE:    { name: 'Hatterene',    types: ['PSYCHIC','FAIRY'],    team: 'violet',  emoji: '🧙', img: SPRITE(858),  desc: 'Silent Pokémon',        hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   // Violet pack-only
-  PICHU:        { name: 'Pichu',        types: ['ELECTRIC'],           team: 'violet',  emoji: '⚡', img: SPRITE(172),  desc: 'Tiny Mouse Pokémon',    hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
+  PICHU:        { name: 'Pichu',        types: ['ELECTRIC'],           team: 'violet',  emoji: '⚡', img: SPRITE(172),  desc: 'Tiny Mouse Pokémon',    hp: 15, maxHp: 15, damage: 0, damageTier: 'none', noAttack: true },
   RAICHU:       { name: 'Raichu',       types: ['ELECTRIC','PSYCHIC'], team: 'violet',  emoji: '⚡', img: SPRITE(26),   desc: 'Mouse Pokémon',         hp: 10, maxHp: 10, damage: 4, damageTier: 'heavy' },
   AEGISLASH:    { name: 'Aegislash',    types: ['STEEL','GHOST'],      team: 'violet',  emoji: '🛡️', img: SPRITE(681),  desc: 'Royal Sword Pokémon',   hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
   ZOROARK:      { name: 'Zoroark',      types: ['DARK'],               team: 'violet',  emoji: '🦊', img: SPRITE(571),  desc: 'Illusion Fox Pokémon',  hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },

@@ -36,7 +36,14 @@ export function getLegalMoves(board, row, col, enPassantTarget = null) {
     default:          moves = []; break;
   }
 
-  return applyParalysis(moves, piece);
+  let finalMoves = applyParalysis(moves, piece);
+
+  // noAttack pieces (e.g. Pichu) can move but cannot capture
+  if (piece.noAttack) {
+    finalMoves = finalMoves.filter(m => !m.isCapture);
+  }
+
+  return finalMoves;
 }
 
 /**

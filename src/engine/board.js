@@ -62,6 +62,10 @@ export function createPiece(color, roleKey, pokemonKey, id, overrideLevel) {
   if (pokemonKey === 'FLUTTER_MANE' || pokemonKey === 'IRON_CROWN') {
     piece.optionalAttackCooldown = 0;
   }
+  // noAttack pieces (e.g. Pichu) — can move but cannot capture
+  if (pkmn?.noAttack) {
+    piece.noAttack = true;
+  }
   return piece;
 }
 
