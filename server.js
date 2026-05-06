@@ -97,7 +97,7 @@ function loadDBLocal() {
   } catch (e) {
     console.error('Local DB load error:', e.message);
   }
-  return { users: {}, sessions: {} };
+  return { users: {}, sessions: {}, reports: [] };
 }
 
 // Debounced Redis save to batch rapid writes
@@ -268,6 +268,12 @@ function routeRequest(req, res, body) {
     handleShopSync(req, res, body);
   } else if (req.method === 'POST' && url === '/api/admin/gift-coins') {
     handleAdminGiftCoins(req, res, body);
+  } else if (req.method === 'POST' && url === '/api/report') {
+    handleReport(req, res, body);
+  } else if (req.method === 'POST' && url === '/api/admin/reports') {
+    handleAdminGetReports(req, res, body);
+  } else if (req.method === 'POST' && url === '/api/admin/dismiss-report') {
+    handleAdminDismissReport(req, res, body);
   } else {
     sendJSON(res, 404, { error: 'Not found' });
   }
@@ -1166,6 +1172,68 @@ function handleAdminGiftCoins(req, res, body) {
   const verb = coins > 0 ? 'gifted' : coins < 0 ? 'removed' : 'reset';
   console.log(`🪙 Admin ${verb} ${Math.abs(coins)} coins for ${username} (balance: ${target.shop.coins})`);
   sendJSON(res, 200, { ok: true, newBalance: target.shop.coins });
+}
+
+// ─── Player Reports ─────────────────────────────────────────────────
+
+function handleReport(req, res, body) {
+  const auth = getAuthUser(req);
+  if (!auth) return sendJSON(res, 401, { error: 'Must be logged in to report' });
+
+  const { reportedUser, reason } = body || {};
+  if (!reportedUser || !reason) return sendJSON(res, 400, { error: 'Must provide reportedUser and reason' });
+  if (reason.length > 500) return sendJSON(res, 400, { error: 'Reason too long (max 500 chars)' });
+  if (reportedUser.toLowerCase() === auth.username) return sendJSON(res, 400, { error: 'Cannot report yourself' });
+
+  // Check if reported user exists
+  if (!db.users[reportedUser.toLowerCase()]) {
+    return sendJSON(res, 404, { error: 'Reported user not found' });
+  }
+
+  // Initialize reports array if needed
+  if (!db.reports) db.reports = [];
+
+  // Rate limit: max 5 reports per user per hour
+  const oneHourAgo = Date.now() - 60 * 60 * 1000;
+  const recentReports = db.reports.filter(r => r.reporter === auth.username && r.timestamp > oneHourAgo);
+  if (recentReports.length >= 5) {
+    return sendJSON(res, 429, { error: 'Too many reports — try again later' });
+  }
+
+  const report = {
+    id: randomBytes(8).toString('hex'),
+    reporter: auth.username,
+    reported: reportedUser.toLowerCase(),
+    reason: reason.trim(),
+    timestamp: Date.now(),
+    dismissed: false,
+  };
+
+  db.reports.push(report);
+  saveDB(db);
+  console.log(`🚩 Report: ${auth.username} reported ${reportedUser} — "${reason}"`);
+  sendJSON(res, 200, { ok: true, message: 'Report submitted. Thank you!' });
+}
+
+function handleAdminGetReports(req, res, body) {
+  if (!verifyAdmin(body)) return sendJSON(res, 403, { error: 'Invalid admin password' });
+  if (!db.reports) db.reports = [];
+  // Return active (non-dismissed) reports, newest first
+  const active = db.reports.filter(r => !r.dismissed).sort((a, b) => b.timestamp - a.timestamp);
+  sendJSON(res, 200, { reports: active });
+}
+
+function handleAdminDismissReport(req, res, body) {
+  if (!verifyAdmin(body)) return sendJSON(res, 403, { error: 'Invalid admin password' });
+  const { reportId } = body || {};
+  if (!reportId) return sendJSON(res, 400, { error: 'reportId required' });
+  if (!db.reports) db.reports = [];
+  const report = db.reports.find(r => r.id === reportId);
+  if (!report) return sendJSON(res, 404, { error: 'Report not found' });
+  report.dismissed = true;
+  saveDB(db);
+  console.log(`✅ Admin dismissed report ${reportId}`);
+  sendJSON(res, 200, { ok: true });
 }
 
 // ─── Stripe Webhook ─────────────────────────────────────────────────

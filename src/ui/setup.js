@@ -174,6 +174,7 @@ export function renderTitleScreen(onStart) {
       <!-- Shop & Admin -->
       <div class="title-bottom-btns">
         <button class="btn btn--shop-title" id="btn-shop-title">🛒 Shop <span class="shop-coin-badge">🪙 <span id="title-coin-count">0</span></span></button>
+        <button class="btn btn--report" id="btn-report">🚩 Report</button>
         <button class="btn btn--admin" id="btn-admin">🔒 Admin</button>
       </div>
       <div class="admin-overlay" id="admin-overlay"></div>
@@ -588,6 +589,77 @@ export function renderTitleScreen(onStart) {
     openShop(null); // no item-use callback on title screen
   });
 
+  // ── Report Player ──
+  document.getElementById('btn-report')?.addEventListener('click', () => {
+    const overlay = document.getElementById('admin-overlay');
+    if (!overlay) return;
+
+    overlay.innerHTML = `
+      <div class="admin-panel" style="max-width:420px">
+        <div class="admin-header">
+          <h2>🚩 Report a Player</h2>
+          <button class="admin-close" id="report-close">✕</button>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+          <label style="color:#94a3b8;font-size:0.85rem">Username to report</label>
+          <input type="text" id="report-username" class="admin-input" placeholder="Enter username..." />
+          <label style="color:#94a3b8;font-size:0.85rem">Reason</label>
+          <select id="report-reason-select" class="admin-input" style="padding:8px;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px">
+            <option value="">Select a reason...</option>
+            <option value="Cheating / Exploiting">Cheating / Exploiting</option>
+            <option value="Harassment / Toxic Behavior">Harassment / Toxic Behavior</option>
+            <option value="Inappropriate Username">Inappropriate Username</option>
+            <option value="Intentional Disconnecting">Intentional Disconnecting</option>
+            <option value="Other">Other</option>
+          </select>
+          <textarea id="report-details" class="admin-input" placeholder="Additional details (optional)..." rows="3" style="resize:vertical;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:8px;font-family:inherit"></textarea>
+          <button class="btn btn--start" id="report-submit" style="margin-top:4px">Submit Report</button>
+          <div id="report-status" style="color:#94a3b8;font-size:0.85rem;text-align:center;min-height:20px"></div>
+        </div>
+      </div>
+    `;
+    overlay.classList.add('admin-overlay--open');
+
+    document.getElementById('report-close')?.addEventListener('click', () => {
+      overlay.classList.remove('admin-overlay--open');
+      overlay.innerHTML = '';
+    });
+
+    document.getElementById('report-submit')?.addEventListener('click', async () => {
+      const username = document.getElementById('report-username')?.value?.trim();
+      const reasonSelect = document.getElementById('report-reason-select')?.value;
+      const details = document.getElementById('report-details')?.value?.trim();
+      const statusEl = document.getElementById('report-status');
+
+      if (!username) { if (statusEl) statusEl.textContent = '❌ Enter a username'; return; }
+      if (!reasonSelect) { if (statusEl) statusEl.textContent = '❌ Select a reason'; return; }
+
+      const reason = details ? `${reasonSelect}: ${details}` : reasonSelect;
+      const token = localStorage.getItem('pokechess_token');
+      if (!token) { if (statusEl) statusEl.textContent = '❌ You must be logged in to report'; return; }
+
+      const isDev = window.location.port === '5173' || window.location.port === '5174';
+      const base = isDev ? `http://${window.location.hostname}:3001/api` : `${window.location.origin}/api`;
+
+      try {
+        const res = await fetch(`${base}/report`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ reportedUser: username, reason }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          if (statusEl) { statusEl.style.color = '#4ade80'; statusEl.textContent = '✅ Report submitted. Thank you!'; }
+          setTimeout(() => { overlay.classList.remove('admin-overlay--open'); overlay.innerHTML = ''; }, 2000);
+        } else {
+          if (statusEl) { statusEl.style.color = '#f87171'; statusEl.textContent = `❌ ${data.error}`; }
+        }
+      } catch {
+        if (statusEl) { statusEl.style.color = '#f87171'; statusEl.textContent = '❌ Failed to submit report'; }
+      }
+    });
+  });
+
   // ── Admin Panel ──
   document.getElementById('btn-admin')?.addEventListener('click', showAdminPanel);
 
@@ -678,7 +750,14 @@ export function renderTitleScreen(onStart) {
       <div class="admin-panel">
         <div class="admin-header">
           <h2>⚙️ Admin Dashboard</h2>
-          <button class="admin-close" id="admin-close-dash">✕</button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn--report" id="admin-toggle-reports" style="font-size:0.8rem;padding:6px 12px">🚩 Reports <span id="admin-report-badge" style="background:#ef4444;color:white;border-radius:50%;padding:1px 6px;font-size:0.7rem;margin-left:4px;display:none">0</span></button>
+            <button class="admin-close" id="admin-close-dash">✕</button>
+          </div>
+        </div>
+        <div id="admin-reports-section" style="display:none;padding:12px;max-height:300px;overflow-y:auto;border-bottom:1px solid #334155">
+          <h3 style="color:#f87171;margin:0 0 8px">🚩 Player Reports</h3>
+          <div id="admin-reports-list"></div>
         </div>
         <div class="admin-search">
           <input type="text" id="admin-search" class="admin-input" placeholder="Search users..." />
@@ -694,6 +773,74 @@ export function renderTitleScreen(onStart) {
       overlay.innerHTML = '';
       adminPassword = null;
     });
+
+    // ── Reports Section ──
+    let reportsVisible = false;
+
+    async function loadReports() {
+      try {
+        const data = await adminFetch('/admin/reports', {});
+        const reports = data.reports || [];
+        const badge = document.getElementById('admin-report-badge');
+        if (badge) {
+          badge.textContent = reports.length;
+          badge.style.display = reports.length > 0 ? 'inline' : 'none';
+        }
+        renderReportsList(reports);
+      } catch {}
+    }
+
+    function renderReportsList(reports) {
+      const list = document.getElementById('admin-reports-list');
+      if (!list) return;
+      if (reports.length === 0) {
+        list.innerHTML = '<div style="color:#64748b;font-size:0.85rem;padding:8px">No pending reports 🎉</div>';
+        return;
+      }
+      list.innerHTML = reports.map(r => {
+        const time = new Date(r.timestamp).toLocaleString();
+        return `
+          <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
+              <div>
+                <div style="color:#f87171;font-weight:600;font-size:0.9rem">🚩 ${r.reported}</div>
+                <div style="color:#94a3b8;font-size:0.75rem;margin-top:2px">Reported by: ${r.reporter} — ${time}</div>
+                <div style="color:#e2e8f0;font-size:0.85rem;margin-top:6px;background:#0f172a;padding:6px 8px;border-radius:4px">${r.reason}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+                <button class="admin-action-btn admin-action-btn--ban" data-action="ban" data-user="${r.reported}" style="font-size:0.7rem;padding:4px 8px">🔨 Ban</button>
+                <button class="admin-action-btn" data-report-dismiss="${r.id}" style="font-size:0.7rem;padding:4px 8px;background:#334155;color:#94a3b8">✓ Dismiss</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Wire ban buttons (reuse existing handleAdminAction)
+      list.querySelectorAll('[data-action="ban"]').forEach(btn => {
+        btn.addEventListener('click', () => handleAdminAction('ban', btn.dataset.user));
+      });
+
+      // Wire dismiss buttons
+      list.querySelectorAll('[data-report-dismiss]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const reportId = btn.dataset.reportDismiss;
+          await adminFetch('/admin/dismiss-report', { reportId });
+          loadReports();
+          showStatus('Report dismissed');
+        });
+      });
+    }
+
+    document.getElementById('admin-toggle-reports')?.addEventListener('click', () => {
+      reportsVisible = !reportsVisible;
+      const section = document.getElementById('admin-reports-section');
+      if (section) section.style.display = reportsVisible ? 'block' : 'none';
+      if (reportsVisible) loadReports();
+    });
+
+    // Load report count on dashboard open
+    loadReports();
 
     let allUsers = users;
 

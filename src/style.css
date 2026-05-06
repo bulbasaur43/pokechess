@@ -2340,6 +2340,23 @@ body {
   background: rgba(255, 107, 107, 0.05);
 }
 
+.btn--report {
+  background: transparent;
+  border: 1px solid rgba(251, 146, 60, 0.25);
+  color: rgba(251, 146, 60, 0.6);
+  font-size: 0.7rem;
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  margin-top: 16px;
+  transition: all 0.2s ease;
+}
+.btn--report:hover {
+  color: #fb923c;
+  border-color: #fb923c88;
+  background: rgba(251, 146, 60, 0.08);
+}
+
 .admin-overlay {
   display: none;
   position: fixed;
