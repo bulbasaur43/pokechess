@@ -101,15 +101,30 @@ function startJumpGame(canvas) {
     ctx.font = 'bold 18px monospace';
     ctx.fillText(`Score: ${score}`, 10, 25);
     if (gameOver) {
+      // Check for hidden item unlock
+      let justUnlocked = false;
+      if (score >= 50 && !isHiddenItemUnlocked('AGILITY_BAND')) {
+        justUnlocked = unlockHiddenItem('AGILITY_BAND');
+      }
+
       ctx.fillStyle = 'rgba(0,0,0,0.6)';
       ctx.fillRect(0, 0, W, H);
       ctx.fillStyle = '#fbbf24';
       ctx.font = 'bold 28px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('Game Over!', W / 2, H / 2 - 15);
+      ctx.fillText('Game Over!', W / 2, H / 2 - 30);
       ctx.font = '16px monospace';
       ctx.fillStyle = '#fff';
-      ctx.fillText(`Score: ${score} — Click to retry`, W / 2, H / 2 + 15);
+      ctx.fillText(`Score: ${score} — Click to retry`, W / 2, H / 2);
+
+      if (justUnlocked || (score >= 50 && isHiddenItemUnlocked('AGILITY_BAND'))) {
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 18px monospace';
+        ctx.fillText('💨 SECRET UNLOCKED: Agility Band! 💨', W / 2, H / 2 + 30);
+        ctx.font = '13px monospace';
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.8)';
+        ctx.fillText('Check the shop for your new item!', W / 2, H / 2 + 50);
+      }
       ctx.textAlign = 'left';
     }
   }
@@ -373,6 +388,20 @@ function startShooterGame(canvas) {
         ctx.fillStyle = 'rgba(74, 222, 128, 0.8)';
         ctx.fillText('Check the shop for your new item!', W / 2, H / 2 + 50);
       }
+
+      // Toxic Orb unlock at score 200
+      let toxicUnlocked = false;
+      if (score >= 200 && !isHiddenItemUnlocked('TOXIC_ORB')) {
+        toxicUnlocked = unlockHiddenItem('TOXIC_ORB');
+      }
+      if (toxicUnlocked || (score >= 200 && isHiddenItemUnlocked('TOXIC_ORB'))) {
+        ctx.fillStyle = '#a855f7';
+        ctx.font = 'bold 18px monospace';
+        ctx.fillText('☠️ SECRET UNLOCKED: Toxic Orb! ☠️', W / 2, H / 2 + 75);
+        ctx.font = '13px monospace';
+        ctx.fillStyle = 'rgba(168, 85, 247, 0.8)';
+        ctx.fillText('A deadly new item awaits in the shop!', W / 2, H / 2 + 95);
+      }
       ctx.textAlign = 'left';
     }
   }
@@ -491,16 +520,31 @@ function startMazeGame(canvas) {
     ctx.fillText('Arrow keys / WASD to move', 5, H - 16);
 
     if (won) {
+      // Check for hidden item unlock
+      let justUnlocked = false;
+      if (moves <= 30 && !isHiddenItemUnlocked('SHADOW_CLOAK')) {
+        justUnlocked = unlockHiddenItem('SHADOW_CLOAK');
+      }
+
       ctx.fillStyle = 'rgba(0,0,0,0.6)';
       ctx.fillRect(0, 0, W, H);
       ctx.fillStyle = '#fbbf24';
       ctx.font = 'bold 26px monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('🎉 You escaped!', W / 2, H / 2 - 15);
+      ctx.fillText('🎉 You escaped!', W / 2, H / 2 - 25);
       ctx.font = '14px monospace';
       ctx.fillStyle = '#fff';
-      ctx.fillText(`${moves} moves — SPACE for new maze`, W / 2, H / 2 + 15);
+      ctx.fillText(`${moves} moves — SPACE for new maze`, W / 2, H / 2 + 5);
+
+      if (justUnlocked || (moves <= 30 && isHiddenItemUnlocked('SHADOW_CLOAK'))) {
+        ctx.fillStyle = '#6366f1';
+        ctx.font = 'bold 16px monospace';
+        ctx.fillText('🌑 SECRET UNLOCKED: Shadow Cloak! 🌑', W / 2, H / 2 + 35);
+        ctx.font = '12px monospace';
+        ctx.fillStyle = 'rgba(99, 102, 241, 0.8)';
+        ctx.fillText('Check the shop for your new item!', W / 2, H / 2 + 55);
+      }
     }
   }
 

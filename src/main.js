@@ -676,7 +676,7 @@ function applyItemToCell(itemId, row, col) {
   }
 
   // Check if this item was already used on this piece (for piece-targeting items)
-  const pieceTargetItems = ['MAX_POTION','X_ATTACK','X_DEFENSE','FOCUS_SASH','LEFTOVERS','SMOKE_BALL','DESTINY_BOND','OBLITERATOR','RAZOR_LEAF'];
+  const pieceTargetItems = ['MAX_POTION','X_ATTACK','X_DEFENSE','FOCUS_SASH','LEFTOVERS','SMOKE_BALL','DESTINY_BOND','OBLITERATOR','RAZOR_LEAF','AGILITY_BAND','SHADOW_CLOAK','TOXIC_ORB'];
   if (pieceTargetItems.includes(itemId) && piece) {
     const applied = piece.appliedItems || [];
     if (applied.includes(itemId)) {
@@ -740,6 +740,25 @@ function applyItemToCell(itemId, row, col) {
       game.board[row][col] = { ...piece, razorLeaf: true, razorLeafDmg: bonusDmg, appliedItems: [...(piece.appliedItems || []), itemId] };
       const pokeName = POKEMON[piece.pokemon]?.name || 'Piece';
       showStatusToast(`🍃 ${pokeName} gained Razor Leaf Storm! +${bonusDmg} AOE damage on abilities!`, 'buff');
+      break;
+    }
+    case 'AGILITY_BAND': {
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
+      game.board[row][col] = { ...piece, agilityBand: 5, appliedItems: [...(piece.appliedItems || []), itemId] };
+      showStatusToast(`💨 ${POKEMON[piece.pokemon]?.name || 'Piece'} equipped Agility Band! +1 move range for 5 turns!`, 'buff');
+      break;
+    }
+    case 'SHADOW_CLOAK': {
+      if (!piece || piece.color !== playerColor) return cancelItem('Select a friendly piece!');
+      game.board[row][col] = { ...piece, shadowCloak: true, appliedItems: [...(piece.appliedItems || []), itemId] };
+      showStatusToast(`🌑 ${POKEMON[piece.pokemon]?.name || 'Piece'} cloaked in shadow! Immune to abilities!`, 'buff');
+      break;
+    }
+    case 'TOXIC_ORB': {
+      if (!piece) return cancelItem('Select an enemy piece!');
+      if (piece.color === playerColor) return cancelItem('Target an enemy piece!');
+      game.board[row][col] = { ...piece, toxicOrb: 3, appliedItems: [...(piece.appliedItems || []), 'TOXIC_ORB'] };
+      showStatusToast(`☠️ ${POKEMON[piece.pokemon]?.name || 'Piece'} poisoned by Toxic Orb! -1 HP per turn for 3 turns!`, 'status');
       break;
     }
     case 'QUICK_CLAW': {
