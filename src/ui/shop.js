@@ -508,6 +508,8 @@ export function getUnlockedPokemon() { return [..._unlockedPokemon]; }
 
 // Trade: remove a Pokémon you're giving away, add the one you receive, handle coins
 export function executeTrade(giveKey, receiveKey, coinsGave = 0, coinsReceived = 0) {
+  console.log('[Trade] executing:', { giveKey, receiveKey, coinsGave, coinsReceived });
+  console.log('[Trade] before:', [..._unlockedPokemon]);
   // Remove the given pokemon (if in unlocked list)
   if (giveKey) {
     const idx = _unlockedPokemon.indexOf(giveKey);
@@ -521,6 +523,7 @@ export function executeTrade(giveKey, receiveKey, coinsGave = 0, coinsReceived =
   }
   // Handle coin transfer
   _coins = Math.max(0, _coins - (coinsGave || 0) + (coinsReceived || 0));
+  console.log('[Trade] after:', [..._unlockedPokemon], 'coins:', _coins);
   saveState();
   syncToServer();
   return true;

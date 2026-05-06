@@ -1514,6 +1514,7 @@ function openTradeUI() {
     },
     onTradeConfirmed: (msg) => {
       // Trade executed! Update local data
+      console.log('[Trade] confirmed message:', JSON.stringify(msg));
       executeTrade(msg.youGave, msg.youReceived, msg.coinsGave || 0, msg.coinsReceived || 0);
       const gaveName = msg.youGave ? (POKEMON[msg.youGave]?.name || msg.youGave) : null;
       const gotName = msg.youReceived ? (POKEMON[msg.youReceived]?.name || msg.youReceived) : null;
