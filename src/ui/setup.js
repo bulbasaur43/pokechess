@@ -9,7 +9,7 @@ import { loadPlayerStats, getRankTitle, getWinRate } from '../engine/elo.js';
 import { isLoggedIn, getUsername, login, signup, logout, refreshProfile, getLeaderboard, saveTeam, loadTeam } from '../engine/auth.js';
 import { isPokemonUnlocked, openShop, getCoins, initShop, getUnlockedPokemon, executeTrade } from './shop.js';
 import { openMinigames } from './minigames.js';
-import { connectToServer, findTrade, sendTradeOffer, confirmTrade, cancelTrade, disconnect, sendLobbyChat, setUsername, isConnected } from '../engine/online.js';
+import { connectToServer, findTrade, sendTradeOffer, confirmTrade, cancelTrade, disconnect, sendLobbyChat, setUsername, isConnected, requestChatHistory } from '../engine/online.js';
 
 export function renderTitleScreen(onStart) {
   const app = document.getElementById('app');
@@ -609,11 +609,17 @@ export function renderTitleScreen(onStart) {
   let lobbyChatOpen = false;
   let unreadCount = 0;
   let lobbyChatConnected = false;
+  let lobbyChatHistoryLoaded = false;
 
   async function ensureLobbyConnection() {
     if (lobbyChatConnected || isConnected()) {
       if (isConnected() && isLoggedIn()) setUsername(getUsername());
       lobbyChatConnected = true;
+      // Still request history if we haven't loaded it yet
+      if (!lobbyChatHistoryLoaded) {
+        requestChatHistory();
+        lobbyChatHistoryLoaded = true;
+      }
       return;
     }
     try {
@@ -626,10 +632,30 @@ export function renderTitleScreen(onStart) {
             if (badge) { badge.textContent = unreadCount; badge.style.display = 'inline'; }
           }
         },
-        onDisconnected: () => { lobbyChatConnected = false; },
+        onChatHistory: (msg) => {
+          // Load all of today's messages
+          const msgs = document.getElementById('lobby-chat-messages');
+          if (msgs) msgs.innerHTML = ''; // clear any existing
+          const messages = msg.messages || [];
+          for (const m of messages) {
+            appendLobbyMessage(m.username, m.text, m.timestamp);
+          }
+          if (messages.length > 0) {
+            // Show unread count if chat is closed
+            if (!lobbyChatOpen) {
+              unreadCount = messages.length;
+              const badge = document.getElementById('lobby-chat-badge');
+              if (badge) { badge.textContent = unreadCount > 99 ? '99+' : unreadCount; badge.style.display = 'inline'; }
+            }
+          }
+        },
+        onDisconnected: () => { lobbyChatConnected = false; lobbyChatHistoryLoaded = false; },
       });
       lobbyChatConnected = true;
       if (isLoggedIn()) setUsername(getUsername());
+      // Request today's chat history
+      requestChatHistory();
+      lobbyChatHistoryLoaded = true;
     } catch (e) {
       console.error('Chat connection failed:', e);
     }

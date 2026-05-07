@@ -755,6 +755,9 @@ wss.on('connection', (ws) => {
       case 'set_username':
         ws.chatUsername = (msg.username || 'Guest').slice(0, 20);
         break;
+      case 'get_chat_history':
+        handleGetChatHistory(ws);
+        break;
       case 'ping':
         ws.send(JSON.stringify({ type: 'pong' }));
         break;
@@ -1017,9 +1020,6 @@ function handleTradeCancel(ws) {
 
 // ─── Chat Handlers ──────────────────────────────────────────────────
 
-// Lobby chat history (last 50 messages, in-memory only)
-const lobbyChatHistory = [];
-const MAX_LOBBY_HISTORY = 50;
 const CHAT_RATE_LIMIT = new Map(); // ws.id -> { count, resetTime }
 
 function isChatRateLimited(ws) {
@@ -1038,6 +1038,33 @@ function sanitizeChat(text) {
   return text.slice(0, 200).replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// Get today's date key (YYYY-MM-DD)
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// Get today's chat log from DB (creates if missing)
+function getTodayChat() {
+  if (!db.chatLogs) db.chatLogs = {};
+  const key = getTodayKey();
+  if (!db.chatLogs[key]) db.chatLogs[key] = [];
+  // Prune old days (keep only today + yesterday)
+  for (const k of Object.keys(db.chatLogs)) {
+    if (k < getTodayKey() && k !== getTodayKey()) {
+      delete db.chatLogs[k];
+    }
+  }
+  return db.chatLogs[key];
+}
+
+function handleGetChatHistory(ws) {
+  const todayMsgs = getTodayChat();
+  ws.send(JSON.stringify({
+    type: 'chat_history',
+    messages: todayMsgs,
+  }));
+}
+
 function handleLobbyChat(ws, msg) {
   if (isChatRateLimited(ws)) return;
   const text = sanitizeChat(msg.text);
@@ -1051,9 +1078,12 @@ function handleLobbyChat(ws, msg) {
     timestamp: Date.now(),
   };
 
-  // Store in history
-  lobbyChatHistory.push(chatMsg);
-  if (lobbyChatHistory.length > MAX_LOBBY_HISTORY) lobbyChatHistory.shift();
+  // Persist to today's chat log in DB
+  const todayChat = getTodayChat();
+  todayChat.push({ username, text, timestamp: chatMsg.timestamp });
+  // Cap at 200 messages per day to keep DB manageable
+  if (todayChat.length > 200) todayChat.shift();
+  saveDB(db);
 
   // Broadcast to all connected clients
   const payload = JSON.stringify(chatMsg);

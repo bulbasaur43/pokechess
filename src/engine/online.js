@@ -78,6 +78,9 @@ export function connectToServer(cbs) {
         case 'game_chat':
           callbacks.onGameChat?.(msg);
           break;
+        case 'chat_history':
+          callbacks.onChatHistory?.(msg);
+          break;
       }
     };
 
@@ -149,6 +152,11 @@ export function sendLobbyChat(text) {
 export function sendGameChat(text) {
   if (!ws || ws.readyState !== 1) return;
   ws.send(JSON.stringify({ type: 'game_chat', text }));
+}
+
+export function requestChatHistory() {
+  if (!ws || ws.readyState !== 1) return;
+  ws.send(JSON.stringify({ type: 'get_chat_history' }));
 }
 
 // ─── Trade Functions ────────────────────────────────────────────────
