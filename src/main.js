@@ -9,7 +9,7 @@ import { renderBoard, animateCell, showDamageNumber, playAttackEffect } from './
 import { renderTitleScreen } from './ui/setup.js';
 import { renderHUD } from './ui/hud.js';
 import { getAIMove } from './engine/ai.js';
-import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect, isConnected, sendGameChat } from './engine/online.js';
+import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect, isConnected, sendGameChat, updateCallbacks } from './engine/online.js';
 import { reportGameResult, loadPlayerStats, getRankTitle } from './engine/elo.js';
 import { isLoggedIn, reportGameResultToServer, getUsername } from './engine/auth.js';
 import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS, COLOR_TO_TEAM } from './engine/types.js';
@@ -127,7 +127,7 @@ function startLocalOrAI(clockPreset, options) {
 function startOnlineMatch(clockPreset, options) {
   showSearchingOverlay();
 
-  connectToServer({
+  const gameCallbacks = {
     onSearching: () => {
       updateSearchStatus('🔍 Searching for opponent...');
     },
@@ -184,12 +184,20 @@ function startOnlineMatch(clockPreset, options) {
     onDisconnected: () => {
       removeSearchingOverlay();
     },
-  }).then(() => {
+  };
+
+  // Reuse existing WebSocket if already connected (e.g. from lobby chat)
+  if (isConnected()) {
+    updateCallbacks(gameCallbacks);
     findMatch(options.preferredTeam, clockPreset, options.teamPresets, getUsername() || 'Guest');
-  }).catch(() => {
-    removeSearchingOverlay();
-    showStatusToast('⚠️ Could not connect to server. Try again later.', 'error');
-  });
+  } else {
+    connectToServer(gameCallbacks).then(() => {
+      findMatch(options.preferredTeam, clockPreset, options.teamPresets, getUsername() || 'Guest');
+    }).catch(() => {
+      removeSearchingOverlay();
+      showStatusToast('⚠️ Could not connect to server. Try again later.', 'error');
+    });
+  }
 }
 
 // Process opponent moves one at a time from the queue

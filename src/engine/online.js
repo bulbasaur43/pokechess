@@ -12,7 +12,21 @@ const WS_URL = isDev
 let ws = null;
 let callbacks = {};
 
+/**
+ * Update callbacks on existing connection (avoids reconnecting).
+ * Merges new callbacks with existing ones so lobby chat keeps working during games.
+ */
+export function updateCallbacks(newCbs) {
+  const oldCbs = callbacks;
+  callbacks = { ...oldCbs, ...newCbs };
+}
+
 export function connectToServer(cbs) {
+  // Close existing connection to prevent orphans
+  if (ws && ws.readyState <= 1) {
+    ws.onclose = null; // prevent triggering onDisconnected
+    ws.close();
+  }
   callbacks = cbs;
 
   return new Promise((resolve, reject) => {
