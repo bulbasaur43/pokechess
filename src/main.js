@@ -13,7 +13,7 @@ import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect,
 import { reportGameResult, loadPlayerStats, getRankTitle } from './engine/elo.js';
 import { isLoggedIn, reportGameResultToServer, getUsername } from './engine/auth.js';
 import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS, COLOR_TO_TEAM } from './engine/types.js';
-import { openShop, closeShop, consumeItem, incrementBattleCount, awardDailyCoins, SHOP_ITEMS } from './ui/shop.js';
+import { openShop, closeShop, consumeItem, incrementBattleCount, awardDailyCoins, awardGameCoins, SHOP_ITEMS } from './ui/shop.js';
 
 let game = createGame();
 let clockInterval = null;
@@ -1005,10 +1005,20 @@ function handleEloUpdate() {
     setTimeout(() => showEloChangeToast(eloResult), 800);
   }
 
-  // Daily coin reward
-  const earned = awardDailyCoins();
-  if (earned) {
-    setTimeout(() => showStatusToast(`🪙 +${earned} PokéCoin${earned > 1 ? 's' : ''} earned! (daily reward)`, 'heal'), 1500);
+  // Daily coin reward (bonus on top of game coins)
+  const dailyEarned = awardDailyCoins();
+  if (dailyEarned) {
+    setTimeout(() => showStatusToast(`🪙 +${dailyEarned} PokéCoin${dailyEarned > 1 ? 's' : ''} (daily bonus)`, 'heal'), 1500);
+  }
+
+  // Per-game coin reward based on AI difficulty / mode
+  const result2 = game.winner === 'draw' ? 'draw' : (game.winner === playerColor ? 'win' : 'loss');
+  const gameEarned = awardGameCoins(result2, gameMode, game.aiDifficulty);
+  if (gameEarned > 0) {
+    const diffLabel = gameMode === 'ai'
+      ? ` (AI Lv.${game.aiDifficulty || '?'})`
+      : gameMode === 'online' ? ' (online)' : '';
+    setTimeout(() => showStatusToast(`🪙 +${gameEarned} PokéCoin${gameEarned > 1 ? 's' : ''} earned!${diffLabel}`, 'buff'), 2200);
   }
 }
 

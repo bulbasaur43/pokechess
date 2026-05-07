@@ -652,6 +652,50 @@ export function awardDailyCoins() {
   return earned;
 }
 
+/**
+ * Award coins based on game result and AI difficulty.
+ * Higher AI = more coins. Online wins = best reward.
+ * @param {'win'|'loss'|'draw'} result
+ * @param {'ai'|'online'|'local'} mode
+ * @param {number|string} [aiDifficulty] - 1-10 or 'easy'/'medium'/'hard'/'expert'
+ * @returns {number} coins earned
+ */
+export function awardGameCoins(result, mode, aiDifficulty) {
+  if (mode === 'local') return 0; // no coins for local games
+
+  let earned = 0;
+
+  if (mode === 'online') {
+    // Online: big reward for wins
+    if (result === 'win') earned = Math.floor(Math.random() * 11) + 10; // 10-20
+    else if (result === 'draw') earned = Math.floor(Math.random() * 4) + 3; // 3-6
+    else earned = Math.floor(Math.random() * 2) + 1; // 1-2
+  } else {
+    // AI: scale coins by difficulty level
+    const diff = typeof aiDifficulty === 'string'
+      ? { easy: 2, medium: 5, hard: 7, expert: 10 }[aiDifficulty] || 5
+      : (parseInt(aiDifficulty, 10) || 5);
+
+    if (result === 'win') {
+      // Win: scale 1-15 based on difficulty
+      const base = Math.max(1, Math.floor(diff * 1.5));
+      earned = base + Math.floor(Math.random() * Math.max(1, Math.ceil(diff / 2)));
+    } else if (result === 'draw') {
+      earned = Math.max(1, Math.floor(diff / 2));
+    } else {
+      // Loss: small consolation (only on harder difficulties)
+      earned = diff >= 5 ? Math.floor(Math.random() * 2) + 1 : 0;
+    }
+  }
+
+  if (earned > 0) {
+    _coins += earned;
+    saveState();
+    syncToServer();
+  }
+  return earned;
+}
+
 export function canEarnDaily() {
   const today = new Date().toISOString().slice(0, 10);
   return _lastDailyReward !== today;
