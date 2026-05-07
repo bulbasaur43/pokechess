@@ -666,10 +666,10 @@ export function awardGameCoins(result, mode, aiDifficulty) {
   let earned = 0;
 
   if (mode === 'online') {
-    // Online: big reward for wins
-    if (result === 'win') earned = Math.floor(Math.random() * 11) + 10; // 10-20
-    else if (result === 'draw') earned = Math.floor(Math.random() * 4) + 3; // 3-6
-    else earned = Math.floor(Math.random() * 2) + 1; // 1-2
+    // Online: modest reward
+    if (result === 'win') earned = Math.floor(Math.random() * 5) + 3; // 3-7
+    else if (result === 'draw') earned = 1;
+    else earned = 0;
   } else {
     // AI: scale coins by difficulty level
     const diff = typeof aiDifficulty === 'string'
@@ -677,14 +677,12 @@ export function awardGameCoins(result, mode, aiDifficulty) {
       : (parseInt(aiDifficulty, 10) || 5);
 
     if (result === 'win') {
-      // Win: scale 1-15 based on difficulty
-      const base = Math.max(1, Math.floor(diff * 1.5));
-      earned = base + Math.floor(Math.random() * Math.max(1, Math.ceil(diff / 2)));
+      // Win: scale by difficulty (1-8)
+      earned = Math.max(1, Math.floor(diff * 0.8)) + Math.floor(Math.random() * 2);
     } else if (result === 'draw') {
-      earned = Math.max(1, Math.floor(diff / 2));
+      earned = diff >= 7 ? 1 : 0;
     } else {
-      // Loss: small consolation (only on harder difficulties)
-      earned = diff >= 5 ? Math.floor(Math.random() * 2) + 1 : 0;
+      earned = 0; // No coins for losses
     }
   }
 
