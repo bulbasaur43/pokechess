@@ -9,7 +9,7 @@ import { loadPlayerStats, getRankTitle, getWinRate } from '../engine/elo.js';
 import { isLoggedIn, getUsername, login, signup, logout, refreshProfile, getLeaderboard, saveTeam, loadTeam } from '../engine/auth.js';
 import { isPokemonUnlocked, openShop, getCoins, initShop, getUnlockedPokemon, executeTrade } from './shop.js';
 import { openMinigames } from './minigames.js';
-import { connectToServer, findTrade, sendTradeOffer, confirmTrade, cancelTrade, disconnect } from '../engine/online.js';
+import { connectToServer, findTrade, sendTradeOffer, confirmTrade, cancelTrade, disconnect, sendLobbyChat, setUsername, isConnected } from '../engine/online.js';
 
 export function renderTitleScreen(onStart) {
   const app = document.getElementById('app');
@@ -179,6 +179,22 @@ export function renderTitleScreen(onStart) {
       </div>
       <div class="admin-overlay" id="admin-overlay"></div>
       <div class="trade-overlay" id="trade-overlay"></div>
+
+      <!-- Lobby Chat -->
+      <div class="lobby-chat" id="lobby-chat">
+        <button class="lobby-chat__toggle" id="lobby-chat-toggle">💬 Chat <span class="lobby-chat__badge" id="lobby-chat-badge" style="display:none">0</span></button>
+        <div class="lobby-chat__panel" id="lobby-chat-panel" style="display:none">
+          <div class="lobby-chat__header">
+            <span>💬 Lobby Chat</span>
+            <button class="lobby-chat__close" id="lobby-chat-close">✕</button>
+          </div>
+          <div class="lobby-chat__messages" id="lobby-chat-messages"></div>
+          <div class="lobby-chat__input-row">
+            <input type="text" id="lobby-chat-input" class="lobby-chat__input" placeholder="Type a message..." maxlength="200" autocomplete="off" />
+            <button class="lobby-chat__send" id="lobby-chat-send">➤</button>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 
@@ -587,6 +603,86 @@ export function renderTitleScreen(onStart) {
   });
   document.getElementById('btn-shop-title')?.addEventListener('click', () => {
     openShop(null); // no item-use callback on title screen
+  });
+
+  // ── Lobby Chat ──
+  let lobbyChatOpen = false;
+  let unreadCount = 0;
+  let lobbyChatConnected = false;
+
+  async function ensureLobbyConnection() {
+    if (lobbyChatConnected || isConnected()) {
+      if (isConnected() && isLoggedIn()) setUsername(getUsername());
+      lobbyChatConnected = true;
+      return;
+    }
+    try {
+      await connectToServer({
+        onLobbyChat: (msg) => {
+          appendLobbyMessage(msg.username, msg.text, msg.timestamp);
+          if (!lobbyChatOpen) {
+            unreadCount++;
+            const badge = document.getElementById('lobby-chat-badge');
+            if (badge) { badge.textContent = unreadCount; badge.style.display = 'inline'; }
+          }
+        },
+        onDisconnected: () => { lobbyChatConnected = false; },
+      });
+      lobbyChatConnected = true;
+      if (isLoggedIn()) setUsername(getUsername());
+    } catch (e) {
+      console.error('Chat connection failed:', e);
+    }
+  }
+
+  function appendLobbyMessage(username, text, timestamp) {
+    const msgs = document.getElementById('lobby-chat-messages');
+    if (!msgs) return;
+    const el = document.createElement('div');
+    el.className = 'lobby-chat__msg';
+    const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    el.innerHTML = `<span class="lobby-chat__time">${time}</span> <strong class="lobby-chat__user">${username}</strong>: <span class="lobby-chat__text">${text}</span>`;
+    msgs.appendChild(el);
+    msgs.scrollTop = msgs.scrollHeight;
+    // Limit displayed messages
+    while (msgs.children.length > 100) msgs.firstChild.remove();
+  }
+
+  document.getElementById('lobby-chat-toggle')?.addEventListener('click', async () => {
+    lobbyChatOpen = !lobbyChatOpen;
+    const panel = document.getElementById('lobby-chat-panel');
+    if (panel) panel.style.display = lobbyChatOpen ? 'flex' : 'none';
+    if (lobbyChatOpen) {
+      unreadCount = 0;
+      const badge = document.getElementById('lobby-chat-badge');
+      if (badge) badge.style.display = 'none';
+      await ensureLobbyConnection();
+      document.getElementById('lobby-chat-input')?.focus();
+    }
+  });
+
+  document.getElementById('lobby-chat-close')?.addEventListener('click', () => {
+    lobbyChatOpen = false;
+    const panel = document.getElementById('lobby-chat-panel');
+    if (panel) panel.style.display = 'none';
+  });
+
+  function sendLobbyMessage() {
+    const input = document.getElementById('lobby-chat-input');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    if (!isLoggedIn()) {
+      appendLobbyMessage('System', 'You must be logged in to chat', Date.now());
+      return;
+    }
+    sendLobbyChat(text);
+    input.value = '';
+  }
+
+  document.getElementById('lobby-chat-send')?.addEventListener('click', sendLobbyMessage);
+  document.getElementById('lobby-chat-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); sendLobbyMessage(); }
   });
 
   // ── Report Player ──

@@ -72,6 +72,12 @@ export function connectToServer(cbs) {
         case 'trade_partner_disconnected':
           callbacks.onTradePartnerDisconnected?.();
           break;
+        case 'lobby_chat':
+          callbacks.onLobbyChat?.(msg);
+          break;
+        case 'game_chat':
+          callbacks.onGameChat?.(msg);
+          break;
       }
     };
 
@@ -126,6 +132,23 @@ export function disconnect() {
 
 export function isConnected() {
   return ws && ws.readyState === 1;
+}
+
+// ─── Chat Functions ─────────────────────────────────────────────────
+
+export function setUsername(username) {
+  if (!ws || ws.readyState !== 1) return;
+  ws.send(JSON.stringify({ type: 'set_username', username }));
+}
+
+export function sendLobbyChat(text) {
+  if (!ws || ws.readyState !== 1) return;
+  ws.send(JSON.stringify({ type: 'lobby_chat', text }));
+}
+
+export function sendGameChat(text) {
+  if (!ws || ws.readyState !== 1) return;
+  ws.send(JSON.stringify({ type: 'game_chat', text }));
 }
 
 // ─── Trade Functions ────────────────────────────────────────────────

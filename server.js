@@ -746,6 +746,15 @@ wss.on('connection', (ws) => {
       case 'trade_cancel':
         handleTradeCancel(ws);
         break;
+      case 'lobby_chat':
+        handleLobbyChat(ws, msg);
+        break;
+      case 'game_chat':
+        handleGameChat(ws, msg);
+        break;
+      case 'set_username':
+        ws.chatUsername = (msg.username || 'Guest').slice(0, 20);
+        break;
       case 'ping':
         ws.send(JSON.stringify({ type: 'pong' }));
         break;
@@ -1004,6 +1013,74 @@ function handleTradeCancel(ws) {
   }
   ws.tradeRoomId = null;
   ws.send(JSON.stringify({ type: 'trade_cancelled' }));
+}
+
+// ─── Chat Handlers ──────────────────────────────────────────────────
+
+// Lobby chat history (last 50 messages, in-memory only)
+const lobbyChatHistory = [];
+const MAX_LOBBY_HISTORY = 50;
+const CHAT_RATE_LIMIT = new Map(); // ws.id -> { count, resetTime }
+
+function isChatRateLimited(ws) {
+  const now = Date.now();
+  let entry = CHAT_RATE_LIMIT.get(ws.id);
+  if (!entry || now > entry.resetTime) {
+    entry = { count: 0, resetTime: now + 10000 }; // 10s window
+    CHAT_RATE_LIMIT.set(ws.id, entry);
+  }
+  entry.count++;
+  return entry.count > 5; // max 5 messages per 10s
+}
+
+function sanitizeChat(text) {
+  if (!text || typeof text !== 'string') return '';
+  return text.slice(0, 200).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleLobbyChat(ws, msg) {
+  if (isChatRateLimited(ws)) return;
+  const text = sanitizeChat(msg.text);
+  if (!text) return;
+
+  const username = ws.chatUsername || ws.matchUsername || ws.tradeUsername || 'Guest';
+  const chatMsg = {
+    type: 'lobby_chat',
+    username,
+    text,
+    timestamp: Date.now(),
+  };
+
+  // Store in history
+  lobbyChatHistory.push(chatMsg);
+  if (lobbyChatHistory.length > MAX_LOBBY_HISTORY) lobbyChatHistory.shift();
+
+  // Broadcast to all connected clients
+  const payload = JSON.stringify(chatMsg);
+  wss.clients.forEach(client => {
+    if (client.readyState === 1) client.send(payload);
+  });
+}
+
+function handleGameChat(ws, msg) {
+  if (isChatRateLimited(ws)) return;
+  const text = sanitizeChat(msg.text);
+  if (!text) return;
+
+  // Find opponent in game room
+  const room = rooms.get(ws.roomId);
+  if (!room) return;
+
+  const opponent = room.white === ws ? room.black : room.white;
+  if (!opponent || opponent.readyState !== 1) return;
+
+  const username = ws.chatUsername || ws.matchUsername || 'Opponent';
+  opponent.send(JSON.stringify({
+    type: 'game_chat',
+    username,
+    text,
+    timestamp: Date.now(),
+  }));
 }
 
 // ─── Shop Handlers (PokéCoins system) ───────────────────────────────

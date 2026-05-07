@@ -9,7 +9,7 @@ import { renderBoard, animateCell, showDamageNumber, playAttackEffect } from './
 import { renderTitleScreen } from './ui/setup.js';
 import { renderHUD } from './ui/hud.js';
 import { getAIMove } from './engine/ai.js';
-import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect, isConnected } from './engine/online.js';
+import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect, isConnected, sendGameChat } from './engine/online.js';
 import { reportGameResult, loadPlayerStats, getRankTitle } from './engine/elo.js';
 import { isLoggedIn, reportGameResultToServer, getUsername } from './engine/auth.js';
 import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS, COLOR_TO_TEAM } from './engine/types.js';
@@ -177,6 +177,10 @@ function startOnlineMatch(clockPreset, options) {
       showStatusToast('Opponent disconnected. You win!', 'kill');
       renderAll();
     },
+    onGameChat: (msg) => {
+      appendGameChatMessage(msg.username, msg.text, msg.timestamp);
+    },
+    onLobbyChat: () => {}, // ignore lobby chat during game
     onDisconnected: () => {
       removeSearchingOverlay();
     },
@@ -310,6 +314,7 @@ function updateClockDisplay() {
 
 function renderGameView() {
   const app = document.getElementById('app');
+  const isOnlineGame = gameMode === 'online';
   app.innerHTML = `
     <div class="game-layout">
       <div class="game-layout__board">
@@ -318,9 +323,78 @@ function renderGameView() {
       <div class="game-layout__hud">
         <div id="hud"></div>
       </div>
+      ${isOnlineGame ? `
+      <div class="game-chat" id="game-chat">
+        <button class="game-chat__toggle" id="game-chat-toggle">💬</button>
+        <div class="game-chat__panel" id="game-chat-panel" style="display:none">
+          <div class="game-chat__header">
+            <span>💬 Game Chat</span>
+            <button class="game-chat__close" id="game-chat-close">✕</button>
+          </div>
+          <div class="game-chat__messages" id="game-chat-messages"></div>
+          <div class="game-chat__input-row">
+            <input type="text" id="game-chat-input" class="game-chat__input" placeholder="Message opponent..." maxlength="200" autocomplete="off" />
+            <button class="game-chat__send" id="game-chat-send">➤</button>
+          </div>
+        </div>
+      </div>
+      ` : ''}
     </div>
   `;
+
+  if (isOnlineGame) wireGameChat();
   renderAll();
+}
+
+function wireGameChat() {
+  let chatOpen = false;
+
+  document.getElementById('game-chat-toggle')?.addEventListener('click', () => {
+    chatOpen = !chatOpen;
+    const panel = document.getElementById('game-chat-panel');
+    if (panel) panel.style.display = chatOpen ? 'flex' : 'none';
+    if (chatOpen) document.getElementById('game-chat-input')?.focus();
+  });
+
+  document.getElementById('game-chat-close')?.addEventListener('click', () => {
+    chatOpen = false;
+    const panel = document.getElementById('game-chat-panel');
+    if (panel) panel.style.display = 'none';
+  });
+
+  function doSend() {
+    const input = document.getElementById('game-chat-input');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    sendGameChat(text);
+    appendGameChatMessage(getUsername() || 'You', text, Date.now());
+    input.value = '';
+  }
+
+  document.getElementById('game-chat-send')?.addEventListener('click', doSend);
+  document.getElementById('game-chat-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); doSend(); }
+  });
+}
+
+function appendGameChatMessage(username, text, timestamp) {
+  const msgs = document.getElementById('game-chat-messages');
+  if (!msgs) return;
+  const el = document.createElement('div');
+  el.className = 'game-chat__msg';
+  const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const isMe = username === (getUsername() || 'You');
+  el.innerHTML = `<span class="game-chat__time">${time}</span> <strong class="game-chat__user" style="color:${isMe ? '#4ade80' : '#60a5fa'}">${username}</strong>: ${text}`;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // Flash the toggle button if chat is closed
+  const panel = document.getElementById('game-chat-panel');
+  if (panel && panel.style.display === 'none' && !isMe) {
+    const toggle = document.getElementById('game-chat-toggle');
+    if (toggle) { toggle.classList.add('game-chat__toggle--flash'); setTimeout(() => toggle.classList.remove('game-chat__toggle--flash'), 2000); }
+  }
 }
 
 function renderAll() {
