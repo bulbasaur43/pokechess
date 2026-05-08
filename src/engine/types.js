@@ -101,7 +101,7 @@ export const POKEMON = {
   RAGING_BOLT:  { name: 'Raging Bolt',  types: ['ELECTRIC','DRAGON'],  team: 'scarlet', emoji: '🦕', img: SPRITE(1021), desc: 'Ancient Raikou',        hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
   ROARING_MOON: { name: 'Roaring Moon', types: ['DRAGON','DARK'],      team: 'scarlet', emoji: '🌙', img: SPRITE(1005), desc: 'Ancient Salamence',     hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   SCREAM_TAIL:  { name: 'Scream Tail',  types: ['FAIRY','PSYCHIC'],    team: 'scarlet', emoji: '🎀', img: SPRITE(985),  desc: 'Ancient Jigglypuff',    hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
-  GREAT_TUSK:   { name: 'Great Tusk',   types: ['GROUND','FIGHTING'],  team: 'scarlet', emoji: '🐘', img: SPRITE(984),  desc: 'Ancient Donphan',       hp: 9,  maxHp: 9,  damage: 4, damageTier: 'heavy' },
+  GREAT_TUSK:   { name: 'Great Tusk',   types: ['GROUND','FIGHTING'],  team: 'scarlet', emoji: '🐘', img: SPRITE(984),  desc: 'Ancient Donphan',       hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   BRUTE_BONNET: { name: 'Brute Bonnet', types: ['GRASS','DARK'],       team: 'scarlet', emoji: '🍄', img: SPRITE(986),  desc: 'Ancient Amoonguss',     hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   SLITHER_WING: { name: 'Slither Wing', types: ['BUG','FIGHTING'],     team: 'scarlet', emoji: '🦗', img: SPRITE(988),  desc: 'Ancient Volcarona',     hp: 8,  maxHp: 8,  damage: 3, damageTier: 'standard' },
   WALKING_WAKE: { name: 'Walking Wake', types: ['WATER','DRAGON'],     team: 'scarlet', emoji: '🌊', img: SPRITE(1009), desc: 'Ancient Suicune',       hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },

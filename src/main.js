@@ -683,8 +683,22 @@ function generateAITeam(teamKey, difficulty) {
     };
   }
 
-  // Sort pool by requiredElo (strongest last)
-  const sorted = [...pool].sort((a, b) => a.requiredElo - b.requiredElo);
+  // AI ELO cap — prevents bots from using Pokémon above their "power level"
+  const eloCap = {
+    4: 900,
+    5: 1000,
+    6: 1200,
+    7: 1400,
+    8: 1600,
+    9: 1900,
+    10: Infinity,
+  }[difficulty] || 1000;
+
+  // Filter pool: only Pokémon the AI is "strong enough" to use, exclude packOnly
+  const available = pool.filter(p => p.requiredElo <= eloCap && !p.packOnly);
+
+  // Sort by requiredElo (strongest last)
+  const sorted = [...available].sort((a, b) => a.requiredElo - b.requiredElo);
 
   // How many "upgrades" to apply based on difficulty
   // Lv4: 2 upgrades, Lv5: 3, Lv6: 4, Lv7: 5, Lv8: 6, Lv9-10: all 8
@@ -692,7 +706,7 @@ function generateAITeam(teamKey, difficulty) {
                        difficulty <= 7 ? difficulty - 1 :
                        8;
 
-  // Pick the strongest Pokémon available for the upgrades
+  // Pick the strongest available Pokémon for upgrades
   const strongPokemon = sorted.slice(-Math.min(upgradeSlots + 3, sorted.length));
 
   // Build back rank
@@ -713,20 +727,22 @@ function generateAITeam(teamKey, difficulty) {
     }
   }
 
-  // Pick best pawn for higher difficulties
+  // Pick best pawn for higher difficulties (from available pool only)
   let pawnPokemon = defaultTeam.pawnPokemon;
-  if (difficulty >= 6) {
+  if (difficulty >= 6 && sorted.length > 0) {
     // Use a mid-tier Pokémon as pawn
     const midTier = sorted[Math.min(Math.floor(sorted.length * 0.6), sorted.length - 1)];
     if (midTier) pawnPokemon = midTier.key;
   }
 
-  // Best king for Lv 9-10
+  // Best king for Lv 9-10 (also respect ELO cap)
   const result = { backRank, pawnPokemon };
   if (difficulty >= 9 && kingPool.length > 1) {
-    // Use the highest-ELO king
-    const bestKing = kingPool.reduce((a, b) => a.requiredElo > b.requiredElo ? a : b);
-    backRank[4] = bestKing.key;
+    const availableKings = kingPool.filter(k => k.requiredElo <= eloCap);
+    if (availableKings.length > 0) {
+      const bestKing = availableKings.reduce((a, b) => a.requiredElo > b.requiredElo ? a : b);
+      backRank[4] = bestKing.key;
+    }
   }
 
   return result;
