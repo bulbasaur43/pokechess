@@ -409,7 +409,16 @@ export function upgradePokemon(key) {
   syncToServer();
   return { success: true, newLevel: _pokemonLevels[key] };
 }
-const STATE_KEY = 'pokechess_shop';
+function getStateKey() {
+  try {
+    const token = localStorage.getItem('pokechess_token');
+    if (token) {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.username) return `pokechess_shop_${payload.username}`;
+    }
+  } catch {}
+  return 'pokechess_shop_guest';
+}
 
 // Pre-process cosmetic images that need background removal.
 // Per-asset config: 'dark' removes near-black, 'light' removes near-white.
@@ -469,7 +478,8 @@ const BG_REMOVAL_CONFIG = {
 
 function loadState() {
   try {
-    const cached = localStorage.getItem(STATE_KEY);
+    const key = getStateKey();
+    const cached = localStorage.getItem(key);
     if (cached) {
       const data = JSON.parse(cached);
       _coins = data.coins || 0;
@@ -481,6 +491,11 @@ function loadState() {
       _equippedCosmetic = data.equippedCosmetic || '';
       _pokemonLevels = data.pokemonLevels || {};
       _unlockedHiddenItems = data.unlockedHiddenItems || [];
+    } else {
+      // No data for this user — start fresh
+      _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = [];
+      _lastDailyReward = ''; _ownedCosmetics = []; _equippedCosmetic = '';
+      _pokemonLevels = {}; _unlockedHiddenItems = [];
     }
   } catch { _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = []; _lastDailyReward = ''; _ownedCosmetics = []; _equippedCosmetic = ''; _pokemonLevels = {}; _unlockedHiddenItems = []; }
 
@@ -503,7 +518,8 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem(STATE_KEY, JSON.stringify({
+  const key = getStateKey();
+  localStorage.setItem(key, JSON.stringify({
     coins: _coins,
     inventory: _inventory,
     battleCount: _battleCount,
