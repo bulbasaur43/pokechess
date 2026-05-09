@@ -4258,6 +4258,19 @@ body {
   box-shadow: 0 4px 16px rgba(100, 200, 255, 0.15);
 }
 
+/* ── In-Game Pokédex Button ── */
+.btn--pokedex-game {
+  background: linear-gradient(135deg, rgba(100, 200, 255, 0.1), rgba(167, 139, 250, 0.06));
+  border: 1px solid rgba(100, 200, 255, 0.2);
+  color: #7cc8ff;
+}
+
+.btn--pokedex-game:hover {
+  background: linear-gradient(135deg, rgba(100, 200, 255, 0.15), rgba(167, 139, 250, 0.1));
+  border-color: rgba(100, 200, 255, 0.4);
+  box-shadow: 0 4px 16px rgba(100, 200, 255, 0.15);
+}
+
 /* ── Pokédex Overlay ── */
 .pokedex-overlay {
   position: fixed;
