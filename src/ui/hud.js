@@ -3,7 +3,7 @@
  * Turn indicator, captured Pokémon, battle log, type chart, and controls
  */
 
-import { TYPES, POKEMON, TEAMS, COLOR_TO_TEAM, TYPE_KEYS, getEffectiveness } from '../engine/types.js';
+import { TYPES, POKEMON, ABILITIES, TEAMS, COLOR_TO_TEAM, TYPE_KEYS, getEffectiveness } from '../engine/types.js';
 import { ROLES } from '../engine/board.js';
 import { PHASES } from '../engine/game.js';
 import { loadPlayerStats, getRankTitle, getWinRate } from '../engine/elo.js';
@@ -172,6 +172,13 @@ export function renderHUD(game, callbacks) {
   chartBtn.addEventListener('click', toggleTypeChart);
   controls.appendChild(chartBtn);
 
+  const dexBtn = document.createElement('button');
+  dexBtn.className = 'btn btn--secondary btn--pokedex-game';
+  dexBtn.id = 'btn-pokedex-game';
+  dexBtn.textContent = '📖 Pokédex';
+  dexBtn.addEventListener('click', togglePokedex);
+  controls.appendChild(dexBtn);
+
   hud.appendChild(controls);
 
   // ── Item Bar (in-game inventory) ──
@@ -339,4 +346,101 @@ function toggleTypeChart() {
     ol.classList.remove('type-chart-overlay--show');
     setTimeout(() => { ol.style.display = 'none'; }, 300);
   }
+}
+
+// ─── In-Game Pokédex Overlay ────────────────────────────────────────
+
+function togglePokedex() {
+  let overlay = document.getElementById('pokedex-game-overlay');
+  if (overlay) {
+    // Already exists — toggle visibility
+    if (overlay.classList.contains('pokedex-overlay--open')) {
+      overlay.classList.remove('pokedex-overlay--open');
+      overlay.innerHTML = '';
+    } else {
+      renderPokedexContent(overlay);
+    }
+    return;
+  }
+  // Create overlay
+  overlay = document.createElement('div');
+  overlay.className = 'pokedex-overlay';
+  overlay.id = 'pokedex-game-overlay';
+  document.body.appendChild(overlay);
+  renderPokedexContent(overlay);
+}
+
+function renderPokedexContent(overlay) {
+  const effectLabel = (ab) => {
+    if (!ab) return '—';
+    const parts = [];
+    if (ab.effect === 'damage') parts.push(`${ab.damage} dmg to ${ab.targets.replace(/_/g,' ')}`);
+    else if (ab.effect === 'status') parts.push(`${ab.status} ${ab.targets.replace(/_/g,' ')}`);
+    else if (ab.effect === 'heal') parts.push(`heal ${ab.heal} HP (self)`);
+    else if (ab.effect === 'drain') {
+      parts.push(`${ab.damage} dmg to ${ab.targets.replace(/_/g,' ')}`);
+      if (ab.heal > 0) parts.push(`heal ${ab.heal} HP`);
+      else if (ab.heal < 0) parts.push(`costs ${Math.abs(ab.heal)} self HP`);
+    }
+    else if (ab.effect === 'heal_allies') parts.push(`heal allies ${ab.heal} HP`);
+    if (ab.bonusStatus) parts.push(`+ ${ab.bonusStatus} 1 target`);
+    return parts.join(', ');
+  };
+
+  const renderTeam = (teamKey, teamLabel, teamColor) => {
+    const entries = Object.entries(POKEMON).filter(([k, p]) => p.team === teamKey);
+    return `
+      <div class="pokedex-team">
+        <h3 class="pokedex-team__title" style="color:${teamColor}">${teamLabel}</h3>
+        <div class="pokedex-grid">
+          ${entries.map(([key, p]) => {
+            const ab = ABILITIES[key];
+            return `
+              <div class="pokedex-card">
+                <img class="pokedex-card__img" src="${p.img || ''}" alt="${p.name}" />
+                <div class="pokedex-card__info">
+                  <div class="pokedex-card__name">${p.name}</div>
+                  <div class="pokedex-card__stats">❤️ ${p.hp} ⚔️ ${p.damage}</div>
+                  ${ab ? `
+                    <div class="pokedex-card__ability">
+                      <span class="pokedex-card__ability-name">${ab.emoji} ${ab.name}</span>
+                      <span class="pokedex-card__ability-desc">${effectLabel(ab)}</span>
+                    </div>
+                  ` : '<div class="pokedex-card__ability"><span class="pokedex-card__ability-desc">No ability</span></div>'}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  };
+
+  overlay.innerHTML = `
+    <div class="pokedex-panel">
+      <div class="pokedex-header">
+        <h2>📖 Pokédex — Abilities</h2>
+        <button class="pokedex-close" id="pokedex-game-close">✕</button>
+      </div>
+      <div class="pokedex-body">
+        ${renderTeam('scarlet', '🔴 Ancient Team (Scarlet)', TEAMS.scarlet.color)}
+        ${renderTeam('violet', '🟣 Future Team (Violet)', TEAMS.violet.color)}
+      </div>
+    </div>
+  `;
+
+  overlay.classList.add('pokedex-overlay--open');
+
+  document.getElementById('pokedex-game-close')?.addEventListener('click', () => {
+    overlay.classList.remove('pokedex-overlay--open');
+    overlay.innerHTML = '';
+  });
+
+  // Close on overlay background click
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.classList.remove('pokedex-overlay--open');
+      overlay.innerHTML = '';
+    }
+  });
 }
