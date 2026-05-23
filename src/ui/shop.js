@@ -647,6 +647,12 @@ export function keepDupe(key) {
 // ─── Public API ─────────────────────────────────────────────────────
 
 export function getCoins() { return _coins; }
+export function spendCoins(amount) {
+  if (_coins < amount) return false;
+  _coins -= amount;
+  saveState(); syncToServer();
+  return true;
+}
 
 // Hidden item unlocks (via achievements like minigame scores)
 export function unlockHiddenItem(itemId) {
