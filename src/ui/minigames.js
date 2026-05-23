@@ -850,14 +850,15 @@ function startThunderCatchGame(canvas) {
 }
 
 // ─── Game 6: PokéDrift (Drift Boss style) ───────────────────
-// Pseudo-3D road perspective. Camera behind car looking forward.
-// Road curves left/right. Hold=drift right, release=drift left.
+// Straight-ahead 3D: white platforms floating in blue sky.
+// Road scrolls toward you. Car at bottom center.
+// Hold = drift right, release = drift left.
 
 const DRIFT_CARS = [
-  { name: 'Pikachu',    body: '#f8d030', roof: '#d4a800', trim: '#b89000', turn: 1.8, cost: 0 },
-  { name: 'Bulbasaur',  body: '#4ade80', roof: '#16a34a', trim: '#0d7a32', turn: 1.4, cost: 30 },
-  { name: 'Charmander', body: '#ef4444', roof: '#b91c1c', trim: '#7f1d1d', turn: 2.5, cost: 50 },
-  { name: 'Squirtle',   body: '#38bdf8', roof: '#0284c7', trim: '#075985', turn: 2.1, cost: 40 },
+  { name: 'Sedan',      body: '#e84040', roof: '#c02020', cost: 0 },
+  { name: 'Sports Car', body: '#f8d030', roof: '#d4a800', cost: 30 },
+  { name: 'Truck',      body: '#38bdf8', roof: '#0284c7', cost: 50 },
+  { name: 'SUV',        body: '#4ade80', roof: '#16a34a', cost: 40 },
 ];
 
 function getDriftUnlocks() {
@@ -875,68 +876,53 @@ function startDriftGame(canvas) {
   let phase = 'select';
   let carIdx = 0, animId;
   let score = 0, coinsGot = 0, bestScore = 0;
-  let fallTimer = 0, holding = false;
+  let fallT = 0, holding = false;
   let buyMsg = '', buyMsgT = 0;
 
-  // Pseudo-3D road params
-  const HORIZON = H * 0.38;       // horizon Y line
-  const ROAD_HALF = 0.4;          // road half-width as fraction of screen at bottom
-  const CAM_HEIGHT = 1200;        // camera height
-  const DRAW_DIST = 200;          // how many segments to draw
+  // Road: sequence of segments, each is "straight", "right", or "left"
+  // The road is a flat platform viewed from above-behind.
+  // We scroll forward. The road center shifts at each turn.
+  const ROAD_W = 130;
+  const SEG_H = 40;
+  const DEPTH_3D = 14;
 
-  // Road segments: each has curve, length
-  let road = [];       // [{curve, len}]
-  let pos = 0;         // distance traveled along road
-  let playerX = 0;     // -1 to 1 (position on road, 0=center)
-  let speed = 0;
-  const MAX_SPEED = 180;
-  const ACCEL = 0.8;
-
-  // Collectibles on road
-  let roadCoins = [];  // {z, lane}  z=distance along road, lane=-1..1
-  let roadPowerups = []; // {z, type:'shield'|'boost'}
-  let shield = 0;
-  let boost = 0;
+  let segs = [];       // [{cx, type}] cx = center x of this segment
+  let coins = [];      // [{si, ox}]
+  let powerups = [];   // [{si, type}]
+  let scrollY = 0;
+  let carX = W / 2;
+  let speed = 2.5;
+  let shield = 0, boost = 0;
 
   try { bestScore = parseInt(localStorage.getItem('pokechess_drift_best') || '0'); } catch {}
 
   function buildRoad() {
-    road = [];
-    roadCoins = [];
-    roadPowerups = [];
-    // Start straight
-    addRoad(50, 0);
-    for (let i = 0; i < 80; i++) {
-      // Random curves
-      const curve = (Math.random() - 0.5) * 5;
-      const len = 15 + Math.floor(Math.random() * 25);
-      addRoad(len, curve);
-      // Some straight between curves
-      if (Math.random() < 0.3) addRoad(10, 0);
-    }
-    // Place coins and powerups
-    let totalLen = 0;
-    for (const seg of road) totalLen += seg.len;
-    for (let z = 100; z < totalLen - 50; z += 12 + Math.floor(Math.random() * 20)) {
-      if (Math.random() < 0.7) {
-        roadCoins.push({ z, lane: (Math.random() - 0.5) * 1.2, got: false });
+    segs = []; coins = []; powerups = [];
+    let cx = W / 2;
+    for (let i = 0; i < 3000; i++) {
+      segs.push({ cx });
+      // Place coins
+      if (i > 5 && Math.random() < 0.25) {
+        coins.push({ si: i, ox: (Math.random() - 0.5) * ROAD_W * 0.5, got: false });
       }
-    }
-    for (let z = 300; z < totalLen - 100; z += 150 + Math.floor(Math.random() * 200)) {
-      roadPowerups.push({ z, type: Math.random() < 0.5 ? 'shield' : 'boost', got: false });
-    }
-  }
-
-  function addRoad(len, curve) {
-    for (let i = 0; i < len; i++) {
-      road.push({ curve, len: 1 });
+      // Place powerups
+      if (i > 20 && i % 40 === 0) {
+        powerups.push({ si: i, type: Math.random() < 0.5 ? 'shield' : 'boost', got: false });
+      }
+      // Every 3-5 segs, turn
+      if (i > 3 && i % (3 + Math.floor(Math.random() * 3)) === 0) {
+        const dir = Math.random() < 0.5 ? 1 : -1;
+        const amount = 35 + Math.random() * 35;
+        cx += dir * amount;
+        cx = Math.max(ROAD_W / 2 + 15, Math.min(W - ROAD_W / 2 - 15, cx));
+      }
     }
   }
 
   function resetGame() {
     buildRoad();
-    pos = 0; playerX = 0; speed = 80;
-    score = 0; coinsGot = 0; fallTimer = 0;
+    scrollY = 0; carX = segs[0].cx; speed = 2.5;
+    score = 0; coinsGot = 0; fallT = 0;
     shield = 0; boost = 0; holding = false;
   }
 
@@ -948,407 +934,341 @@ function startDriftGame(canvas) {
     } else { buyMsg = `Need ${cost} coins (have ${getCoins()})`; buyMsgT = 120; }
   }
 
-  // ── Input ──
+  // Input
   canvas.setAttribute('tabindex', '0'); canvas.focus();
-  function press() {
-    if (phase === 'select') return;
-    if (phase === 'dead') { phase = 'select'; return; }
-    holding = true;
-  }
-  function release() { holding = false; }
-  canvas.addEventListener('mousedown', press);
-  canvas.addEventListener('mouseup', release);
-  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); press(); }, { passive: false });
-  canvas.addEventListener('touchend', (e) => { e.preventDefault(); release(); }, { passive: false });
+  canvas.addEventListener('mousedown', () => { if (phase === 'select') return; if (phase === 'dead') { phase = 'select'; return; } holding = true; });
+  canvas.addEventListener('mouseup', () => { holding = false; });
+  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if (phase === 'select') return; if (phase === 'dead') { phase = 'select'; return; } holding = true; }, { passive: false });
+  canvas.addEventListener('touchend', (e) => { e.preventDefault(); holding = false; }, { passive: false });
   canvas.onkeydown = (e) => {
-    if (e.code === 'Space') { e.preventDefault(); press(); }
-    if (phase === 'select') {
-      if (e.code === 'ArrowUp') carIdx = (carIdx - 1 + DRIFT_CARS.length) % DRIFT_CARS.length;
-      if (e.code === 'ArrowDown') carIdx = (carIdx + 1) % DRIFT_CARS.length;
-      if (e.code === 'Enter') tryStart();
-    }
+    if (e.code === 'Space') { e.preventDefault(); if (phase === 'select') return; if (phase === 'dead') { phase = 'select'; return; } holding = true; }
+    if (phase === 'select' && e.code === 'ArrowUp') carIdx = (carIdx - 1 + DRIFT_CARS.length) % DRIFT_CARS.length;
+    if (phase === 'select' && e.code === 'ArrowDown') carIdx = (carIdx + 1) % DRIFT_CARS.length;
+    if (phase === 'select' && e.code === 'Enter') tryStart();
   };
-  canvas.onkeyup = (e) => { if (e.code === 'Space') release(); };
+  canvas.onkeyup = (e) => { if (e.code === 'Space') holding = false; };
   canvas.onclick = (e) => {
     if (phase !== 'select') return;
     const rect = canvas.getBoundingClientRect();
     const mx = (e.clientX - rect.left) / rect.width * W;
     const my = (e.clientY - rect.top) / rect.height * H;
-    const btnW = 260, btnH = 50, startY = 135;
+    const btnW = 250, btnH = 48, startY = 150;
     for (let i = 0; i < DRIFT_CARS.length; i++) {
       const bx = (W - btnW) / 2, by = startY + i * (btnH + 8);
-      if (mx >= bx && mx <= bx + btnW && my >= by && my <= by + btnH) {
-        carIdx = i; tryStart(); return;
-      }
+      if (mx >= bx && mx <= bx + btnW && my >= by && my <= by + btnH) { carIdx = i; tryStart(); return; }
     }
   };
 
-  // ── Update ──
+  // Update
   function update() {
     if (buyMsgT > 0) buyMsgT--;
-    if (phase !== 'play') { if (phase === 'dead') fallTimer++; return; }
+    if (phase !== 'play') { if (phase === 'dead') fallT++; return; }
 
-    // Speed up gradually
-    const baseMax = Math.min(MAX_SPEED, 80 + score * 0.3);
-    const curMax = boost > 0 ? baseMax * 1.5 : baseMax;
-    speed = Math.min(curMax, speed + ACCEL);
+    const curSpeed = boost > 0 ? speed * 1.6 : speed;
     if (boost > 0) boost--;
-
-    pos += speed * 0.005;
-    score = Math.floor(pos);
+    scrollY += curSpeed;
+    speed = Math.min(5.5, 2.5 + score * 0.002);
+    score = Math.floor(scrollY / SEG_H);
 
     // Drift
-    const turnRate = DRIFT_CARS[carIdx].turn * 0.012;
-    if (holding) playerX += turnRate;
-    else playerX -= turnRate;
+    const rate = 1.8;
+    if (holding) carX += rate;
+    else carX -= rate;
 
-    // Road curvature pushes the player
-    const segIdx = Math.floor(pos) % road.length;
-    const curve = road[segIdx] ? road[segIdx].curve : 0;
-    playerX += curve * speed * 0.000008;
-
-    // Check if off road
-    if (Math.abs(playerX) > 1.05) {
-      if (shield > 0) {
-        shield--;
-        playerX = Math.sign(playerX) * 0.8;
-      } else {
-        phase = 'dead'; fallTimer = 0;
-        if (score > bestScore) {
-          bestScore = score;
-          try { localStorage.setItem('pokechess_drift_best', String(bestScore)); } catch {}
+    // Check if on road
+    const carSI = Math.floor((scrollY + (H - 65)) / SEG_H);
+    if (carSI >= 0 && carSI < segs.length) {
+      const roadCX = segs[carSI].cx;
+      if (carX < roadCX - ROAD_W / 2 || carX > roadCX + ROAD_W / 2) {
+        if (shield > 0) { shield--; carX = roadCX + Math.sign(carX - roadCX) * (ROAD_W / 2 - 10); }
+        else {
+          phase = 'dead'; fallT = 0;
+          if (score > bestScore) { bestScore = score; try { localStorage.setItem('pokechess_drift_best', String(bestScore)); } catch {} }
+          return;
         }
-        return;
       }
     }
 
     // Collect coins
-    for (const c of roadCoins) {
+    for (const c of coins) {
       if (c.got) continue;
-      const dz = c.z - pos;
-      if (dz > -1 && dz < 1 && Math.abs(c.lane - playerX) < 0.35) {
-        c.got = true; coinsGot++;
+      const csy = H - (c.si * SEG_H - scrollY) - SEG_H / 2;
+      if (csy > 40 && csy < 90) {
+        const coinX = segs[c.si].cx + c.ox;
+        if (Math.abs(carX - coinX) < 20) { c.got = true; coinsGot++; }
       }
     }
     // Collect powerups
-    for (const p of roadPowerups) {
+    for (const p of powerups) {
       if (p.got) continue;
-      const dz = p.z - pos;
-      if (dz > -1 && dz < 1 && Math.abs(playerX) < 0.6) {
-        p.got = true;
-        if (p.type === 'shield') shield = Math.min(shield + 1, 3);
-        else boost = 180;
+      const psy = H - (p.si * SEG_H - scrollY) - SEG_H / 2;
+      if (psy > 40 && psy < 90) {
+        const px = segs[p.si].cx;
+        if (Math.abs(carX - px) < 25) {
+          p.got = true;
+          if (p.type === 'shield') shield = Math.min(shield + 1, 3);
+          else boost = 180;
+        }
       }
     }
   }
 
-  // ── Draw ──
+  // Draw
   function draw() {
-    // Sky gradient
-    const sky = ctx.createLinearGradient(0, 0, 0, HORIZON);
-    sky.addColorStop(0, '#3a7bd5');
-    sky.addColorStop(1, '#87CEEB');
+    // SKY - light blue gradient, NO grass
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#4facfe');
+    sky.addColorStop(1, '#00f2fe');
     ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, W, HORIZON);
+    ctx.fillRect(0, 0, W, H);
 
-    // Ground (far ground below horizon)
-    ctx.fillStyle = '#5a8f3a';
-    ctx.fillRect(0, HORIZON, W, H - HORIZON);
+    // Subtle clouds
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    for (let i = 0; i < 6; i++) {
+      const cx2 = ((i * 97 + 20 + scrollY * 0.05) % (W + 80)) - 40;
+      const cy2 = 30 + (i * 53) % 80;
+      ctx.beginPath(); ctx.ellipse(cx2, cy2, 35, 12, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx2 + 20, cy2 - 5, 25, 10, 0, 0, Math.PI * 2); ctx.fill();
+    }
 
     if (phase === 'select') { drawSelect(); return; }
 
-    // ── Pseudo-3D Road ──
-    const baseIdx = Math.floor(pos);
-    let cumCurve = 0;
-    let x = 0; // accumulated horizontal shift
-    let dx = 0; // rate of horizontal shift
+    // Draw road segments from top to bottom
+    const startSI = Math.floor(scrollY / SEG_H);
+    const offY = scrollY % SEG_H;
 
-    // Draw from horizon down to bottom (far to near)
-    for (let y = HORIZON; y < H; y++) {
-      // Perspective: how far away is this scan line
-      const perspective = (y - HORIZON) / (H - HORIZON); // 0 at horizon, 1 at bottom
-      if (perspective < 0.001) continue;
-      const z = 1 / perspective; // depth
+    for (let row = -2; row < Math.ceil(H / SEG_H) + 3; row++) {
+      const si = startSI + Math.ceil(H / SEG_H) + 2 - row;
+      if (si < 0 || si >= segs.length) continue;
+      const seg = segs[si];
+      const screenY = (row * SEG_H) - offY;
+      const left = seg.cx - ROAD_W / 2;
 
-      // Which road segment are we looking at
-      const segZ = baseIdx + z * 6;
-      const segIdx = Math.floor(segZ) % road.length;
-      const seg = road[segIdx];
+      // 3D side of platform (visible depth)
+      ctx.fillStyle = '#999';
+      ctx.fillRect(left, screenY + SEG_H, ROAD_W, DEPTH_3D);
+      // Left side wall
+      ctx.fillStyle = '#aaa';
+      ctx.fillRect(left - 3, screenY, 3, SEG_H + DEPTH_3D);
+      // Right side wall
+      ctx.fillStyle = '#888';
+      ctx.fillRect(left + ROAD_W, screenY, 3, SEG_H + DEPTH_3D);
 
-      // Accumulate curve
-      if (seg) dx += seg.curve * 0.015;
-      x += dx * perspective;
+      // Road top surface (white/light gray like Drift Boss)
+      ctx.fillStyle = si % 2 === 0 ? '#e8e8e8' : '#dcdcdc';
+      ctx.fillRect(left, screenY, ROAD_W, SEG_H + 1);
 
-      // Road width at this depth (wider near bottom)
-      const roadW = ROAD_HALF * W * perspective;
-      const roadCenter = W / 2 + x * W * 0.3 - playerX * roadW;
-
-      const roadL = roadCenter - roadW;
-      const roadR = roadCenter + roadW;
-
-      // Grass (alternating stripes for speed effect)
-      const grassDark = Math.floor(segZ) % 6 < 3;
-      ctx.fillStyle = grassDark ? '#4a7f2a' : '#5a8f3a';
-      ctx.fillRect(0, y, W, 1);
-
-      // Road rumble strip (red/white at edges)
-      const rumbleW = roadW * 0.08;
-      const rumbleOn = Math.floor(segZ) % 4 < 2;
-      ctx.fillStyle = rumbleOn ? '#e03030' : '#ffffff';
-      ctx.fillRect(roadL - rumbleW, y, rumbleW, 1);
-      ctx.fillRect(roadR, y, rumbleW, 1);
-
-      // Road surface
-      const roadDark = Math.floor(segZ) % 6 < 3;
-      ctx.fillStyle = roadDark ? '#686868' : '#707070';
-      ctx.fillRect(roadL, y, roadR - roadL, 1);
-
-      // Road edge lines (white)
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(roadL, y, 2, 1);
-      ctx.fillRect(roadR - 2, y, 2, 1);
+      // Edge marks
+      ctx.fillStyle = '#bbb';
+      ctx.fillRect(left, screenY, 3, SEG_H + 1);
+      ctx.fillRect(left + ROAD_W - 3, screenY, 3, SEG_H + 1);
 
       // Center dashes
-      if (Math.floor(segZ * 2) % 3 < 2) {
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.fillRect(roadCenter - 1, y, 2, 1);
+      if (si % 3 === 0) {
+        ctx.fillStyle = 'rgba(0,0,0,0.08)';
+        ctx.fillRect(seg.cx - 1, screenY + 5, 2, SEG_H - 10);
       }
     }
 
-    // ── Draw coins (in 3D space) ──
-    for (const c of roadCoins) {
+    // Draw coins
+    for (const c of coins) {
       if (c.got) continue;
-      const dz = c.z - pos;
-      if (dz < 0.5 || dz > 30) continue;
-      const p = 1 / (dz * 0.17);
-      if (p < 0.02) continue;
-      const screenY = HORIZON + (H - HORIZON) * p;
-      const roadW = ROAD_HALF * W * p;
-      const dx2 = getScreenXShift(c.z);
-      const screenX = W / 2 + dx2 * W * 0.3 + c.lane * roadW - playerX * roadW;
-      const r = Math.max(3, 7 * p);
+      const csy = H - (c.si * SEG_H - scrollY) - SEG_H / 2;
+      if (csy < -20 || csy > H + 20) continue;
+      const coinX = segs[c.si].cx + c.ox;
       ctx.fillStyle = '#FFD700';
-      ctx.beginPath(); ctx.arc(screenX, screenY - r, r, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(coinX, csy, 8, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#B8860B';
-      ctx.beginPath(); ctx.arc(screenX, screenY - r, r * 0.65, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(coinX, csy, 5.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FFD700'; ctx.font = 'bold 7px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('$', coinX, csy + 3); ctx.textAlign = 'left';
     }
 
-    // ── Draw powerups ──
-    for (const p2 of roadPowerups) {
-      if (p2.got) continue;
-      const dz = p2.z - pos;
-      if (dz < 0.5 || dz > 30) continue;
-      const p = 1 / (dz * 0.17);
-      if (p < 0.02) continue;
-      const screenY = HORIZON + (H - HORIZON) * p;
-      const dx2 = getScreenXShift(p2.z);
-      const roadW = ROAD_HALF * W * p;
-      const screenX = W / 2 + dx2 * W * 0.3 - playerX * roadW;
-      const sz = Math.max(8, 18 * p);
-      ctx.font = `${sz}px serif`;
-      ctx.textAlign = 'center';
-      ctx.fillText(p2.type === 'shield' ? '🛡️' : '🚀', screenX, screenY - 2);
+    // Draw powerups
+    for (const p of powerups) {
+      if (p.got) continue;
+      const psy = H - (p.si * SEG_H - scrollY) - SEG_H / 2;
+      if (psy < -20 || psy > H + 20) continue;
+      const px = segs[p.si].cx;
+      ctx.font = '20px serif'; ctx.textAlign = 'center';
+      ctx.fillText(p.type === 'shield' ? '🛡️' : '🚀', px, psy + 7);
+      ctx.textAlign = 'left';
     }
 
-    // ── Draw car ──
-    if (phase === 'play' || (phase === 'dead' && fallTimer < 35)) {
-      drawCar3D(phase === 'dead' ? Math.max(0.2, 1 - fallTimer / 35) : 1);
+    // Draw car
+    if (phase === 'play' || (phase === 'dead' && fallT < 40)) {
+      const alpha = phase === 'dead' ? Math.max(0, 1 - fallT / 30) : 1;
+      const sc = phase === 'dead' ? Math.max(0.2, 1 - fallT / 40) : 1;
+      ctx.globalAlpha = alpha;
+      drawCar(carX, H - 65, sc);
+      ctx.globalAlpha = 1;
     }
 
-    // Shield indicator
+    // Shield ring around car
     if (shield > 0 && phase === 'play') {
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(W / 2, H - 55, 35, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(`×${shield}`, W / 2 + 30, H - 30);
+      ctx.strokeStyle = 'rgba(56,189,248,0.7)'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(carX, H - 65, 30, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(`×${shield}`, carX + 28, H - 45); ctx.textAlign = 'left';
     }
-    // Boost indicator
+
+    // Boost effect
     if (boost > 0 && phase === 'play') {
-      ctx.fillStyle = '#f8d030'; ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('🚀 BOOST!', W / 2, HORIZON + 30);
+      ctx.fillStyle = `rgba(255,200,0,${0.3 + 0.2 * Math.sin(Date.now() * 0.01)})`;
+      ctx.beginPath(); ctx.arc(carX, H - 40, 12, 0, Math.PI * 2); ctx.fill();
     }
 
-    // ── HUD ──
-    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillRect(8, 8, 130, 55);
+    // HUD
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(6, 6, 120, 55);
     ctx.fillStyle = '#fff'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'left';
-    ctx.fillText(`Score: ${score}`, 16, 30);
-    ctx.fillText(`🪙 ${coinsGot}`, 16, 52);
+    ctx.fillText(`Score: ${score}`, 14, 28);
+    ctx.fillText(`🪙 ${coinsGot}`, 14, 50);
 
-    ctx.fillStyle = holding ? '#f8d030' : 'rgba(255,255,255,0.4)';
-    ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText(holding ? '→ DRIFT' : '← LEFT', W - 14, 28);
+    ctx.fillStyle = holding ? '#f8d030' : 'rgba(255,255,255,0.5)';
+    ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(holding ? '→ DRIFT' : '← LEFT', W - 10, 26);
     ctx.textAlign = 'left';
-    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '11px sans-serif';
-    ctx.fillText('Hold SPACE / Click = Drift Right', 14, H - 8);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = '11px sans-serif';
+    ctx.fillText('Hold SPACE / Click = Drift Right', 10, H - 8);
 
     // Game over
-    if (phase === 'dead' && fallTimer > 25) {
-      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 0, W, H);
+    if (phase === 'dead' && fallT > 25) {
+      ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, W, H);
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#fff'; ctx.font = 'bold 32px sans-serif';
-      ctx.fillText('GAME OVER', W / 2, H / 2 - 55);
-      ctx.font = '18px sans-serif';
-      ctx.fillText(`Score: ${score}  ·  Coins: ${coinsGot}`, W / 2, H / 2 - 18);
-      ctx.fillStyle = '#FFD700'; ctx.font = 'bold 16px sans-serif';
-      ctx.fillText(`🏆 Best: ${bestScore}`, W / 2, H / 2 + 12);
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 30px sans-serif';
+      ctx.fillText('GAME OVER', W / 2, H / 2 - 50);
+      ctx.font = '17px sans-serif';
+      ctx.fillText(`Score: ${score}  ·  Coins: ${coinsGot}`, W / 2, H / 2 - 15);
+      ctx.fillStyle = '#FFD700'; ctx.font = 'bold 15px sans-serif';
+      ctx.fillText(`🏆 Best: ${bestScore}`, W / 2, H / 2 + 14);
       ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = '14px sans-serif';
-      ctx.fillText('Click or Space to continue', W / 2, H / 2 + 48);
+      ctx.fillText('Click or Space to continue', W / 2, H / 2 + 45);
       ctx.textAlign = 'left';
     }
   }
 
-  function getScreenXShift(targetZ) {
-    const baseIdx = Math.floor(pos);
-    let xAcc = 0, dxAcc = 0;
-    const steps = Math.floor(targetZ - pos);
-    for (let i = 0; i < steps && i < 200; i++) {
-      const si = (baseIdx + i) % road.length;
-      const seg = road[si];
-      if (seg) dxAcc += seg.curve * 0.015;
-      const p = (i + 1) / (steps + 1);
-      xAcc += dxAcc * p * 0.5;
-    }
-    return xAcc;
-  }
-
-  function drawCar3D(alpha) {
-    ctx.globalAlpha = alpha;
-    const cx = W / 2, cy = H - 45;
+  function drawCar(x, y, sc) {
     const car = DRIFT_CARS[carIdx];
+    const w = 20 * sc, h = 32 * sc;
 
     // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.beginPath(); ctx.ellipse(cx, cy + 20, 28, 8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath(); ctx.ellipse(x, y + h * 0.55, w * 1.1, 5 * sc, 0, 0, Math.PI * 2); ctx.fill();
 
-    // Car body (trapezoid shape seen from behind)
+    // Body
     ctx.fillStyle = car.body;
     ctx.beginPath();
-    ctx.moveTo(cx - 26, cy + 16);  // bottom-left
-    ctx.lineTo(cx - 22, cy - 8);   // top-left
-    ctx.lineTo(cx + 22, cy - 8);   // top-right
-    ctx.lineTo(cx + 26, cy + 16);  // bottom-right
-    ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = car.trim; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.moveTo(x - w, y + h * 0.4);
+    ctx.lineTo(x - w * 0.85, y - h * 0.35);
+    ctx.quadraticCurveTo(x, y - h * 0.5, x + w * 0.85, y - h * 0.35);
+    ctx.lineTo(x + w, y + h * 0.4);
+    ctx.quadraticCurveTo(x, y + h * 0.48, x - w, y + h * 0.4);
+    ctx.fill();
 
     // Roof
     ctx.fillStyle = car.roof;
     ctx.beginPath();
-    ctx.moveTo(cx - 18, cy - 6);
-    ctx.lineTo(cx - 14, cy - 22);
-    ctx.lineTo(cx + 14, cy - 22);
-    ctx.lineTo(cx + 18, cy - 6);
-    ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = car.trim; ctx.lineWidth = 1; ctx.stroke();
+    ctx.moveTo(x - w * 0.6, y);
+    ctx.lineTo(x - w * 0.5, y - h * 0.22);
+    ctx.quadraticCurveTo(x, y - h * 0.3, x + w * 0.5, y - h * 0.22);
+    ctx.lineTo(x + w * 0.6, y);
+    ctx.quadraticCurveTo(x, y + h * 0.06, x - w * 0.6, y);
+    ctx.fill();
 
-    // Rear window
-    ctx.fillStyle = 'rgba(150, 200, 240, 0.7)';
+    // Windshield
+    ctx.fillStyle = 'rgba(180,220,255,0.8)';
     ctx.beginPath();
-    ctx.moveTo(cx - 14, cy - 8);
-    ctx.lineTo(cx - 12, cy - 19);
-    ctx.lineTo(cx + 12, cy - 19);
-    ctx.lineTo(cx + 14, cy - 8);
+    ctx.moveTo(x - w * 0.65, y - h * 0.05);
+    ctx.lineTo(x - w * 0.75, y - h * 0.3);
+    ctx.quadraticCurveTo(x, y - h * 0.4, x + w * 0.75, y - h * 0.3);
+    ctx.lineTo(x + w * 0.65, y - h * 0.05);
     ctx.closePath(); ctx.fill();
 
     // Wheels
     ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(cx - 30, cy + 2, 7, 14);
-    ctx.fillRect(cx + 23, cy + 2, 7, 14);
-    // Wheel rims
-    ctx.fillStyle = '#888';
-    ctx.fillRect(cx - 29, cy + 5, 5, 8);
-    ctx.fillRect(cx + 24, cy + 5, 5, 8);
+    ctx.fillRect(x - w - 3 * sc, y - h * 0.2, 5 * sc, 10 * sc);
+    ctx.fillRect(x + w - 2 * sc, y - h * 0.2, 5 * sc, 10 * sc);
+    ctx.fillRect(x - w - 3 * sc, y + h * 0.12, 5 * sc, 10 * sc);
+    ctx.fillRect(x + w - 2 * sc, y + h * 0.12, 5 * sc, 10 * sc);
+
+    // Headlights
+    ctx.fillStyle = '#ffffcc';
+    ctx.beginPath(); ctx.arc(x - w * 0.55, y - h * 0.38, 3 * sc, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + w * 0.55, y - h * 0.38, 3 * sc, 0, Math.PI * 2); ctx.fill();
 
     // Taillights
-    ctx.fillStyle = '#ff2020';
-    ctx.fillRect(cx - 23, cy + 12, 8, 4);
-    ctx.fillRect(cx + 15, cy + 12, 8, 4);
-    // Taillight glow
-    ctx.fillStyle = 'rgba(255, 50, 50, 0.3)';
-    ctx.beginPath(); ctx.arc(cx - 19, cy + 18, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(cx + 19, cy + 18, 6, 0, Math.PI * 2); ctx.fill();
-
-    // License plate
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(cx - 8, cy + 13, 16, 5);
-    ctx.fillStyle = '#333'; ctx.font = '4px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('DRIFT', cx, cy + 17);
-
-    ctx.globalAlpha = 1;
-    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ff2222';
+    ctx.fillRect(x - w * 0.7, y + h * 0.35, 6 * sc, 3 * sc);
+    ctx.fillRect(x + w * 0.4, y + h * 0.35, 6 * sc, 3 * sc);
   }
 
-  // ── Select Screen ──
   function drawSelect() {
-    // Keep sky+grass background from draw()
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 30px sans-serif';
-    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 4;
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 28px sans-serif';
+    ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 4;
     ctx.fillText('🏎️ PokéDrift', W / 2, 38);
     ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '12px sans-serif';
-    ctx.fillText('Hold to drift right  ·  Release to drift left', W / 2, 58);
-    ctx.fillText('Stay on the road! Collect coins and power-ups!', W / 2, 74);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = '12px sans-serif';
+    ctx.fillText('Hold to drift right · Release to drift left', W / 2, 60);
+    ctx.fillText('Stay on the white platforms!', W / 2, 78);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = '11px sans-serif';
+    ctx.fillText('🪙 Coins  ·  🛡️ Shield (saves a fall)  ·  🚀 Speed Boost', W / 2, 100);
 
     if (bestScore > 0) {
       ctx.fillStyle = '#FFD700'; ctx.font = 'bold 13px sans-serif';
-      ctx.fillText(`🏆 Best: ${bestScore}`, W / 2, 100);
+      ctx.fillText(`🏆 Best: ${bestScore}`, W / 2, 125);
     }
 
     ctx.fillStyle = '#fff'; ctx.font = 'bold 14px sans-serif';
-    ctx.fillText('Choose Your Car', W / 2, 125);
+    ctx.fillText('Select Car', W / 2, 145);
 
-    const btnW = 260, btnH = 50, startY = 135;
+    const btnW = 250, btnH = 48, startY = 150;
     for (let i = 0; i < DRIFT_CARS.length; i++) {
       const c = DRIFT_CARS[i];
       const bx = (W - btnW) / 2, by = startY + i * (btnH + 8);
       const sel = i === carIdx, unl = getDriftUnlocks().includes(i);
 
-      ctx.fillStyle = sel ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.75)';
+      ctx.fillStyle = sel ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.7)';
       ctx.fillRect(bx, by, btnW, btnH);
-      ctx.strokeStyle = sel ? c.body : '#bbb';
+      ctx.strokeStyle = sel ? c.body : 'rgba(255,255,255,0.3)';
       ctx.lineWidth = sel ? 3 : 1;
       ctx.strokeRect(bx, by, btnW, btnH);
-      if (!unl) { ctx.fillStyle = 'rgba(180,180,180,0.3)'; ctx.fillRect(bx, by, btnW, btnH); }
 
-      // Car color preview
-      ctx.fillStyle = c.body;
-      ctx.fillRect(bx + 10, by + 8, 34, 34);
-      ctx.fillStyle = c.roof;
-      ctx.fillRect(bx + 14, by + 15, 26, 19);
-      ctx.fillStyle = 'rgba(150,200,240,0.5)';
-      ctx.fillRect(bx + 16, by + 10, 22, 6);
-      ctx.fillStyle = '#ff2020';
-      ctx.fillRect(bx + 15, by + 34, 7, 3);
-      ctx.fillRect(bx + 32, by + 34, 7, 3);
+      // Mini car swatch
+      ctx.fillStyle = c.body; ctx.fillRect(bx + 8, by + 6, 36, 36);
+      ctx.fillStyle = c.roof; ctx.fillRect(bx + 13, by + 14, 26, 20);
+      ctx.fillStyle = 'rgba(180,220,255,0.5)'; ctx.fillRect(bx + 15, by + 9, 22, 6);
+      ctx.fillStyle = '#ff2222';
+      ctx.fillRect(bx + 13, by + 34, 7, 3); ctx.fillRect(bx + 32, by + 34, 7, 3);
+      ctx.fillStyle = '#222';
+      ctx.fillRect(bx + 6, by + 12, 4, 8); ctx.fillRect(bx + 42, by + 12, 4, 8);
+      ctx.fillRect(bx + 6, by + 28, 4, 8); ctx.fillRect(bx + 42, by + 28, 4, 8);
 
       ctx.textAlign = 'left';
       ctx.fillStyle = unl ? '#222' : '#888'; ctx.font = 'bold 15px sans-serif';
-      ctx.fillText(c.name, bx + 54, by + 24);
-      ctx.fillStyle = '#777'; ctx.font = '11px sans-serif';
-      const td = c.turn <= 1.5 ? 'Steady & Safe' : c.turn <= 1.9 ? 'Balanced' : c.turn <= 2.3 ? 'Quick' : 'Wild & Fast';
-      ctx.fillText(td, bx + 54, by + 42);
+      ctx.fillText(c.name, bx + 56, by + 22);
+      ctx.fillStyle = '#999'; ctx.font = '11px sans-serif';
+      ctx.fillText(unl ? 'Ready to race!' : 'Locked', bx + 56, by + 40);
 
       ctx.textAlign = 'right';
       if (unl) {
-        ctx.fillStyle = '#16a34a'; ctx.font = 'bold 13px sans-serif';
-        ctx.fillText('▶ PLAY', bx + btnW - 12, by + 32);
+        ctx.fillStyle = '#16a34a'; ctx.font = 'bold 14px sans-serif';
+        ctx.fillText('▶ GO', bx + btnW - 10, by + 30);
       } else {
-        ctx.fillStyle = '#B8860B'; ctx.font = 'bold 13px sans-serif';
-        ctx.fillText(`🪙 ${c.cost}`, bx + btnW - 12, by + 32);
+        ctx.fillStyle = '#B8860B'; ctx.font = 'bold 14px sans-serif';
+        ctx.fillText(`🪙 ${c.cost}`, bx + btnW - 10, by + 30);
       }
     }
 
     ctx.textAlign = 'center';
-    const infoY = startY + DRIFT_CARS.length * (btnH + 8) + 10;
-    ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '12px sans-serif';
-    ctx.fillText(`Balance: 🪙 ${getCoins()}   |   🛡️ Shield saves a fall   |   🚀 Speed boost`, W / 2, infoY);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = '12px sans-serif';
+    ctx.fillText(`Balance: 🪙 ${getCoins()}`, W / 2, startY + DRIFT_CARS.length * (btnH + 8) + 12);
     if (buyMsgT > 0) {
       ctx.fillStyle = '#ff6b6b'; ctx.font = 'bold 12px sans-serif';
-      ctx.fillText(buyMsg, W / 2, infoY + 22);
+      ctx.fillText(buyMsg, W / 2, startY + DRIFT_CARS.length * (btnH + 8) + 32);
     }
     ctx.textAlign = 'left';
   }
