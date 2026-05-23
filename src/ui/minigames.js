@@ -850,177 +850,315 @@ function startThunderCatchGame(canvas) {
 }
 
 // ─── Game 6: PokéDrift (Drift Boss style) ───────────────────
+const DRIFT_CARS = [
+  { name: 'Pikachu',   emoji: '⚡', turn: 0.038, color: '#f8d030', desc: 'Balanced' },
+  { name: 'Bulbasaur', emoji: '🌿', turn: 0.030, color: '#4ade80', desc: 'Slow turn, stable' },
+  { name: 'Charmander',emoji: '🔥', turn: 0.050, color: '#ef4444', desc: 'Fast turn, tricky' },
+  { name: 'Squirtle',  emoji: '💧', turn: 0.042, color: '#38bdf8', desc: 'Quick & smooth' },
+];
+
 function startDriftGame(canvas) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
-  let animId;
-  let gameOver = false;
-  let score = 0;
-  let speed = 2;
-  let turning = false; // true = drifting right
+  let animId, gameOver = false, score = 0, coinCount = 0;
+  let holding = false, fallAnim = 0, carIdx = 0;
+  let selecting = true; // car select screen
 
-  // Road is a series of segments: each has a direction ('straight' or 'right')
-  const SEG_HEIGHT = 40;
-  let segments = [];
-  let scrollY = 0; // how far we've scrolled
-  let pikaX = W / 2; // pikachu's X position on road
-  const pikaSize = 32;
-  const roadWidth = 100;
+  const PLAT_W = 68;
+  let track = [], coins = [], powerups = [];
+  let car = { x: 0, y: 0, angle: 0, speed: 0, baseSpeed: 1.6 };
+  let cam = { x: 0, y: 0 };
+  let shield = 0; // shield hits remaining
+  let rampBoost = 0; // frames of speed boost
 
-  function initRoad() {
-    segments = [];
-    let curX = W / 2;
-    for (let i = 0; i < Math.ceil(H / SEG_HEIGHT) + 8; i++) {
-      const dir = Math.random() < 0.5 ? 'straight' : 'right';
-      segments.push({ x: curX, dir });
-      if (dir === 'right') curX += 30 + Math.random() * 20;
-      else curX += (Math.random() - 0.5) * 10;
-      curX = Math.max(roadWidth, Math.min(W - roadWidth, curX));
+  function genTrack() {
+    track = []; coins = []; powerups = [];
+    let cx = 0, cy = 0, lastDir = 'up';
+    track.push({ x: cx, y: cy, dir: 'up', len: 180 });
+    cy -= 180;
+    for (let i = 0; i < 300; i++) {
+      const diff = Math.min(i / 10, 1); // difficulty 0-1
+      const len = 70 + Math.floor(Math.random() * (130 - diff * 50));
+      let dir;
+      if (lastDir === 'up') dir = Math.random() < 0.5 ? 'right' : 'left';
+      else dir = 'up';
+      track.push({ x: cx, y: cy, dir, len });
+      // Coins along segment
+      const nc = Math.floor(len / 50);
+      for (let c = 0; c < nc; c++) {
+        const t = (c + 0.5) / nc;
+        let px = cx, py = cy;
+        if (dir === 'up') py -= len * t;
+        else if (dir === 'right') px += len * t;
+        else px -= len * t;
+        coins.push({ x: px, y: py, got: false });
+      }
+      // Power-ups (ramp or shield) every ~8 segments
+      if (i > 3 && i % 8 === 0) {
+        let px = cx, py = cy;
+        const t = 0.5;
+        if (dir === 'up') py -= len * t;
+        else if (dir === 'right') px += len * t;
+        else px -= len * t;
+        powerups.push({ x: px, y: py, type: Math.random() < 0.5 ? 'ramp' : 'shield', got: false });
+      }
+      if (dir === 'up') cy -= len;
+      else if (dir === 'right') cx += len;
+      else cx -= len;
+      lastDir = dir;
     }
   }
 
-  function reset() {
-    gameOver = false; score = 0; speed = 2; scrollY = 0;
-    turning = false;
-    initRoad();
-    pikaX = segments[0]?.x || W / 2;
+  function onTrack(px, py) {
+    const h = PLAT_W / 2;
+    for (const s of track) {
+      let l, r, t, b;
+      if (s.dir === 'up') { l = s.x - h; r = s.x + h; t = s.y - s.len; b = s.y + h; }
+      else if (s.dir === 'right') { l = s.x - h; r = s.x + s.len + h; t = s.y - h; b = s.y + h; }
+      else { l = s.x - s.len - h; r = s.x + h; t = s.y - h; b = s.y + h; }
+      if (px >= l && px <= r && py >= t && py <= b) return true;
+    }
+    return false;
   }
 
-  reset();
+  function reset() {
+    gameOver = false; score = 0; coinCount = 0; fallAnim = 0;
+    shield = 0; rampBoost = 0; holding = false;
+    genTrack();
+    car.x = 0; car.y = -10; car.angle = -Math.PI / 2;
+    car.baseSpeed = 1.6; car.speed = car.baseSpeed;
+    cam.x = 0; cam.y = -10;
+  }
 
-  canvas.setAttribute('tabindex', '0');
-  canvas.focus();
-
-  function onDown() { if (gameOver) { reset(); return; } turning = true; }
-  function onUp() { turning = false; }
-
+  canvas.setAttribute('tabindex', '0'); canvas.focus();
+  function onDown() {
+    if (selecting) return;
+    if (gameOver) { selecting = true; return; }
+    holding = true;
+  }
+  function onUp() { holding = false; }
   canvas.addEventListener('mousedown', onDown);
   canvas.addEventListener('mouseup', onUp);
   canvas.addEventListener('touchstart', (e) => { e.preventDefault(); onDown(); }, { passive: false });
   canvas.addEventListener('touchend', (e) => { e.preventDefault(); onUp(); }, { passive: false });
-  canvas.onkeydown = (e) => { if (e.code === 'Space') { e.preventDefault(); onDown(); } };
+  canvas.onkeydown = (e) => {
+    if (e.code === 'Space') { e.preventDefault(); onDown(); }
+    if (selecting && e.code === 'ArrowRight') carIdx = (carIdx + 1) % DRIFT_CARS.length;
+    if (selecting && e.code === 'ArrowLeft') carIdx = (carIdx - 1 + DRIFT_CARS.length) % DRIFT_CARS.length;
+    if (selecting && e.code === 'Enter') { selecting = false; reset(); }
+  };
   canvas.onkeyup = (e) => { if (e.code === 'Space') onUp(); };
+  canvas.onclick = (e) => {
+    if (!selecting) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (W / rect.width);
+    const my = (e.clientY - rect.top) * (H / rect.height);
+    // Car buttons
+    const bw = 80, bh = 70, gap = 10;
+    const totalW = DRIFT_CARS.length * bw + (DRIFT_CARS.length - 1) * gap;
+    const sx = (W - totalW) / 2;
+    for (let i = 0; i < DRIFT_CARS.length; i++) {
+      const bx = sx + i * (bw + gap);
+      if (mx >= bx && mx <= bx + bw && my >= 140 && my <= 140 + bh) {
+        carIdx = i; selecting = false; reset(); return;
+      }
+    }
+  };
 
   function update() {
+    if (selecting || (gameOver && fallAnim < 60)) { if (gameOver) fallAnim++; return; }
     if (gameOver) return;
-    scrollY += speed;
-    score = Math.floor(scrollY / SEG_HEIGHT);
-    if (score % 20 === 0 && score > 0) speed = Math.min(6, 2 + score * 0.015);
 
-    // Determine current road center from segments
-    const segIdx = Math.floor(scrollY / SEG_HEIGHT);
-    const segFrac = (scrollY % SEG_HEIGHT) / SEG_HEIGHT;
-    if (segIdx >= segments.length - 5) {
-      // Add more segments
-      let lastX = segments[segments.length - 1].x;
-      for (let i = 0; i < 10; i++) {
-        const dir = Math.random() < 0.45 ? 'straight' : 'right';
-        segments.push({ x: lastX, dir });
-        if (dir === 'right') lastX += 25 + Math.random() * 25;
-        else lastX += (Math.random() - 0.5) * 15;
-        lastX = Math.max(roadWidth, Math.min(W - roadWidth, lastX));
+    const turnRate = DRIFT_CARS[carIdx].turn;
+    if (holding) car.angle += turnRate;
+    else car.angle -= turnRate;
+
+    car.speed = rampBoost > 0 ? car.baseSpeed * 1.8 : car.baseSpeed;
+    if (rampBoost > 0) rampBoost--;
+    car.x += Math.cos(car.angle) * car.speed;
+    car.y += Math.sin(car.angle) * car.speed;
+
+    if (!onTrack(car.x, car.y)) {
+      if (shield > 0) {
+        shield--;
+        // Push back onto track
+        car.x -= Math.cos(car.angle) * car.speed * 3;
+        car.y -= Math.sin(car.angle) * car.speed * 3;
+      } else { gameOver = true; fallAnim = 0; }
+    }
+
+    // Score = distance traveled
+    const dist = Math.sqrt(car.x * car.x + car.y * car.y);
+    score = Math.floor(dist / 10);
+
+    // Collect coins
+    for (const c of coins) {
+      if (!c.got && Math.hypot(car.x - c.x, car.y - c.y) < 14) { c.got = true; coinCount++; }
+    }
+    // Collect power-ups
+    for (const p of powerups) {
+      if (!p.got && Math.hypot(car.x - p.x, car.y - p.y) < 16) {
+        p.got = true;
+        if (p.type === 'ramp') rampBoost = 90;
+        else shield = Math.min(shield + 1, 3);
       }
     }
 
-    // Move pikachu
-    if (turning) pikaX += speed * 1.2; // drift right
-    else pikaX -= speed * 0.3; // slight left drift
-
-    // Check if pikachu is on the road
-    const roadCenter = segments[segIdx]?.x || W / 2;
-    const nextCenter = segments[segIdx + 1]?.x || roadCenter;
-    const interpCenter = roadCenter + (nextCenter - roadCenter) * segFrac;
-    const halfRoad = roadWidth / 2;
-
-    if (pikaX < interpCenter - halfRoad || pikaX > interpCenter + halfRoad) {
-      gameOver = true;
-    }
+    car.baseSpeed = Math.min(3.2, 1.6 + score * 0.002);
+    cam.x += (car.x - cam.x) * 0.09;
+    cam.y += (car.y - cam.y) * 0.09;
   }
 
   function draw() {
-    // Sky gradient
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, '#0c0e2a');
-    grad.addColorStop(1, '#1a103d');
-    ctx.fillStyle = grad;
+    ctx.fillStyle = '#0a0a1a';
     ctx.fillRect(0, 0, W, H);
+    // Stars
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    for (let i = 0; i < 35; i++) ctx.fillRect((i * 173 + 50) % W, (i * 131 + 20) % H, 1.5, 1.5);
 
-    // Draw road segments from bottom to top
-    const segIdx = Math.floor(scrollY / SEG_HEIGHT);
-    const offsetY = scrollY % SEG_HEIGHT;
+    if (selecting) { drawCarSelect(); return; }
 
-    for (let i = 0; i < Math.ceil(H / SEG_HEIGHT) + 2; i++) {
-      const si = segIdx + i;
-      if (si >= segments.length) break;
-      const seg = segments[si];
-      const y = H - (i * SEG_HEIGHT - offsetY) - SEG_HEIGHT;
-      const halfRoad = roadWidth / 2;
+    ctx.save();
+    ctx.translate(W / 2 - cam.x, H / 2 - cam.y);
+    const h = PLAT_W / 2;
 
-      // Road surface
-      ctx.fillStyle = i % 2 === 0 ? '#2a1f5e' : '#1e1850';
-      ctx.fillRect(seg.x - halfRoad, y, roadWidth, SEG_HEIGHT + 1);
-
-      // Road edges (neon glow)
-      ctx.strokeStyle = '#f8d030';
+    // Shadows
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    for (const s of track) {
+      if (s.dir === 'up') ctx.fillRect(s.x - h + 5, s.y - s.len + 5, PLAT_W, s.len + h);
+      else if (s.dir === 'right') ctx.fillRect(s.x - h + 5, s.y - h + 5, s.len + PLAT_W, PLAT_W);
+      else ctx.fillRect(s.x - s.len - h + 5, s.y - h + 5, s.len + PLAT_W, PLAT_W);
+    }
+    // Platforms
+    for (let i = 0; i < track.length; i++) {
+      const s = track[i];
+      ctx.fillStyle = i % 2 === 0 ? '#221a48' : '#2a2058';
+      ctx.strokeStyle = DRIFT_CARS[carIdx].color;
       ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(seg.x - halfRoad, y);
-      ctx.lineTo(seg.x - halfRoad, y + SEG_HEIGHT);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(seg.x + halfRoad, y);
-      ctx.lineTo(seg.x + halfRoad, y + SEG_HEIGHT);
-      ctx.stroke();
-
-      // Center dashes
-      ctx.strokeStyle = 'rgba(248, 208, 48, 0.2)';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([8, 12]);
-      ctx.beginPath();
-      ctx.moveTo(seg.x, y);
-      ctx.lineTo(seg.x, y + SEG_HEIGHT);
-      ctx.stroke();
-      ctx.setLineDash([]);
+      let rx, ry, rw, rh;
+      if (s.dir === 'up') { rx = s.x - h; ry = s.y - s.len; rw = PLAT_W; rh = s.len + h; }
+      else if (s.dir === 'right') { rx = s.x - h; ry = s.y - h; rw = s.len + PLAT_W; rh = PLAT_W; }
+      else { rx = s.x - s.len - h; ry = s.y - h; rw = s.len + PLAT_W; rh = PLAT_W; }
+      ctx.fillRect(rx, ry, rw, rh);
+      ctx.strokeRect(rx, ry, rw, rh);
     }
 
-    // Pikachu (drawn near bottom of screen)
-    const pikaY = H - 80;
-    drawPikachu(ctx, pikaX - pikaSize / 2, pikaY, pikaSize);
-
-    // Turn indicator
-    if (!gameOver) {
-      ctx.fillStyle = turning ? 'rgba(248, 208, 48, 0.6)' : 'rgba(255,255,255,0.3)';
-      ctx.font = 'bold 12px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(turning ? '→ DRIFTING' : '← STRAIGHT', pikaX, pikaY - 10);
+    // Coins
+    for (const c of coins) {
+      if (c.got) continue;
+      ctx.font = '12px serif'; ctx.fillText('🪙', c.x - 6, c.y + 4);
     }
+    // Power-ups
+    for (const p of powerups) {
+      if (p.got) continue;
+      ctx.font = '16px serif';
+      ctx.fillText(p.type === 'ramp' ? '🚀' : '🛡️', p.x - 8, p.y + 6);
+    }
+
+    // Car
+    if (!gameOver || fallAnim < 50) {
+      ctx.save();
+      ctx.translate(car.x, car.y);
+      ctx.rotate(car.angle + Math.PI / 2);
+      const sc = gameOver ? Math.max(0.1, 1 - fallAnim / 50) : 1;
+      ctx.globalAlpha = gameOver ? Math.max(0, 1 - fallAnim / 35) : 1;
+      const sz = 28 * sc;
+      // Draw car as colored circle + emoji
+      ctx.fillStyle = DRIFT_CARS[carIdx].color;
+      ctx.beginPath(); ctx.arc(0, 0, sz / 2 + 2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#0a0a1a';
+      ctx.beginPath(); ctx.arc(0, 0, sz / 2, 0, Math.PI * 2); ctx.fill();
+      ctx.font = `${sz - 4}px serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(DRIFT_CARS[carIdx].emoji, 0, 1);
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    // Shield indicator around car
+    if (shield > 0 && !gameOver) {
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(car.x, car.y, 20, 0, Math.PI * 2); ctx.stroke();
+    }
+    // Ramp boost trail
+    if (rampBoost > 0 && !gameOver) {
+      ctx.fillStyle = `rgba(248, 208, 48, ${rampBoost / 90 * 0.4})`;
+      const bx = car.x - Math.cos(car.angle) * 18, by = car.y - Math.sin(car.angle) * 18;
+      ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI * 2); ctx.fill();
+    }
+
+    ctx.restore();
 
     // HUD
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 16px monospace';
+    ctx.fillText(`🪙 ${coinCount}`, 10, 22);
+    ctx.fillText(`📏 ${score}m`, 10, 42);
+    if (shield > 0) ctx.fillText(`🛡️ ×${shield}`, W - 60, 22);
+    if (rampBoost > 0) { ctx.fillStyle = '#f8d030'; ctx.fillText('🚀 BOOST!', W - 100, 42); }
+    ctx.fillStyle = holding ? `${DRIFT_CARS[carIdx].color}` : 'rgba(255,255,255,0.4)';
+    ctx.font = 'bold 12px monospace'; ctx.textAlign = 'right';
+    ctx.fillText(holding ? '→ DRIFT' : '← LEFT', W - 10, H - 10);
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 18px monospace';
-    ctx.fillText(`Distance: ${score}`, 10, 25);
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.font = '11px monospace';
-    ctx.fillText('Hold SPACE / click to drift right', 10, H - 8);
+    ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.font = '10px monospace';
+    ctx.fillText('Hold SPACE/click = drift right', 10, H - 8);
 
-    if (gameOver) {
-      ctx.fillStyle = 'rgba(0,0,0,0.65)';
-      ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = '#f8d030';
-      ctx.font = 'bold 28px monospace';
+    if (gameOver && fallAnim >= 30) {
+      ctx.fillStyle = 'rgba(0,0,0,0.65)'; ctx.fillRect(0, 0, W, H);
       ctx.textAlign = 'center';
-      ctx.fillText('Off the Road!', W / 2, H / 2 - 30);
-      ctx.font = '16px monospace';
-      ctx.fillStyle = '#fff';
-      ctx.fillText(`Distance: ${score} — Click to retry`, W / 2, H / 2 + 5);
+      ctx.fillStyle = '#f8d030'; ctx.font = 'bold 26px monospace';
+      ctx.fillText('Fell Off!', W / 2, H / 2 - 40);
+      ctx.fillStyle = '#fff'; ctx.font = '15px monospace';
+      ctx.fillText(`📏 ${score}m  🪙 ${coinCount} coins`, W / 2, H / 2 - 10);
+      ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '13px monospace';
+      ctx.fillText('Click to pick a new car', W / 2, H / 2 + 18);
       ctx.textAlign = 'left';
     }
   }
 
+  function drawCarSelect() {
+    ctx.fillStyle = '#f8d030'; ctx.font = 'bold 22px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('🏎️ PokéDrift', W / 2, 40);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '12px monospace';
+    ctx.fillText('Choose your driver — click to start!', W / 2, 65);
+    // Legend
+    ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.font = '11px monospace';
+    ctx.fillText('🪙 Coins  🚀 Ramp Boost  🛡️ Shield', W / 2, 95);
+    ctx.fillText('Hold SPACE/click = drift right, release = left', W / 2, 112);
+
+    const bw = 80, bh = 70, gap = 10;
+    const totalW = DRIFT_CARS.length * bw + (DRIFT_CARS.length - 1) * gap;
+    const sx = (W - totalW) / 2;
+    for (let i = 0; i < DRIFT_CARS.length; i++) {
+      const c = DRIFT_CARS[i];
+      const bx = sx + i * (bw + gap), by = 140;
+      const sel = i === carIdx;
+      ctx.fillStyle = sel ? `${c.color}22` : 'rgba(255,255,255,0.04)';
+      ctx.strokeStyle = sel ? c.color : 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = sel ? 2 : 1;
+      ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 10); ctx.fill(); ctx.stroke();
+      ctx.font = '24px serif'; ctx.fillText(c.emoji, bx + bw / 2, by + 30);
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace';
+      ctx.fillText(c.name, bx + bw / 2, by + 50);
+      ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '9px monospace';
+      ctx.fillText(c.desc, bx + bw / 2, by + 63);
+    }
+    // Turn rate visualizer
+    const c = DRIFT_CARS[carIdx];
+    ctx.fillStyle = c.color; ctx.font = 'bold 14px monospace';
+    ctx.fillText(`${c.emoji} ${c.name}`, W / 2, 240);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '11px monospace';
+    const bars = Math.round(c.turn * 500);
+    ctx.fillText(`Turn: ${'▮'.repeat(bars)}${'▯'.repeat(5 - bars)}  ${c.desc}`, W / 2, 258);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '11px monospace';
+    ctx.fillText('← → to browse, click or ENTER to start', W / 2, 290);
+    ctx.textAlign = 'left';
+  }
+
   function loop() { update(); draw(); animId = requestAnimationFrame(loop); }
   loop();
-  return () => { cancelAnimationFrame(animId); canvas.onkeydown = null; canvas.onkeyup = null; };
+  return () => { cancelAnimationFrame(animId); canvas.onkeydown = null; canvas.onkeyup = null; canvas.onclick = null; };
 }
 
 // ─── Minigame Selector Overlay ──────────────────────────────
