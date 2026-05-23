@@ -165,6 +165,22 @@ export const POKEMON = {
   AEGISLASH:    { name: 'Aegislash',    types: ['STEEL','GHOST'],      team: 'violet',  emoji: '🛡️', img: SPRITE(681),  desc: 'Royal Sword Pokémon',   hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
   ZOROARK:      { name: 'Zoroark',      types: ['DARK'],               team: 'violet',  emoji: '🦊', img: SPRITE(571),  desc: 'Illusion Fox Pokémon',  hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
   TOXAPEX:      { name: 'Toxapex',      types: ['POISON','WATER'],     team: 'violet',  emoji: '🌊', img: SPRITE(748),  desc: 'Brutal Star Pokémon',   hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
+
+  // ── Additional Scarlet Classics ──
+  GYARADOS:     { name: 'Gyarados',     types: ['WATER','FLYING'],     team: 'scarlet', emoji: '🐉', img: SPRITE(130),  desc: 'Atrocious Pokémon',     hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
+  ALAKAZAM:     { name: 'Alakazam',     types: ['PSYCHIC'],            team: 'scarlet', emoji: '🥄', img: SPRITE(65),   desc: 'Psi Pokémon',           hp: 6,  maxHp: 6,  damage: 5, damageTier: 'heavy' },
+  TOGEKISS:     { name: 'Togekiss',     types: ['FAIRY','FLYING'],     team: 'scarlet', emoji: '🕊️', img: SPRITE(468),  desc: 'Jubilee Pokémon',       hp: 8,  maxHp: 8,  damage: 2, damageTier: 'weak' },
+  AGGRON:       { name: 'Aggron',       types: ['STEEL','ROCK'],       team: 'scarlet', emoji: '🦏', img: SPRITE(306),  desc: 'Iron Armor Pokémon',    hp: 10, maxHp: 10, damage: 3, damageTier: 'standard' },
+  INFERNAPE:    { name: 'Infernape',    types: ['FIRE','FIGHTING'],    team: 'scarlet', emoji: '🐵', img: SPRITE(392),  desc: 'Flame Pokémon',         hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
+  SWAMPERT:     { name: 'Swampert',     types: ['WATER','GROUND'],     team: 'scarlet', emoji: '🐟', img: SPRITE(260),  desc: 'Mud Fish Pokémon',      hp: 9,  maxHp: 9,  damage: 3, damageTier: 'standard' },
+
+  // ── Additional Violet Classics ──
+  GRENINJA:     { name: 'Greninja',     types: ['WATER','DARK'],       team: 'violet',  emoji: '🐸', img: SPRITE(658),  desc: 'Ninja Pokémon',         hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
+  CORVIKNIGHT:  { name: 'Corviknight',  types: ['FLYING','STEEL'],     team: 'violet',  emoji: '🦅', img: SPRITE(823),  desc: 'Raven Pokémon',         hp: 9,  maxHp: 9,  damage: 2, damageTier: 'weak' },
+  HYDREIGON:    { name: 'Hydreigon',    types: ['DARK','DRAGON'],      team: 'violet',  emoji: '🐲', img: SPRITE(635),  desc: 'Brutal Pokémon',        hp: 8,  maxHp: 8,  damage: 4, damageTier: 'heavy' },
+  CHANDELURE:   { name: 'Chandelure',   types: ['GHOST','FIRE'],       team: 'violet',  emoji: '🕯️', img: SPRITE(609),  desc: 'Luring Pokémon',        hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
+  ESPEON:       { name: 'Espeon',       types: ['PSYCHIC'],            team: 'violet',  emoji: '🔮', img: SPRITE(196),  desc: 'Sun Pokémon',           hp: 7,  maxHp: 7,  damage: 3, damageTier: 'standard' },
+  WEAVILE:      { name: 'Weavile',      types: ['DARK','ICE'],         team: 'violet',  emoji: '❄️', img: SPRITE(461),  desc: 'Sharp Claw Pokémon',    hp: 7,  maxHp: 7,  damage: 4, damageTier: 'heavy' },
 };
 
 // ─── Team Rosters ───────────────────────────────────────────────────
@@ -232,6 +248,12 @@ export const POKEMON_POOL = {
     { key: 'SCIZOR',       requiredElo: 1200, packOnly: true },
     { key: 'VOLCANION',    requiredElo: 1000, packOnly: true },
     { key: 'LYCANROC',     requiredElo: 700,  packOnly: true },
+    { key: 'GYARADOS',     requiredElo: 1100 },
+    { key: 'ALAKAZAM',     requiredElo: 1300 },
+    { key: 'TOGEKISS',     requiredElo: 1000 },
+    { key: 'AGGRON',       requiredElo: 900 },
+    { key: 'INFERNAPE',    requiredElo: 1100 },
+    { key: 'SWAMPERT',     requiredElo: 1200 },
   ],
   violet: [
     { key: 'IRON_MOTH',    requiredElo: 0 },
@@ -264,6 +286,12 @@ export const POKEMON_POOL = {
     { key: 'AEGISLASH',    requiredElo: 1200, packOnly: true },
     { key: 'ZOROARK',      requiredElo: 1000, packOnly: true },
     { key: 'TOXAPEX',      requiredElo: 1300, packOnly: true },
+    { key: 'GRENINJA',     requiredElo: 1500 },
+    { key: 'CORVIKNIGHT',  requiredElo: 1100 },
+    { key: 'HYDREIGON',    requiredElo: 1300 },
+    { key: 'CHANDELURE',   requiredElo: 900 },
+    { key: 'ESPEON',       requiredElo: 800 },
+    { key: 'WEAVILE',      requiredElo: 1100 },
   ],
 };
 
@@ -324,6 +352,13 @@ export const ABILITIES = {
   SCIZOR:       { name: 'Bullet Punch',    effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '👊', color: '#b8b8d0' },
   VOLCANION:    { name: 'Steam Eruption',  effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '💨', color: '#f08030' },
   LYCANROC:     { name: 'Accelerock',      effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '🪨', color: '#b8a038' },
+  // Additional Scarlet
+  GYARADOS:     { name: 'Waterfall',       effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '🌊', color: '#6890f0' },
+  ALAKAZAM:     { name: 'Psychic',         effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '🔮', color: '#f85888' },
+  TOGEKISS:     { name: 'Air Slash',       effect: 'status',  status: 'stunned', targets: 'random_1',         emoji: '🕊️', color: '#a890f0' },
+  AGGRON:       { name: 'Iron Defense',    effect: 'heal',    heal: 2,           targets: 'self',             emoji: '🛡️', color: '#b8b8d0' },
+  INFERNAPE:    { name: 'Close Combat',    effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '🥊', color: '#c03028' },
+  SWAMPERT:     { name: 'Muddy Water',     effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '🌊', color: '#e0c068' },
 
   // ── Violet Team ──
   MIRAIDON:     { name: 'Hadron Engine',   effect: 'damage',  damage: 3,         targets: 'adjacent_enemies', emoji: '⚡', color: '#6d28d9' },
@@ -359,6 +394,13 @@ export const ABILITIES = {
   AEGISLASH:    { name: "King's Shield",   effect: 'heal',    heal: 2,           targets: 'self',             emoji: '🛡️', color: '#b8b8d0' },
   ZOROARK:      { name: 'Night Daze',      effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '🌑', color: '#705848' },
   TOXAPEX:      { name: 'Toxic',           effect: 'status',  status: 'poisoned',targets: 'adjacent_enemies', emoji: '☠️', color: '#a040a0' },
+  // Additional Violet
+  GRENINJA:     { name: 'Water Shuriken',  effect: 'damage',  damage: 2,         targets: 'adjacent_enemies', emoji: '💧', color: '#6890f0' },
+  CORVIKNIGHT:  { name: 'Mirror Armor',    effect: 'counter', damage: 2,         targets: 'self',             emoji: '🪞', color: '#b8b8d0' },
+  HYDREIGON:    { name: 'Draco Meteor',    effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '☄️', color: '#7038f8' },
+  CHANDELURE:   { name: 'Shadow Ball',     effect: 'damage',  damage: 3,         targets: 'random_1',         emoji: '👻', color: '#705898' },
+  ESPEON:       { name: 'Morning Sun',     effect: 'heal_allies', heal: 1,       targets: 'adjacent_allies',  emoji: '☀️', color: '#f85888' },
+  WEAVILE:      { name: 'Ice Shard',       effect: 'damage',  damage: 2,         targets: 'random_1',         emoji: '❄️', color: '#98d8d8', bonusStatus: 'frozen', bonusTargets: 'random_1' },
 };
 
 // White = Scarlet, Black = Violet

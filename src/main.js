@@ -13,7 +13,8 @@ import { connectToServer, findMatch, sendMove, cancelSearch, resign, disconnect,
 import { reportGameResult, loadPlayerStats, getRankTitle } from './engine/elo.js';
 import { isLoggedIn, reportGameResultToServer, getUsername } from './engine/auth.js';
 import { POKEMON, POKEMON_POOL, KING_POOL, TEAMS, COLOR_TO_TEAM } from './engine/types.js';
-import { openShop, closeShop, consumeItem, incrementBattleCount, awardDailyCoins, awardGameCoins, SHOP_ITEMS } from './ui/shop.js';
+import { openShop, closeShop, consumeItem, incrementBattleCount, awardDailyCoins, awardGameCoins, checkEloPackReward, SHOP_ITEMS } from './ui/shop.js';
+import { preloadAllSprites } from './ui/spriteCache.js';
 
 let game = createGame();
 let clockInterval = null;
@@ -46,6 +47,9 @@ function withRandomReplay(values, fn) {
 }
 
 function init() {
+  // Start preloading all Pokémon sprites in the background immediately
+  preloadAllSprites();
+
   // Handle Stripe payment return
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('payment') === 'success') {
@@ -1010,15 +1014,18 @@ function handleEloUpdate() {
     }).then(serverResult => {
       if (serverResult) {
         setTimeout(() => showEloChangeToast(serverResult), 800);
+        checkEloMilestonePack(serverResult.newRating);
       } else {
         // Fallback to local
         const eloResult = reportGameResult(result, gameMode, { aiDifficulty: game.aiDifficulty });
         setTimeout(() => showEloChangeToast(eloResult), 800);
+        checkEloMilestonePack(eloResult.newRating);
       }
     });
   } else {
     const eloResult = reportGameResult(result, gameMode, { aiDifficulty: game.aiDifficulty });
     setTimeout(() => showEloChangeToast(eloResult), 800);
+    checkEloMilestonePack(eloResult.newRating);
   }
 
   // Daily coin reward (bonus on top of game coins)
@@ -1036,6 +1043,19 @@ function handleEloUpdate() {
       : gameMode === 'online' ? ' (online)' : '';
     setTimeout(() => showStatusToast(`🪙 +${gameEarned} PokéCoin${gameEarned > 1 ? 's' : ''} earned!${diffLabel}`, 'buff'), 2200);
   }
+}
+
+function checkEloMilestonePack(newRating) {
+  const packResult = checkEloPackReward(newRating);
+  if (!packResult) return;
+
+  const pkmn = POKEMON[packResult.result.key];
+  const name = pkmn?.name || packResult.result.key;
+  const milestone = packResult.milestone;
+
+  setTimeout(() => {
+    showStatusToast(`🎉 ${milestone} ELO Milestone! Free Pack: ${pkmn?.emoji || '📦'} ${name}${packResult.isDuplicate ? ' (duplicate)' : ' — NEW!'}`, 'buff');
+  }, 3000);
 }
 
 function showEloChangeToast(eloResult) {
@@ -1110,6 +1130,14 @@ function showEloChangeToast(eloResult) {
 
 // Boot
 document.addEventListener('DOMContentLoaded', init);
+
+// Fix blank page when using browser back from Stripe checkout (bfcache restore)
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    // Page was restored from bfcache (back/forward navigation) — reload to reinitialize
+    window.location.reload();
+  }
+});
 
 // Cancel item targeting with ESC or right-click
 document.addEventListener('keydown', (e) => {

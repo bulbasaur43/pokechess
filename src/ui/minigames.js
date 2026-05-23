@@ -4,10 +4,14 @@
  */
 import { unlockHiddenItem, isHiddenItemUnlocked } from './shop.js';
 
-// Preload Bulbasaur sprite from PokeAPI official artwork
+// Preload sprites from PokeAPI official artwork
 const BULBA_IMG = new Image();
 BULBA_IMG.crossOrigin = 'anonymous';
 BULBA_IMG.src = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png';
+
+const PIKA_IMG = new Image();
+PIKA_IMG.crossOrigin = 'anonymous';
+PIKA_IMG.src = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png';
 
 function drawBulbasaur(ctx, x, y, size, facing = 1) {
   ctx.save();
@@ -571,6 +575,454 @@ function startMazeGame(canvas) {
   return () => { cancelAnimationFrame(animId); canvas.onkeydown = null; };
 }
 
+// ─── Pikachu Draw Helper ────────────────────────────────────
+function drawPikachu(ctx, x, y, size, facing = 1) {
+  ctx.save();
+  if (facing < 0) {
+    ctx.translate(x + size, y);
+    ctx.scale(-1, 1);
+    x = 0; y = 0;
+  }
+  if (PIKA_IMG.complete && PIKA_IMG.naturalWidth > 0) {
+    ctx.drawImage(PIKA_IMG, x, y, size, size);
+  } else {
+    ctx.fillStyle = '#f8d030';
+    ctx.beginPath();
+    ctx.arc(x + size / 2, y + size / 2, size / 2.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+// ─── Game 4: Pikachu Volt Dash ──────────────────────────────
+function startVoltDashGame(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const ground = H - 50;
+  let pika = { x: 70, y: ground - 40, vy: 0, size: 40, jumping: false };
+  let bolts = []; // collectible thunderbolts
+  let rocks = []; // obstacles
+  let score = 0;
+  let speed = 3.5;
+  let frameCount = 0;
+  let gameOver = false;
+  let combo = 0;
+  let animId;
+
+  function spawnBolt() {
+    bolts.push({ x: W + 10, y: ground - 30 - Math.random() * 120, size: 18 });
+  }
+  function spawnRock() {
+    const h = 18 + Math.random() * 28;
+    rocks.push({ x: W + 10, w: 18 + Math.random() * 14, h, y: ground - h });
+  }
+
+  function jump() {
+    if (!pika.jumping && !gameOver) { pika.vy = -11; pika.jumping = true; }
+    if (gameOver) resetGame();
+  }
+
+  function resetGame() {
+    pika = { x: 70, y: ground - 40, vy: 0, size: 40, jumping: false };
+    bolts = []; rocks = []; score = 0; speed = 3.5; frameCount = 0; gameOver = false; combo = 0;
+  }
+
+  canvas.onclick = jump;
+  canvas.onkeydown = (e) => { if (e.code === 'Space') { e.preventDefault(); jump(); } };
+  canvas.setAttribute('tabindex', '0');
+  canvas.focus();
+
+  function update() {
+    if (gameOver) return;
+    frameCount++;
+    if (frameCount % 55 === 0) spawnBolt();
+    if (frameCount % Math.max(35, 75 - Math.floor(score / 5)) === 0) spawnRock();
+    if (frameCount % 250 === 0) speed = Math.min(8, speed + 0.3);
+
+    pika.vy += 0.55;
+    pika.y += pika.vy;
+    if (pika.y >= ground - pika.size) { pika.y = ground - pika.size; pika.vy = 0; pika.jumping = false; }
+
+    bolts.forEach(b => b.x -= speed);
+    rocks.forEach(r => r.x -= speed);
+    bolts = bolts.filter(b => b.x > -30);
+    rocks = rocks.filter(r => r.x > -30);
+
+    // Collect bolts
+    for (let i = bolts.length - 1; i >= 0; i--) {
+      const b = bolts[i];
+      if (pika.x + 30 > b.x && pika.x + 10 < b.x + b.size && pika.y + 10 < b.y + b.size && pika.y + pika.size > b.y) {
+        bolts.splice(i, 1);
+        combo++;
+        score += combo; // combo scoring
+      }
+    }
+
+    // Hit rocks
+    for (const r of rocks) {
+      if (pika.x + 30 > r.x && pika.x + 10 < r.x + r.w && pika.y + pika.size > r.y) {
+        gameOver = true;
+      }
+    }
+  }
+
+  function draw() {
+    // Dark electric sky
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#0c0e1a');
+    grad.addColorStop(1, '#1a1040');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Ground
+    ctx.fillStyle = '#2a1f4e';
+    ctx.fillRect(0, ground, W, H - ground);
+    ctx.fillStyle = '#f8d030';
+    ctx.fillRect(0, ground, W, 2);
+
+    // Bolts
+    bolts.forEach(b => {
+      ctx.font = `${b.size}px serif`;
+      ctx.fillText('⚡', b.x, b.y + b.size);
+    });
+
+    // Rocks
+    ctx.fillStyle = '#6b7280';
+    rocks.forEach(r => {
+      ctx.beginPath();
+      ctx.moveTo(r.x, r.y + r.h);
+      ctx.lineTo(r.x + r.w / 2, r.y);
+      ctx.lineTo(r.x + r.w, r.y + r.h);
+      ctx.closePath();
+      ctx.fill();
+    });
+
+    // Pikachu
+    drawPikachu(ctx, pika.x, pika.y, pika.size);
+
+    // Combo indicator
+    if (combo > 1 && !gameOver) {
+      ctx.fillStyle = '#f8d030';
+      ctx.font = 'bold 14px monospace';
+      ctx.fillText(`x${combo} combo!`, pika.x - 5, pika.y - 8);
+    }
+
+    // HUD
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 18px monospace';
+    ctx.fillText(`⚡ ${score}`, 10, 25);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '11px monospace';
+    ctx.fillText('Click / SPACE to jump', 10, H - 8);
+
+    if (gameOver) {
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#f8d030';
+      ctx.font = 'bold 28px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('Zapped Out!', W / 2, H / 2 - 30);
+      ctx.font = '16px monospace';
+      ctx.fillStyle = '#fff';
+      ctx.fillText(`Score: ${score} (best combo: x${combo}) — Click to retry`, W / 2, H / 2 + 5);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  function loop() { update(); draw(); animId = requestAnimationFrame(loop); }
+  loop();
+  return () => cancelAnimationFrame(animId);
+}
+
+// ─── Game 5: Pikachu Thunder Catch ──────────────────────────
+function startThunderCatchGame(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  let pika = { x: W / 2 - 20, size: 40 };
+  const pikaY = H - 55;
+  let items = []; // falling objects
+  let score = 0;
+  let hp = 5;
+  let frameCount = 0;
+  let gameOver = false;
+  let animId;
+  let keys = {};
+
+  const ITEM_TYPES = [
+    { emoji: '🍇', points: 1, color: '#a855f7' },
+    { emoji: '🍎', points: 2, color: '#ef4444' },
+    { emoji: '⚡', points: 5, color: '#f8d030' },
+    { emoji: '💎', points: 10, color: '#38bdf8' },
+    { emoji: '💣', points: -1, color: '#374151', harmful: true },
+  ];
+
+  function spawnItem() {
+    // Higher chance of harmful items as score increases
+    const harmfulChance = Math.min(0.35, 0.1 + score * 0.003);
+    const isHarmful = Math.random() < harmfulChance;
+    const type = isHarmful ? ITEM_TYPES[4] : ITEM_TYPES[Math.floor(Math.random() * 4)];
+    items.push({ x: 10 + Math.random() * (W - 30), y: -20, speed: 2 + Math.random() * 2 + score * 0.02, ...type, size: 22 });
+  }
+
+  function resetGame() {
+    pika = { x: W / 2 - 20, size: 40 };
+    items = []; score = 0; hp = 5; frameCount = 0; gameOver = false;
+  }
+
+  canvas.setAttribute('tabindex', '0');
+  canvas.focus();
+  canvas.onkeydown = (e) => { keys[e.code] = true; e.preventDefault(); if (gameOver && e.code === 'Space') resetGame(); };
+  canvas.onkeyup = (e) => { keys[e.code] = false; };
+  canvas.onclick = () => { if (gameOver) resetGame(); };
+
+  function update() {
+    if (gameOver) return;
+    frameCount++;
+    if (frameCount % Math.max(12, 30 - Math.floor(score / 8)) === 0) spawnItem();
+
+    const spd = 5;
+    if (keys['ArrowLeft'] || keys['KeyA']) pika.x = Math.max(0, pika.x - spd);
+    if (keys['ArrowRight'] || keys['KeyD']) pika.x = Math.min(W - pika.size, pika.x + spd);
+
+    items.forEach(it => it.y += it.speed);
+
+    // Catch check
+    for (let i = items.length - 1; i >= 0; i--) {
+      const it = items[i];
+      if (it.y + it.size > pikaY && it.x + it.size > pika.x + 5 && it.x < pika.x + pika.size - 5) {
+        items.splice(i, 1);
+        if (it.harmful) { hp--; if (hp <= 0) gameOver = true; }
+        else { score += it.points; }
+        continue;
+      }
+      // Missed good items don't penalize, missed bombs are fine
+      if (it.y > H + 10) { items.splice(i, 1); }
+    }
+  }
+
+  function draw() {
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#0f172a');
+    grad.addColorStop(1, '#1e1b4b');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Platform
+    ctx.fillStyle = '#f8d030';
+    ctx.fillRect(0, H - 12, W, 12);
+    ctx.fillStyle = '#ca8a04';
+    ctx.fillRect(0, H - 12, W, 2);
+
+    // Falling items
+    items.forEach(it => {
+      ctx.font = `${it.size}px serif`;
+      ctx.fillText(it.emoji, it.x, it.y + it.size);
+    });
+
+    // Pikachu
+    drawPikachu(ctx, pika.x, pikaY, pika.size);
+
+    // HUD
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 16px monospace';
+    ctx.fillText(`Score: ${score}  HP: ${'❤️'.repeat(Math.max(0, hp))}`, 10, 22);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '11px monospace';
+    ctx.fillText('← → / A D to move', 10, H - 18);
+
+    if (gameOver) {
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#f8d030';
+      ctx.font = 'bold 28px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('Game Over!', W / 2, H / 2 - 30);
+      ctx.font = '16px monospace';
+      ctx.fillStyle = '#fff';
+      ctx.fillText(`Score: ${score} — Click to retry`, W / 2, H / 2 + 5);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  function loop() { update(); draw(); animId = requestAnimationFrame(loop); }
+  loop();
+  return () => { cancelAnimationFrame(animId); canvas.onkeydown = null; canvas.onkeyup = null; canvas.onclick = null; };
+}
+
+// ─── Game 6: PokéDrift (Drift Boss style) ───────────────────
+function startDriftGame(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  let animId;
+  let gameOver = false;
+  let score = 0;
+  let speed = 2;
+  let turning = false; // true = drifting right
+
+  // Road is a series of segments: each has a direction ('straight' or 'right')
+  const SEG_HEIGHT = 40;
+  let segments = [];
+  let scrollY = 0; // how far we've scrolled
+  let pikaX = W / 2; // pikachu's X position on road
+  const pikaSize = 32;
+  const roadWidth = 100;
+
+  function initRoad() {
+    segments = [];
+    let curX = W / 2;
+    for (let i = 0; i < Math.ceil(H / SEG_HEIGHT) + 8; i++) {
+      const dir = Math.random() < 0.5 ? 'straight' : 'right';
+      segments.push({ x: curX, dir });
+      if (dir === 'right') curX += 30 + Math.random() * 20;
+      else curX += (Math.random() - 0.5) * 10;
+      curX = Math.max(roadWidth, Math.min(W - roadWidth, curX));
+    }
+  }
+
+  function reset() {
+    gameOver = false; score = 0; speed = 2; scrollY = 0;
+    turning = false;
+    initRoad();
+    pikaX = segments[0]?.x || W / 2;
+  }
+
+  reset();
+
+  canvas.setAttribute('tabindex', '0');
+  canvas.focus();
+
+  function onDown() { if (gameOver) { reset(); return; } turning = true; }
+  function onUp() { turning = false; }
+
+  canvas.addEventListener('mousedown', onDown);
+  canvas.addEventListener('mouseup', onUp);
+  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); onDown(); }, { passive: false });
+  canvas.addEventListener('touchend', (e) => { e.preventDefault(); onUp(); }, { passive: false });
+  canvas.onkeydown = (e) => { if (e.code === 'Space') { e.preventDefault(); onDown(); } };
+  canvas.onkeyup = (e) => { if (e.code === 'Space') onUp(); };
+
+  function update() {
+    if (gameOver) return;
+    scrollY += speed;
+    score = Math.floor(scrollY / SEG_HEIGHT);
+    if (score % 20 === 0 && score > 0) speed = Math.min(6, 2 + score * 0.015);
+
+    // Determine current road center from segments
+    const segIdx = Math.floor(scrollY / SEG_HEIGHT);
+    const segFrac = (scrollY % SEG_HEIGHT) / SEG_HEIGHT;
+    if (segIdx >= segments.length - 5) {
+      // Add more segments
+      let lastX = segments[segments.length - 1].x;
+      for (let i = 0; i < 10; i++) {
+        const dir = Math.random() < 0.45 ? 'straight' : 'right';
+        segments.push({ x: lastX, dir });
+        if (dir === 'right') lastX += 25 + Math.random() * 25;
+        else lastX += (Math.random() - 0.5) * 15;
+        lastX = Math.max(roadWidth, Math.min(W - roadWidth, lastX));
+      }
+    }
+
+    // Move pikachu
+    if (turning) pikaX += speed * 1.2; // drift right
+    else pikaX -= speed * 0.3; // slight left drift
+
+    // Check if pikachu is on the road
+    const roadCenter = segments[segIdx]?.x || W / 2;
+    const nextCenter = segments[segIdx + 1]?.x || roadCenter;
+    const interpCenter = roadCenter + (nextCenter - roadCenter) * segFrac;
+    const halfRoad = roadWidth / 2;
+
+    if (pikaX < interpCenter - halfRoad || pikaX > interpCenter + halfRoad) {
+      gameOver = true;
+    }
+  }
+
+  function draw() {
+    // Sky gradient
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#0c0e2a');
+    grad.addColorStop(1, '#1a103d');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Draw road segments from bottom to top
+    const segIdx = Math.floor(scrollY / SEG_HEIGHT);
+    const offsetY = scrollY % SEG_HEIGHT;
+
+    for (let i = 0; i < Math.ceil(H / SEG_HEIGHT) + 2; i++) {
+      const si = segIdx + i;
+      if (si >= segments.length) break;
+      const seg = segments[si];
+      const y = H - (i * SEG_HEIGHT - offsetY) - SEG_HEIGHT;
+      const halfRoad = roadWidth / 2;
+
+      // Road surface
+      ctx.fillStyle = i % 2 === 0 ? '#2a1f5e' : '#1e1850';
+      ctx.fillRect(seg.x - halfRoad, y, roadWidth, SEG_HEIGHT + 1);
+
+      // Road edges (neon glow)
+      ctx.strokeStyle = '#f8d030';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(seg.x - halfRoad, y);
+      ctx.lineTo(seg.x - halfRoad, y + SEG_HEIGHT);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(seg.x + halfRoad, y);
+      ctx.lineTo(seg.x + halfRoad, y + SEG_HEIGHT);
+      ctx.stroke();
+
+      // Center dashes
+      ctx.strokeStyle = 'rgba(248, 208, 48, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([8, 12]);
+      ctx.beginPath();
+      ctx.moveTo(seg.x, y);
+      ctx.lineTo(seg.x, y + SEG_HEIGHT);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Pikachu (drawn near bottom of screen)
+    const pikaY = H - 80;
+    drawPikachu(ctx, pikaX - pikaSize / 2, pikaY, pikaSize);
+
+    // Turn indicator
+    if (!gameOver) {
+      ctx.fillStyle = turning ? 'rgba(248, 208, 48, 0.6)' : 'rgba(255,255,255,0.3)';
+      ctx.font = 'bold 12px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(turning ? '→ DRIFTING' : '← STRAIGHT', pikaX, pikaY - 10);
+    }
+
+    // HUD
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 18px monospace';
+    ctx.fillText(`Distance: ${score}`, 10, 25);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '11px monospace';
+    ctx.fillText('Hold SPACE / click to drift right', 10, H - 8);
+
+    if (gameOver) {
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#f8d030';
+      ctx.font = 'bold 28px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('Off the Road!', W / 2, H / 2 - 30);
+      ctx.font = '16px monospace';
+      ctx.fillStyle = '#fff';
+      ctx.fillText(`Distance: ${score} — Click to retry`, W / 2, H / 2 + 5);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  function loop() { update(); draw(); animId = requestAnimationFrame(loop); }
+  loop();
+  return () => { cancelAnimationFrame(animId); canvas.onkeydown = null; canvas.onkeyup = null; };
+}
+
 // ─── Minigame Selector Overlay ──────────────────────────────
 let activeCleanup = null;
 
@@ -582,10 +1034,14 @@ export function openMinigames() {
   overlay.innerHTML = `
     <div class="minigame-panel">
       <div class="minigame-header">
-        <h2 class="minigame-title">🌿 Bulbasaur Arcade</h2>
+        <h2 class="minigame-title">🎮 Pokémon Arcade</h2>
         <button class="minigame-close">&times;</button>
       </div>
-      <div class="minigame-select">
+      <div class="minigame-tabs">
+        <button class="minigame-tab minigame-tab--active" data-tab="bulbasaur">🌿 Bulbasaur</button>
+        <button class="minigame-tab" data-tab="pikachu">⚡ Pikachu</button>
+      </div>
+      <div class="minigame-select" data-tab-content="bulbasaur">
         <button class="minigame-btn" data-game="jump">
           <span class="minigame-btn__icon">🦘</span>
           <span class="minigame-btn__name">Bulba Jump</span>
@@ -602,6 +1058,23 @@ export function openMinigames() {
           <span class="minigame-btn__desc">Navigate the maze</span>
         </button>
       </div>
+      <div class="minigame-select" data-tab-content="pikachu" style="display:none">
+        <button class="minigame-btn minigame-btn--pika" data-game="voltdash">
+          <span class="minigame-btn__icon">⚡</span>
+          <span class="minigame-btn__name">Volt Dash</span>
+          <span class="minigame-btn__desc">Jump & collect bolts</span>
+        </button>
+        <button class="minigame-btn minigame-btn--pika" data-game="thundercatch">
+          <span class="minigame-btn__icon">🎯</span>
+          <span class="minigame-btn__name">Thunder Catch</span>
+          <span class="minigame-btn__desc">Catch berries, dodge bombs</span>
+        </button>
+        <button class="minigame-btn minigame-btn--pika" data-game="drift">
+          <span class="minigame-btn__icon">🏎️</span>
+          <span class="minigame-btn__name">PokéDrift</span>
+          <span class="minigame-btn__desc">Hold to drift, stay on the road</span>
+        </button>
+      </div>
       <div class="minigame-canvas-wrap" style="display:none">
         <button class="minigame-back">← Back</button>
         <canvas class="minigame-canvas" width="440" height="320"></canvas>
@@ -613,10 +1086,20 @@ export function openMinigames() {
   requestAnimationFrame(() => overlay.classList.add('minigame-overlay--show'));
 
   const panel = overlay.querySelector('.minigame-panel');
-  const selectDiv = overlay.querySelector('.minigame-select');
+  const selectDivs = overlay.querySelectorAll('.minigame-select');
   const canvasWrap = overlay.querySelector('.minigame-canvas-wrap');
   const canvas = overlay.querySelector('.minigame-canvas');
   const backBtn = overlay.querySelector('.minigame-back');
+  const tabsDiv = overlay.querySelector('.minigame-tabs');
+
+  // Tab switching
+  tabsDiv.addEventListener('click', (e) => {
+    const tab = e.target.closest('.minigame-tab');
+    if (!tab) return;
+    tabsDiv.querySelectorAll('.minigame-tab').forEach(t => t.classList.remove('minigame-tab--active'));
+    tab.classList.add('minigame-tab--active');
+    selectDivs.forEach(d => d.style.display = d.dataset.tabContent === tab.dataset.tab ? '' : 'none');
+  });
 
   function close() {
     if (activeCleanup) { activeCleanup(); activeCleanup = null; }
@@ -626,17 +1109,25 @@ export function openMinigames() {
 
   function showSelect() {
     if (activeCleanup) { activeCleanup(); activeCleanup = null; }
-    selectDiv.style.display = '';
+    selectDivs.forEach(d => {
+      const activeTab = tabsDiv.querySelector('.minigame-tab--active')?.dataset.tab;
+      d.style.display = d.dataset.tabContent === activeTab ? '' : 'none';
+    });
+    tabsDiv.style.display = '';
     canvasWrap.style.display = 'none';
   }
 
   function startGame(type) {
-    selectDiv.style.display = 'none';
+    selectDivs.forEach(d => d.style.display = 'none');
+    tabsDiv.style.display = 'none';
     canvasWrap.style.display = '';
     canvas.focus();
     if (type === 'jump') activeCleanup = startJumpGame(canvas);
     else if (type === 'shooter') activeCleanup = startShooterGame(canvas);
     else if (type === 'maze') activeCleanup = startMazeGame(canvas);
+    else if (type === 'voltdash') activeCleanup = startVoltDashGame(canvas);
+    else if (type === 'thundercatch') activeCleanup = startThunderCatchGame(canvas);
+    else if (type === 'drift') activeCleanup = startDriftGame(canvas);
   }
 
   overlay.querySelector('.minigame-close').addEventListener('click', close);

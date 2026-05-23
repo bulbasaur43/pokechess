@@ -357,6 +357,7 @@ let _ownedCosmetics = [];   // cosmetic IDs owned
 let _equippedCosmetic = ''; // currently active cosmetic ID
 let _pokemonLevels = {};    // { POKEMON_KEY: level (1-5) }
 let _unlockedHiddenItems = [];  // hidden item IDs unlocked via achievements
+let _lastPackMilestone = 0;     // highest 100-ELO milestone that awarded a free pack
 
 // ─── Upgrade System ─────────────────────────────────────────────────
 const MAX_KING_LEVEL = 4;
@@ -491,13 +492,14 @@ function loadState() {
       _equippedCosmetic = data.equippedCosmetic || '';
       _pokemonLevels = data.pokemonLevels || {};
       _unlockedHiddenItems = data.unlockedHiddenItems || [];
+      _lastPackMilestone = data.lastPackMilestone || 0;
     } else {
       // No data for this user — start fresh
       _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = [];
       _lastDailyReward = ''; _ownedCosmetics = []; _equippedCosmetic = '';
-      _pokemonLevels = {}; _unlockedHiddenItems = [];
+      _pokemonLevels = {}; _unlockedHiddenItems = []; _lastPackMilestone = 0;
     }
-  } catch { _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = []; _lastDailyReward = ''; _ownedCosmetics = []; _equippedCosmetic = ''; _pokemonLevels = {}; _unlockedHiddenItems = []; }
+  } catch { _coins = 0; _inventory = {}; _battleCount = 0; _unlockedPokemon = []; _lastDailyReward = ''; _ownedCosmetics = []; _equippedCosmetic = ''; _pokemonLevels = {}; _unlockedHiddenItems = []; _lastPackMilestone = 0; }
 
   // Restore any pending trade results that might have been overwritten
   try {
@@ -529,6 +531,7 @@ function saveState() {
     equippedCosmetic: _equippedCosmetic,
     pokemonLevels: _pokemonLevels,
     unlockedHiddenItems: _unlockedHiddenItems,
+    lastPackMilestone: _lastPackMilestone,
   }));
 }
 
@@ -656,11 +659,11 @@ export function isHiddenItemUnlocked(itemId) {
   return _unlockedHiddenItems.includes(itemId);
 }
 
-/** Call after completing a game — awards 1-3 coins once per day */
+/** Call after completing a game — awards 1-4 coins once per day */
 export function awardDailyCoins() {
   const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
   if (_lastDailyReward === today) return null; // already claimed today
-  const earned = Math.floor(Math.random() * 10) + 1; // 1-10
+  const earned = Math.floor(Math.random() * 4) + 1; // 1-4
   _coins += earned;
   _lastDailyReward = today;
   saveState();
@@ -670,7 +673,7 @@ export function awardDailyCoins() {
 
 /**
  * Award coins based on game result and AI difficulty.
- * Higher AI = more coins. Online wins = best reward.
+ * Wins only — no coins for draws or losses.
  * @param {'win'|'loss'|'draw'} result
  * @param {'ai'|'online'|'local'} mode
  * @param {number|string} [aiDifficulty] - 1-10 or 'easy'/'medium'/'hard'/'expert'
@@ -678,28 +681,21 @@ export function awardDailyCoins() {
  */
 export function awardGameCoins(result, mode, aiDifficulty) {
   if (mode === 'local') return 0; // no coins for local games
+  if (result !== 'win') return 0; // wins only
 
   let earned = 0;
 
   if (mode === 'online') {
-    // Online: modest reward
-    if (result === 'win') earned = Math.floor(Math.random() * 5) + 3; // 3-7
-    else if (result === 'draw') earned = 1;
-    else earned = 0;
+    // Online win: small reward
+    earned = Math.floor(Math.random() * 3) + 1; // 1-3
   } else {
-    // AI: scale coins by difficulty level
+    // AI win: scale coins by difficulty level
     const diff = typeof aiDifficulty === 'string'
       ? { easy: 2, medium: 5, hard: 7, expert: 10 }[aiDifficulty] || 5
       : (parseInt(aiDifficulty, 10) || 5);
 
-    if (result === 'win') {
-      // Win: scale by difficulty (1-8)
-      earned = Math.max(1, Math.floor(diff * 0.8)) + Math.floor(Math.random() * 2);
-    } else if (result === 'draw') {
-      earned = diff >= 7 ? 1 : 0;
-    } else {
-      earned = 0; // No coins for losses
-    }
+    // Win: scale by difficulty (1-5)
+    earned = Math.max(1, Math.floor(diff * 0.4)) + Math.floor(Math.random() * 2);
   }
 
   if (earned > 0) {
@@ -1372,6 +1368,30 @@ export function buyPokemonPack() {
   saveState();
   syncToServer();
   return { success: true, result, isDuplicate, refundAmount: Math.floor(PACK_COST / 2) };
+}
+
+/**
+ * Check if the player crossed a new 100-ELO milestone and award a free pack.
+ * Call after every ELO update. Returns the pack result if awarded, or null.
+ * @param {number} newRating - The player's updated ELO rating
+ * @returns {{ result: object, isDuplicate: boolean, milestone: number } | null}
+ */
+export function checkEloPackReward(newRating) {
+  const currentMilestone = Math.floor(newRating / 100) * 100;
+  if (currentMilestone <= _lastPackMilestone || currentMilestone < 100) return null;
+
+  // New milestone reached!
+  _lastPackMilestone = currentMilestone;
+  const result = rollPack();
+  if (!result) { saveState(); syncToServer(); return null; }
+
+  const isDuplicate = _unlockedPokemon.includes(result.key);
+  if (!isDuplicate) {
+    _unlockedPokemon.push(result.key);
+  }
+  saveState();
+  syncToServer();
+  return { result, isDuplicate, milestone: currentMilestone, refundAmount: Math.floor(PACK_COST / 2) };
 }
 
 export function buyPokemonBox() {

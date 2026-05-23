@@ -8,6 +8,7 @@ import { ROLES } from '../engine/board.js';
 import { TYPES, POKEMON, TEAMS, COLOR_TO_TEAM } from '../engine/types.js';
 import { getBattlePreview } from '../engine/battle.js';
 import { getEquippedCosmetic, COSMETICS } from './shop.js';
+import { getCachedSprite } from './spriteCache.js';
 
 // ── Per-Pokémon head positions (% within 88%-square sprite wrapper) ──
 // With object-position: center bottom, sprites sit at bottom of the wrapper square.
@@ -86,6 +87,20 @@ const POKEMON_HEAD_MAP = {
   AEGISLASH:    { headTop: 15, headLeft: 50, headScale: 0.8 },  // sword/shield
   ZOROARK:      { headTop: 5,  headLeft: 48, headScale: 0.85 }, // tall fox
   TOXAPEX:      { headTop: 25, headLeft: 50, headScale: 0.9 },  // spiky sea star
+  // Additional Scarlet
+  GYARADOS:     { headTop: 10, headLeft: 45, headScale: 0.8 },  // serpentine, face at top
+  ALAKAZAM:     { headTop: 10, headLeft: 50, headScale: 0.9 },  // humanoid with spoons
+  TOGEKISS:     { headTop: 20, headLeft: 50, headScale: 1.0 },  // round bird
+  AGGRON:       { headTop: 15, headLeft: 48, headScale: 0.9 },  // armored bipedal
+  INFERNAPE:    { headTop: 8,  headLeft: 50, headScale: 0.9 },  // fiery monkey
+  SWAMPERT:     { headTop: 15, headLeft: 48, headScale: 1.0 },  // bulky amphibian
+  // Additional Violet
+  GRENINJA:     { headTop: 8,  headLeft: 50, headScale: 0.85 }, // slim ninja frog
+  CORVIKNIGHT:  { headTop: 12, headLeft: 48, headScale: 0.8 },  // armored raven
+  HYDREIGON:    { headTop: 10, headLeft: 48, headScale: 0.8 },  // three-headed dragon
+  CHANDELURE:   { headTop: 15, headLeft: 50, headScale: 0.9 },  // chandelier ghost
+  ESPEON:       { headTop: 10, headLeft: 50, headScale: 1.0 },  // feline psychic
+  WEAVILE:      { headTop: 8,  headLeft: 50, headScale: 0.9 },  // sleek ice weasel
 };
 const DEFAULT_HEAD = { headTop: 10, headLeft: 50, headScale: 0.9 };
 
@@ -418,6 +433,20 @@ const COSMETIC_OVERRIDES = {
   CERULEDGE:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
   KINGAMBIT:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
   HATTERENE:    { MARIOS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: -5, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -5, oy: 0 } },
+  // ── Additional Scarlet ──
+  GYARADOS:     { MARIOS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -5, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: -3, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: -5, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -5, oy: 0 } },
+  ALAKAZAM:     { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  TOGEKISS:     { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -4 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  AGGRON:       { MARIOS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  INFERNAPE:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  SWAMPERT:     { MARIOS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  // ── Additional Violet ──
+  GRENINJA:     { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  CORVIKNIGHT:  { MARIOS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: -3, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: -5, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: -5, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: -5, oy: 0 } },
+  HYDREIGON:    { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  CHANDELURE:   { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -4 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  ESPEON:       { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
+  WEAVILE:      { MARIOS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, LINKS_HAT: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, PIKACHU_EARS: { rot: 0, scale: 1.0, ox: 0, oy: -2 }, MAJORAS_MASK: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, MASTER_SWORD: { rot: 0, scale: 1.4, ox: 0, oy: 0 }, ONE_HIT_OBLITERATOR: { rot: 0, scale: 1.0, ox: 0, oy: 0 }, POKEBALL: { rot: 0, scale: 1.0, ox: 0, oy: 0 } },
 };
 
 /** Get cosmetic override for a specific pokemon + cosmetic combo */
@@ -684,10 +713,9 @@ function createPieceElement(piece, playerColor) {
 
   // Main visual — Pokémon sprite image or emoji fallback
   if (pkmn?.img) {
-    const img = document.createElement('img');
+    const img = getCachedSprite(pkmn.img);
     img.className = 'piece__img';
     if (piece.role === 'TRUE_KING') img.classList.add('piece__img--legendary');
-    img.src = pkmn.img;
     img.alt = pkmn.name;
     img.draggable = false;
     wrap.appendChild(img);
@@ -746,10 +774,9 @@ function createPieceElement(piece, playerColor) {
         }
       } else if (cosmetic.img) {
         // Image-based cosmetics (hats, masks, sword, pokeball)
-        const cosEl = document.createElement('img');
+        const cosEl = getCachedSprite(cosmetic.img);
         cosEl.className = `piece__cosmetic piece__cosmetic--${cosmetic.position} piece__cosmetic--img`;
         if (cosmeticId === 'ONE_HIT_OBLITERATOR') cosEl.classList.add('piece__cosmetic--obliterator');
-        cosEl.src = cosmetic.img;
         cosEl.draggable = false;
         // Get per-pokemon per-cosmetic overrides for rotation, scale, offset
         const ovr = getCosmeticOverride(piece.pokemon, cosmeticId);
@@ -845,9 +872,8 @@ function createPieceElement(piece, playerColor) {
   hpBar.appendChild(hpFill);
   // Obliterator indicator next to HP bar
   if (piece.obliterator) {
-    const oblIcon = document.createElement('img');
+    const oblIcon = getCachedSprite('/assets/cosmetics/one_hit_obliterator.png');
     oblIcon.className = 'piece__hp-obliterator';
-    oblIcon.src = '/assets/cosmetics/one_hit_obliterator.png';
     oblIcon.alt = '🗡️';
     oblIcon.draggable = false;
     hpBar.appendChild(oblIcon);

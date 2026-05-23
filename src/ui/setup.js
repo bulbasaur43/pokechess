@@ -157,18 +157,8 @@ export function renderTitleScreen(onStart) {
       <!-- Pokédex Overlay -->
       <div class="pokedex-overlay" id="pokedex-overlay"></div>
 
-      <div class="title-screen__rules">
-        <h3>Quick Rules</h3>
-        <ul>
-          <li>❤️ <strong>Pieces have HP</strong> — attacks deal damage instead of instant captures</li>
-          <li>⚔️ <strong>Damage tiers:</strong> Weak (2), Standard (3), Heavy (4)</li>
-          <li>💀 <strong>Kill = capture</strong> — reduce HP to 0 to take the square</li>
-          <li>🛡️ <strong>Survive = bounce back</strong> — if target has HP left, attacker returns</li>
-          <li>💥 <strong>8% critical hit</strong> — doubles damage</li>
-          <li>✨ <strong>Every Pokémon has a unique ability</strong> — freeze, stun, damage, drain, or heal!</li>
-          <li>👑 <strong>Eliminate the opponent's True King to win!</strong></li>
-          <li>⏱️ <strong>Chess clock</strong> — run out of time and you lose!</li>
-        </ul>
+      <div class="title-screen__rules-btn-wrap">
+        <button class="btn btn--rules" id="btn-rules">📖 Full Rule Book</button>
       </div>
 
       <!-- Shop & Admin -->
@@ -517,6 +507,127 @@ export function renderTitleScreen(onStart) {
   // Logo click → Minigames
   document.querySelector('.title-screen__logo-img')?.addEventListener('click', openMinigames);
 
+  // Rules button
+  document.getElementById('btn-rules')?.addEventListener('click', showRuleBook);
+
+  function showRuleBook() {
+    if (document.querySelector('.rulebook-overlay')) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'rulebook-overlay';
+    overlay.innerHTML = `
+      <div class="rulebook-panel">
+        <div class="rulebook-header">
+          <h2>📖 PokéChess Rule Book</h2>
+          <button class="rulebook-close">&times;</button>
+        </div>
+        <div class="rulebook-body">
+
+          <section class="rulebook-section">
+            <h3>🎯 Objective</h3>
+            <p>Eliminate the opponent's <strong>True King</strong> (👑) to win! Your True King sits at the center of your back rank. If you run out of time on the chess clock, you also lose.</p>
+          </section>
+
+          <section class="rulebook-section">
+            <h3>♟️ Movement</h3>
+            <p>Pieces move like standard chess — each Pokémon is assigned a chess role:</p>
+            <ul>
+              <li><strong>Pawns (×8)</strong> — Move forward 1 square, capture diagonally. Can move 2 squares on first move. Promote on the last rank.</li>
+              <li><strong>Rook</strong> — Moves in straight lines (rows/columns).</li>
+              <li><strong>Knight</strong> — L-shaped jumps, can leap over pieces.</li>
+              <li><strong>Bishop</strong> — Moves diagonally.</li>
+              <li><strong>Queen</strong> — Combines Rook + Bishop movement.</li>
+              <li><strong>True King (👑)</strong> — Moves 1 square in any direction. Losing this piece = game over.</li>
+            </ul>
+          </section>
+
+          <section class="rulebook-section">
+            <h3>⚔️ Combat System</h3>
+            <p>Unlike regular chess, pieces have <strong>HP</strong> and <strong>Damage</strong>. Moving into an enemy square initiates an attack rather than an instant capture.</p>
+            <ul>
+              <li><strong>Damage Tiers:</strong> Weak (1-2), Standard (3), Heavy (4-5)</li>
+              <li><strong>Kill (💀)</strong> — If the target's HP reaches 0, the attacker captures the square.</li>
+              <li><strong>Survive (🛡️)</strong> — If the target still has HP, the attacker bounces back to their starting square.</li>
+              <li><strong>Critical Hit (💥)</strong> — 8% chance to deal double damage!</li>
+            </ul>
+          </section>
+
+          <section class="rulebook-section">
+            <h3>🔥 Type Effectiveness</h3>
+            <p>Every Pokémon has one or two types. When attacking, the attacker's types are checked against the defender's types:</p>
+            <ul>
+              <li><strong>Super Effective (2×)</strong> — Double damage! Fire → Grass, Water → Fire, etc.</li>
+              <li><strong>Not Very Effective (½×)</strong> — Half damage. Fire → Water, etc.</li>
+              <li><strong>No Effect (0×)</strong> — Normal → Ghost, Ground → Flying, etc.</li>
+            </ul>
+            <p>Check the <strong>Type Chart</strong> button in-game for the full matchup table.</p>
+          </section>
+
+          <section class="rulebook-section">
+            <h3>✨ Abilities</h3>
+            <p>Every Pokémon has a unique ability that triggers automatically after it attacks or is attacked. Ability effects include:</p>
+            <ul>
+              <li><strong>Damage</strong> — Deal extra damage to enemies (adjacent or random targets).</li>
+              <li><strong>Heal</strong> — Restore HP to self or nearby allies.</li>
+              <li><strong>Drain</strong> — Damage an enemy and heal yourself.</li>
+              <li><strong>Status</strong> — Inflict freeze ❄️, stun ⚡, paralysis, or poison ☠️.</li>
+              <li><strong>Counter</strong> — Reflect damage back when attacked.</li>
+            </ul>
+          </section>
+
+          <section class="rulebook-section">
+            <h3>🎒 Items</h3>
+            <p>Purchase items from the Shop with PokéCoins. Use them during your turn for tactical advantages:</p>
+            <ul>
+              <li><strong>Max Potion</strong> — Fully heal one piece.</li>
+              <li><strong>Rare Candy</strong> — Instantly promote a pawn.</li>
+              <li><strong>Focus Sash</strong> — Survive a fatal blow with 1 HP.</li>
+              <li><strong>Revive</strong> — Bring back a captured piece at half HP.</li>
+              <li><strong>Quick Claw</strong> — Get an extra turn after your move.</li>
+              <li>...and many more! Items are <strong>disabled in online matches</strong>.</li>
+            </ul>
+          </section>
+
+          <section class="rulebook-section">
+            <h3>🪙 Economy</h3>
+            <ul>
+              <li><strong>Win games</strong> to earn PokéCoins (higher AI = more coins).</li>
+              <li><strong>Daily bonus</strong> — 1-4 coins for your first game each day.</li>
+              <li><strong>ELO milestones</strong> — Free Pokémon pack every 100 ELO!</li>
+              <li><strong>Pokémon Packs</strong> (50 coins) — Unlock random Pokémon for your roster.</li>
+            </ul>
+          </section>
+
+          <section class="rulebook-section">
+            <h3>📊 ELO Rating</h3>
+            <p>Win games to climb the ranks! Your rating changes based on the difficulty of your opponent.</p>
+            <ul>
+              <li>🥚 Beginner → 🌱 Rookie → 🎮 Trainer → ⚔️ Skilled → 🔥 Expert → ⭐ Master → 👑 Champion</li>
+            </ul>
+          </section>
+
+          <section class="rulebook-section">
+            <h3>⏱️ Time Controls</h3>
+            <ul>
+              <li><strong>Short</strong> — 10 minutes per player</li>
+              <li><strong>Medium</strong> — 25 minutes per player</li>
+              <li><strong>Long</strong> — 45 minutes per player</li>
+            </ul>
+            <p>Run out of time? You lose instantly!</p>
+          </section>
+
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('rulebook-overlay--show'));
+
+    const closeRules = () => {
+      overlay.classList.remove('rulebook-overlay--show');
+      setTimeout(() => overlay.remove(), 300);
+    };
+    overlay.querySelector('.rulebook-close').addEventListener('click', closeRules);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeRules(); });
+  }
   function showPokedex() {
     const overlay = document.getElementById('pokedex-overlay');
     if (!overlay) return;
